@@ -175,6 +175,7 @@ model User {
   examEntitlements           ExamEntitlement[]           @relation("ExamEntitlementStudent")
   batchMemberships           BatchMembership[]
   pushSubscriptions          PushSubscription[]
+  passkeys                   PasskeyCredential[]
 }
 
 model StudentProfile {
@@ -268,7 +269,7 @@ model Question {
   createdBy          String
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
-  organization       Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization       Organization?         @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   subject            Subject               @relation(fields: [subjectId], references: [id])
   topic              Topic?                @relation(fields: [topicId], references: [id])
   creator            User                  @relation("QuestionCreator", fields: [createdBy], references: [id])
@@ -324,7 +325,7 @@ model Exam {
   createdBy           String
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
-  organization        Organization?            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization        Organization?            @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   creator             User                     @relation("ExamCreator", fields: [createdBy], references: [id])
   questions           ExamQuestion[]
   batches             ExamBatch[]
@@ -1619,5 +1620,21 @@ model CoachingInvite {
 
   @@index([organizationId, isActive])
   @@index([code])
+}
+
+model PasskeyCredential {
+  id           String   @id @default(cuid())
+  userId       String
+  credentialId String   @unique
+  publicKey    String
+  counter      BigInt   @default(0)
+  deviceType   String?
+  backedUp     Boolean  @default(false)
+  transports   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 

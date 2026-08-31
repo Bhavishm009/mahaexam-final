@@ -27,6 +27,18 @@ export function NotificationPermissionPrompt() {
   async function handleEnable() {
     try {
       setLoading(true);
+
+      // Register service worker explicitly first
+      let reg = null;
+      if ("serviceWorker" in navigator) {
+        try {
+          reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+          await navigator.serviceWorker.ready;
+        } catch (swErr) {
+          console.warn("Service worker registration:", swErr);
+        }
+      }
+
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         let subData = {
@@ -38,32 +50,28 @@ export function NotificationPermissionPrompt() {
           userAgent: navigator.userAgent,
         };
 
-        // If service worker is ready, try real pushManager subscription
-        if ("serviceWorker" in navigator) {
-          const reg = await navigator.serviceWorker.ready.catch(() => null);
-          if (reg && reg.pushManager) {
-            try {
-              let pushSub = await reg.pushManager.getSubscription();
-              if (!pushSub) {
-                const vapidKey =
-                  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-                  "BBXdoA9ueuPsQgjRjbAyEPBGxd47dSZ8cV02rSadvYAuNcjQ2Ev3L_1qZbXJvQ22u5U5fgS0H1mUzE6Ym8LOMiM";
-                pushSub = await reg.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: urlBase64ToUint8Array(vapidKey),
-                });
-              }
-              if (pushSub) {
-                const json = pushSub.toJSON();
-                subData = {
-                  endpoint: pushSub.endpoint,
-                  keys: json.keys || subData.keys,
-                  userAgent: navigator.userAgent,
-                };
-              }
-            } catch {
-              // Fallback to client token registration
+        if (reg && reg.pushManager) {
+          try {
+            let pushSub = await reg.pushManager.getSubscription();
+            if (!pushSub) {
+              const vapidKey =
+                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+                "BBXdoA9ueuPsQgjRjbAyEPBGxd47dSZ8cV02rSadvYAuNcjQ2Ev3L_1qZbXJvQ22u5U5fgS0H1mUzE6Ym8LOMiM";
+              pushSub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidKey),
+              });
             }
+            if (pushSub) {
+              const json = pushSub.toJSON();
+              subData = {
+                endpoint: pushSub.endpoint,
+                keys: json.keys || subData.keys,
+                userAgent: navigator.userAgent,
+              };
+            }
+          } catch (pErr) {
+            console.warn("PushManager subscription warning:", pErr);
           }
         }
 
@@ -73,12 +81,21 @@ export function NotificationPermissionPrompt() {
           body: JSON.stringify(subData),
         }).catch(() => {});
 
+        // Show test welcome notification
+        if (reg && reg.showNotification) {
+          reg.showNotification("MahaExam Alerts Active 🎯", {
+            body: "महाराष्ट्र पोलीस भरती, तलाठी व MPSC परीक्षेच्या सूचना सुरू झाल्या आहेत!",
+            icon: "/icons/icon-192.png",
+          }).catch(() => {});
+        }
+
         setSuccess(true);
-        setTimeout(() => setShow(false), 2000);
+        setTimeout(() => setShow(false), 2200);
       } else {
         setShow(false);
       }
-    } catch {
+    } catch (err) {
+      console.error("Enable notification error:", err);
       setShow(false);
     } finally {
       setLoading(false);

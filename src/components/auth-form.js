@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, Building2, MapPin } from "lucide-react";
+import { Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, Building2, MapPin, Fingerprint } from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES } from "@/lib/exam-types";
 
 export function LoginForm() {
@@ -13,6 +13,7 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
@@ -37,7 +38,7 @@ export function LoginForm() {
       } else {
         const role = data.user?.role;
         if (role === "SUPER_ADMIN" || role === "ADMIN") {
-          router.push("/admin/dashboard");
+          router.push("/admin");
         } else if (role === "COACHING_ADMIN" || role === "TEACHER") {
           router.push("/coaching/dashboard");
         } else {
@@ -51,6 +52,106 @@ export function LoginForm() {
     }
   }
 
+  async function handlePasskeyLogin() {
+    if (typeof window === "undefined" || !window.PublicKeyCredential) {
+      setError("Your browser / device does not support WebAuthn Passkeys.");
+      return;
+    }
+
+    setBiometricLoading(true);
+    setError("");
+    try {
+      const optRes = await fetch("/api/auth/webauthn/login/options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() || undefined }),
+      });
+      const options = await optRes.json();
+      if (!optRes.ok) {
+        throw new Error(options.error || "Failed to initiate passkey authentication");
+      }
+
+      const challengeBuffer = Uint8Array.from(
+        atob(options.challenge.replace(/-/g, "+").replace(/_/g, "/")),
+        (c) => c.charCodeAt(0),
+      );
+
+      const allowCredentials = (options.allowCredentials || []).map((c) => ({
+        ...c,
+        id: Uint8Array.from(
+          atob(c.id.replace(/-/g, "+").replace(/_/g, "/")),
+          (ch) => ch.charCodeAt(0),
+        ),
+      }));
+
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge: challengeBuffer,
+          rpId: options.rpId,
+          allowCredentials: allowCredentials.length > 0 ? allowCredentials : undefined,
+          userVerification: options.userVerification || "preferred",
+          timeout: 60000,
+        },
+      });
+
+      if (!assertion) {
+        throw new Error("No passkey credential returned by device.");
+      }
+
+      const rawIdBase64 = btoa(String.fromCharCode(...new Uint8Array(assertion.rawId)));
+      const clientDataJSON = btoa(
+        String.fromCharCode(...new Uint8Array(assertion.response.clientDataJSON)),
+      );
+      const authenticatorData = btoa(
+        String.fromCharCode(...new Uint8Array(assertion.response.authenticatorData)),
+      );
+      const signature = btoa(
+        String.fromCharCode(...new Uint8Array(assertion.response.signature)),
+      );
+
+      const authRes = await fetch("/api/auth/webauthn/login/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: assertion.id,
+          rawId: rawIdBase64,
+          type: assertion.type,
+          response: {
+            clientDataJSON,
+            authenticatorData,
+            signature,
+          },
+        }),
+      });
+
+      const data = await authRes.json();
+      if (!authRes.ok) {
+        throw new Error(data.error || "Passkey login failed");
+      }
+
+      const next = params.get("next");
+      if (next) {
+        router.push(next);
+      } else {
+        const role = data.user?.role;
+        if (role === "SUPER_ADMIN" || role === "ADMIN") {
+          router.push("/admin");
+        } else if (role === "COACHING_ADMIN" || role === "TEACHER") {
+          router.push("/coaching/dashboard");
+        } else {
+          router.push("/student/dashboard");
+        }
+      }
+      router.refresh();
+    } catch (err) {
+      if (err.name !== "NotAllowedError") {
+        setError(err.message || "Biometric login was cancelled or failed.");
+      }
+    } finally {
+      setBiometricLoading(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
@@ -58,7 +159,7 @@ export function LoginForm() {
           खात्यात लॉगिन करा (Sign In)
         </h2>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          तुमचा ईमेल व पासवर्ड टाकून तुमच्या डॅशबोर्डमध्ये प्रवेश करा.
+          ईमेल-पासवर्ड किंवा फिंगरप्रिंट / Face ID द्वारे सुरक्षित लॉगिन करा.
         </p>
       </div>
 
@@ -80,7 +181,7 @@ export function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               required
-              placeholder="student@example.com"
+              placeholder="bhavishm009@gmail.com"
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
             />
           </div>
@@ -112,11 +213,28 @@ export function LoginForm() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || biometricLoading}
           className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-60"
         >
           <span>{loading ? "लॉगिन होत आहे..." : "खात्यात लॉगिन करा"}</span>
           <ArrowRight className="h-4 w-4" />
+        </button>
+
+        <div className="relative my-4 flex items-center justify-center">
+          <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+          <span className="absolute bg-white px-3 text-[11px] font-bold text-slate-400 dark:bg-slate-900">
+            किंवा बायोमेट्रिक (OR)
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handlePasskeyLogin}
+          disabled={loading || biometricLoading}
+          className="inline-flex w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-xs font-bold text-slate-800 transition hover:bg-slate-100 active:scale-95 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          <Fingerprint className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <span>{biometricLoading ? "Verifying Fingerprint..." : "Login with Fingerprint / Passkey"}</span>
         </button>
       </form>
     </div>

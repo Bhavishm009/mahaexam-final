@@ -386,6 +386,7 @@ export default function OrganizationsPage() {
                     <th className="p-4 font-bold">Batches</th>
                     <th className="p-4 font-bold">Exams</th>
                     <th className="p-4 font-bold">Plan</th>
+                    <th className="p-4 font-bold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -426,6 +427,36 @@ export default function OrganizationsPage() {
                         <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-bold text-blue-800 dark:bg-blue-950/80 dark:text-blue-300">
                           {o.subscriptions?.[0]?.plan?.name || o.subscriptionPlan || "ACTIVE"}
                         </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const conf = confirm(
+                              `Are you sure you want to delete academy "${o.name}"?\n\n🛡️ SAFETY GUARANTEE: All questions and tests created by this institute will NOT be deleted. They will remain permanently accessible in the Question Bank & Platform Archives!`,
+                            );
+                            if (!conf) {
+                              return;
+                            }
+                            try {
+                              const res = await fetch(`/api/admin/organizations?id=${o.id}`, {
+                                method: "DELETE",
+                              });
+                              const d = await res.json();
+                              if (d.success) {
+                                alert("✅ " + d.message);
+                                load();
+                              } else {
+                                alert("❌ Delete error: " + (d.error || "Failed to delete"));
+                              }
+                            } catch (err) {
+                              alert("❌ " + err.message);
+                            }
+                          }}
+                          className="rounded-xl border border-rose-500/20 bg-rose-50 px-3 py-1.5 text-[11px] font-bold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400"
+                        >
+                          Delete Academy
+                        </button>
                       </td>
                     </tr>
                   ))}

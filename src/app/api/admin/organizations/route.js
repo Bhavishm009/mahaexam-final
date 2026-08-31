@@ -150,3 +150,34 @@ export async function POST(request) {
     );
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+    if (!s || !["SUPER_ADMIN", "ADMIN"].includes(s.role)) {
+      return NextResponse.json(
+        { error: "Forbidden: Super Admin access required" },
+        { status: 403 },
+      );
+    }
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "Organization ID is required" }, { status: 400 });
+    }
+
+    const { deleteOrganizationSafely } = await import("@/lib/admin-service");
+    await deleteOrganizationSafely(id);
+
+    return NextResponse.json({
+      success: true,
+      message: "Academy deleted safely. All created questions and question bank items are preserved globally!",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message || "Failed to delete academy" },
+      { status: 500 },
+    );
+  }
+}
+

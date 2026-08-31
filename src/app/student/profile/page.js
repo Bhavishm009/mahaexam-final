@@ -442,6 +442,90 @@ export default function StudentProfilePage() {
           </div>
         </div>
 
+        {/* Biometric & Push Notification Settings Card */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
+                <KeyRound className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <span>फिंगरप्रिंट व बायोमेट्रिक लॉगिन (Passkey / WebAuthn)</span>
+              </h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                पासवर्ड न टाकता थेट फिंगरप्रिंट / Face ID द्वारे १-क्लिक मध्ये सुरक्षित लॉगिन करा.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  if (typeof window === "undefined" || !window.PublicKeyCredential) {
+                    alert("This browser / device does not support WebAuthn Passkeys.");
+                    return;
+                  }
+                  const optRes = await fetch("/api/auth/webauthn/register/options", {
+                    method: "POST",
+                  });
+                  const options = await optRes.json();
+                  if (!optRes.ok) {
+                    throw new Error(options.error || "Failed to start registration");
+                  }
+
+                  options.challenge = Uint8Array.from(
+                    atob(options.challenge.replace(/-/g, "+").replace(/_/g, "/")),
+                    (c) => c.charCodeAt(0),
+                  );
+                  options.user.id = Uint8Array.from(
+                    atob(options.user.id.replace(/-/g, "+").replace(/_/g, "/")),
+                    (c) => c.charCodeAt(0),
+                  );
+
+                  const credential = await navigator.credentials.create({
+                    publicKey: options,
+                  });
+
+                  if (!credential) {
+                    throw new Error("Registration was cancelled");
+                  }
+
+                  const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+                  const clientDataJSON = btoa(
+                    String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)),
+                  );
+                  const attestationObject = btoa(
+                    String.fromCharCode(...new Uint8Array(credential.response.attestationObject)),
+                  );
+
+                  const verifyRes = await fetch("/api/auth/webauthn/register/verify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      id: credential.id,
+                      rawId,
+                      type: credential.type,
+                      response: { clientDataJSON, attestationObject },
+                    }),
+                  });
+                  const d = await verifyRes.json();
+                  if (d.success) {
+                    alert("✅ " + d.message);
+                  } else {
+                    alert("❌ " + (d.error || "Registration failed"));
+                  }
+                } catch (e) {
+                  if (e.name !== "NotAllowedError") {
+                    alert("❌ " + e.message);
+                  }
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-2xl border border-indigo-500/20 bg-indigo-50 px-5 py-2.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 active:scale-95 dark:border-indigo-500/30 dark:bg-indigo-950/40 dark:text-indigo-300"
+            >
+              <KeyRound className="h-4 w-4" />
+              <span>Register Biometric / Fingerprint</span>
+            </button>
+          </div>
+        </div>
+
         {/* Change Password Card */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
