@@ -90,6 +90,24 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (confirm("Populate / Re-Seed all 27 Mock Exams with 2,700 questions?")) {
+                    try {
+                      const res = await fetch("/api/admin/seed", { method: "POST" });
+                      const d = await res.json();
+                      alert(d.message || "Database seeded successfully!");
+                      window.location.reload();
+                    } catch (e) {
+                      alert("Seed failed: " + e.message);
+                    }
+                  }
+                }}
+                className="rounded-2xl border border-emerald-500/30 bg-emerald-600/20 px-4 py-2.5 text-xs font-bold text-emerald-300 transition hover:bg-emerald-600/30 active:scale-95"
+              >
+                🌱 Seed 27 Exams (1-Click)
+              </button>
               <Link
                 href="/admin/organizations"
                 className="rounded-2xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-500 active:scale-95"
