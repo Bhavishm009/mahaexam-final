@@ -1,263 +1,525 @@
 import bcrypt from "bcryptjs";
 
-// Helper to generate 100 syllabus-based questions per exam
+// Helper function to shuffle array and randomize option order (1, 2, 3, 4)
+function shuffleOptions(correctOpt, wrongOpts) {
+  const all = [
+    { ...correctOpt, isCorrect: true },
+    ...wrongOpts.map((w) => ({ ...w, isCorrect: false })),
+  ];
+  // Deterministic or pseudo-random shuffle based on question parameters
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  return all;
+}
+
+// Comprehensive Syllabus Question Bank Generators covering all required Maharashtra exam topics
 export function generate100Questions(examType, examIndex) {
   const questions = [];
 
-  const marathiTopics = [
-    {
-      template: (i) => ({
-        qText: `Identify the correct synonym for the Marathi word '${["सूर्य", "चंद्र", "पृथ्वी", "पाऊस", "समुद्र", "अग्नी", "वारा", "आकाश", "कमळ", "झाड", "सिंह", "हत्ती", "घोडा", "डोळा", "हात", "फूल", "मित्र", "राजा", "घर", "नदी"][i % 20]}'.`,
-        qTextMr: `'${["सूर्य", "चंद्र", "पृथ्वी", "पाऊस", "समुद्र", "अग्नी", "वारा", "आकाश", "कमळ", "झाड", "सिंह", "हत्ती", "घोडा", "डोळा", "हात", "फूल", "मित्र", "राजा", "घर", "नदी"][i % 20]}' या शब्दाचा अचूक समानार्थी शब्द कोणता?`,
-        options: [
-          ["भास्कर / दिनकर", "शशी / सुधाकर", "अवनि / धरणी", "पर्जन्य / वृष्टी", "सागर / रत्नाकर", "पावक / अनल", "पवन / मारुती", "गगन / नभ", "पंकज / राजीव", "वृक्ष / तरु", "केसरी / शार्दूल", "गज / कुंजर", "अश्व / वारू", "नयन / चक्षू", "कर / हस्त", "पुष्प / सुमन", "सखा / सोबती", "नृप / भूपाल", "सदन / गृह", "सरिता / तटिनी"][i % 20],
-          "विपिन",
-          "कानन",
-          "कांता",
-        ],
-        correct: 0,
-        expMr: `या शब्दाचे समानार्थी रूप पर्याय क्रमांक १ आहे.`,
-      }),
-    },
-    {
-      template: (i) => ({
-        qText: `Identify the compound (Samas) type for the word: '${["प्रतिदिन", "यथाशक्ती", "नीलकंठ", "गजानन", "ज्ञानामृत", "कमलनयन", "भाजीपाला", "पापपुण्य", "त्रिभुवन", "पंचवटी", "आजन्म", "यथामती", "लंबोदर", "चंद्रमुखी", "विद्याधन", "सुवर्णकमळ", "केरकचरा", "खरेखोटे", "चौघडा", "सप्ताह"][i % 20]}'.`,
-        qTextMr: `'${["प्रतिदिन", "यथाशक्ती", "नीलकंठ", "गजानन", "ज्ञानामृत", "कमलनयन", "भाजीपाला", "पापपुण्य", "त्रिभुवन", "पंचवटी", "आजन्म", "यथामती", "लंबोदर", "चंद्रमुखी", "विद्याधन", "सुवर्णकमळ", "केरकचरा", "खरेखोटे", "चौघडा", "सप्ताह"][i % 20]}' या सामासिक शब्दाचा समास कोणता?`,
-        options: [
-          ["अव्ययीभाव समास", "अव्ययीभाव समास", "बहुव्रीही समास", "बहुव्रीही समास", "कर्मधारय समास", "कर्मधारय समास", "समाहार द्वंद्व समास", "वैकल्पिक द्वंद्व समास", "द्विगु समास", "द्विगु समास", "अव्ययीभाव समास", "अव्ययीभाव समास", "बहुव्रीही समास", "कर्मधारय समास", "कर्मधारय समास", "कर्मधारय समास", "समाहार द्वंद्व समास", "वैकल्पिक द्वंद्व समास", "द्विगु समास", "द्विगु समास"][i % 20],
-          "तत्पुरुष समास",
-          "मध्यमपदलोपी समास",
-          "इतरेतर द्वंद्व समास",
-        ],
-        correct: 0,
-        expMr: `हा शब्द नियमानुसार सामासिक समासाचे अचूक उदाहरण आहे.`,
-      }),
-    },
-    {
-      template: (i) => ({
-        qText: `Choose the correct meaning of the Marathi proverb / idiom: '${["उंटावरून शेळ्या हाकणे", "काखेत कळसा गावाला वळसा", "अतिशहाणा त्याचा बैल रिकामा", "उथळ पाण्याला खळखळाट फार", "गरज सरो वैद्य मरो", "नाव मोठे लक्षण खोटे", "पालथ्या घड्यावर पाणी", "रात्र थोडी सोंगं फार", "हाताची घडी तोंडावर बोट", "हातचे सोडून पळत्याच्या पाठी लागणे", "आंधळा मागतो एक डोळा देव देतो दोन", "इच्छा तिथे मार्ग", "उतावळा नवरा गुडघ्याला बाशिंग", "एका हाताने टाळी वाजत नाही", "कोल्ह्याला द्राक्षे आंबट", "घरोघरी मातीच्याच चुली", "चोराच्या उलट्या बोंबा", "झाकली मूठ सव्वा लाखाची", "दाम करी काम", "नाचता येईना अंगण वाकडे"][i % 20]}'.`,
-        qTextMr: `'${["उंटावरून शेळ्या हाकणे", "काखेत कळसा गावाला वळसा", "अतिशहाणा त्याचा बैल रिकामा", "उथळ पाण्याला खळखळाट फार", "गरज सरो वैद्य मरो", "नाव मोठे लक्षण खोटे", "पालथ्या घड्यावर पाणी", "रात्र थोडी सोंगं फार", "हाताची घडी तोंडावर बोट", "हातचे सोडून पळत्याच्या पाठी लागणे", "आंधळा मागतो एक डोळा देव देतो दोन", "इच्छा तिथे मार्ग", "उतावळा नवरा गुडघ्याला बाशिंग", "एका हाताने टाळी वाजत नाही", "कोल्ह्याला द्राक्षे आंबट", "घरोघरी मातीच्याच चुली", "चोराच्या उलट्या बोंबा", "झाकली मूठ सव्वा लाखाची", "दाम करी काम", "नाचता येईना अंगण वाकडे"][i % 20]}' या म्हणीचा / वाक्प्रचाराचा अचूक अर्थ कोणता?`,
-        options: [
-          ["प्रत्यक्ष काम न करता दुरूनच सूचना देणे", "जवळची वस्तू सोडून दूर शोधणे", "अति हुशारीमुळे नुकसान होणे", "अंगी कमी गुण असलेला मनुष्य जास्त बडबड करतो", "काम संपताच उपकारकर्त्याला विसरणे", "बाहेरून चांगले दिसणे पण प्रत्यक्षात वाईट असणे", "केलेला उपदेश वाया जाणे", "वेळ कमी आणि कामे खूप असणे", "शांत बसणे", "निश्चित लाभ सोडून अनिश्चित गोष्टीच्या मागे लागणे", "अपेक्षेपेक्षा जास्त लाभ होणे", "तीव्र इच्छा असेल तर मार्ग निघतो", "अतिशय उतावीळ होणे", "दोन्ही बाजूंचा दोष असणे", "न मिळालेल्या गोष्टीला नावे ठेवणे", "सर्वत्र सारखीच परिस्थिती असणे", "स्वतः चूक करून दुसऱ्याला दोष देणे", "गुपित उघड न करणे", "पैशाने सर्व कामे साध्य होतात", "स्वतःतील उणीव लपवण्यासाठी दुसऱ्या वस्तूला दोष देणे"][i % 20],
-          "फार मोठी मदत करणे",
-          "अतिशय आळशी असणे",
-          "कोणतेही काम न करणे",
-        ],
-        correct: 0,
-        expMr: `या म्हणीचा / वाक्प्रचाराचा लोकमान्य अर्थ पर्याय क्रमांक १ आहे.`,
-      }),
-    },
-  ];
-
-  const englishTopics = [
-    {
-      template: (i) => ({
-        qText: `Choose the correct Antonym for the word: '${["TRANSPARENT", "OBSTINATE", "BENEVOLENT", "OPTIMISTIC", "AUTHENTIC", "DILIGENT", "EPHEMERAL", "FUTILE", "GREGARIOUS", "HOSTILE", "ABUNDANT", "CANDID", "DESPAIR", "ELEGANT", "FRUGAL", "GENUINE", "HARMONY", "INNOCENT", "JUBILANT", "KEEN"][i % 20]}'.`,
-        qTextMr: `'${["TRANSPARENT", "OBSTINATE", "BENEVOLENT", "OPTIMISTIC", "AUTHENTIC", "DILIGENT", "EPHEMERAL", "FUTILE", "GREGARIOUS", "HOSTILE", "ABUNDANT", "CANDID", "DESPAIR", "ELEGANT", "FRUGAL", "GENUINE", "HARMONY", "INNOCENT", "JUBILANT", "KEEN"][i % 20]}' या इंग्रजी शब्दाचा योग्य विरुद्धार्थी शब्द निवडा.`,
-        options: [
-          ["Opaque", "Flexible", "Malevolent", "Pessimistic", "Spurious / Fake", "Lazy", "Permanent / Eternal", "Fruitful / Useful", "Introverted / Reclusive", "Friendly / Amiable", "Scarce", "Deceitful", "Hope", "Clumsy", "Extravagant", "Fake", "Conflict", "Guilty", "Depressed", "Dull / Reluctant"][i % 20],
-          "Lucid",
-          "Generous",
-          "Static",
-        ],
-        correct: 0,
-        expMr: `The direct antonym is given in option 1.`,
-      }),
-    },
-    {
-      template: (i) => ({
-        qText: `Select the correct One Word Substitution for: '${["A person who loves books", "One who does not believe in God", "A life history written by oneself", "A person who looks at the bright side of things", "A place where coins are made", "One who knows everything", "A medicine that counters poison", "One who eats everything (both plants and meat)", "A person who cannot make a mistake", "A speech made without preparation"][i % 10]}'.`,
-        qTextMr: `'${["A person who loves books", "One who does not believe in God", "A life history written by oneself", "A person who looks at the bright side of things", "A place where coins are made", "One who knows everything", "A medicine that counters poison", "One who eats everything (both plants and meat)", "A person who cannot make a mistake", "A speech made without preparation"][i % 10]}' यासाठी अचूक इंग्रजी शब्द कोणता?`,
-        options: [
-          ["Bibliophile", "Atheist", "Autobiography", "Optimist", "Mint", "Omniscient", "Antidote", "Omnivore", "Infallible", "Extempore"][i % 10],
-          "Philanthropist",
-          "Polyglot",
-          "Monologue",
-        ],
-        correct: 0,
-        expMr: `Correct one-word substitute is option 1.`,
-      }),
-    },
-  ];
-
-  const mathsTopics = [
-    {
-      template: (i) => {
-        const p = 1000 + (i % 20) * 250;
-        const r = 5 + (i % 6);
-        const t = 2 + (i % 4);
-        const si = (p * r * t) / 100;
-        return {
-          qText: `Calculate the Simple Interest on ₹${p} at ${r}% per annum for ${t} years.`,
-          qTextMr: `₹${p} मुद्दलावर दरसाल दरशेकडा ${r} दराने ${t} वर्षांचे सरळव्याज किती होईल?`,
-          options: [`₹${si}`, `₹${si + 50}`, `₹${si - 50}`, `₹${si + 100}`],
-          correct: 0,
-          expMr: `सरळव्याज = (मुद्दल × दर × काळ) / १०० = (${p} × ${r} × ${t}) / १०० = ₹${si}.`,
-        };
-      },
-    },
-    {
-      template: (i) => {
-        const cp = 200 + (i % 20) * 30;
-        const profitPct = 10 + (i % 5) * 5;
-        const sp = cp + (cp * profitPct) / 100;
-        return {
-          qText: `A shopkeeper buys an article for ₹${cp} and sells it at a profit of ${profitPct}%. What is the Selling Price?`,
-          qTextMr: `एका वस्तूची खरेदी किंमत ₹${cp} आहे. ती ${profitPct}% नफ्याने विकल्यास तिची विक्री किंमत किती होईल?`,
-          options: [`₹${sp}`, `₹${sp + 20}`, `₹${sp - 15}`, `₹${sp + 30}`],
-          correct: 0,
-          expMr: `विक्री किंमत = खरेदी + नफा = ${cp} + (${cp} × ${profitPct} / १००) = ₹${sp}.`,
-        };
-      },
-    },
-    {
-      template: (i) => {
-        const speed = 36 + (i % 8) * 18;
-        const ms = (speed * 5) / 18;
-        return {
-          qText: `Convert a speed of ${speed} km/h into metres per second (m/s).`,
-          qTextMr: `${speed} किमी/तास या वेगाचे मीटर/सेकंद (m/s) मध्ये रूपांतर किती होईल?`,
-          options: [`${ms} m/s`, `${ms + 2} m/s`, `${ms - 3} m/s`, `${ms + 5} m/s`],
-          correct: 0,
-          expMr: `किमी/तास ते मी/से करण्यासाठी ५/१८ ने गुणावे: ${speed} × ५/१८ = ${ms} मी/से.`,
-        };
-      },
-    },
-    {
-      template: (i) => {
-        const a = 10 + (i % 6);
-        const b = 15 + (i % 6);
-        const ans = ((a * b) / (a + b)).toFixed(1);
-        return {
-          qText: `A can complete a work in ${a} days, and B can complete it in ${b} days. How many days will they take together?`,
-          qTextMr: `'अ' एक काम ${a} दिवसांत करतो, आणि 'ब' तेच काम ${b} दिवसांत करतो. दोघे मिळून ते काम किती दिवसांत पूर्ण करतील?`,
-          options: [`${ans} दिवस`, `${(Number(ans) + 1).toFixed(1)} दिवस`, `${(Number(ans) - 1).toFixed(1)} दिवस`, `${(Number(ans) + 2).toFixed(1)} दिवस`],
-          correct: 0,
-          expMr: `एकत्रित कामाचे दिवस = (अ × ब) / (अ + ब) = (${a} × ${b}) / (${a} + ${b}) = ${ans} दिवस.`,
-        };
-      },
+  // 1. History of Maharashtra & India (इतिहास)
+  const historyTemplates = [
+    (i) => {
+      const items = [
+        {
+          q: "Who was the founder of Satavahana dynasty in Maharashtra?",
+          qMr: "महाराष्ट्रात सातवाहन घराण्याची स्थापना कोणी केली?",
+          corr: "Simuka (सिमुक)",
+          wrongs: ["Gautamiputra Satakarni (गौतमीपुत्र सातकर्णी)", "Hala (हाल)", "Pulamavi (पुलुमावी)"],
+          expMr: "सातवाहन घराण्याचा संस्थापक सिमुक हा होता. प्रतिष्ठान (पैठण) ही त्यांची राजधानी होती.",
+        },
+        {
+          q: "Who presided over the first session of Indian National Congress in Mumbai (1885)?",
+          qMr: "१८८५ मध्ये मुंबईत झालेल्या राष्ट्रीय काँग्रेसच्या पहिल्या अधिवेशनाचे अध्यक्ष कोण होते?",
+          corr: "W. C. Bonnerjee (व्योमेशचंद्र बॅनर्जी)",
+          wrongs: ["Dadabhai Naoroji (दादाभाई नौरोजी)", "A. O. Hume (ॲलन ह्यूम)", "Gopal Krishna Gokhale (गोपाळ कृष्ण गोखले)"],
+          expMr: "२८ डिसेंबर १८८५ रोजी मुंबईच्या गोकुळदास तेजपाल संस्कृत कॉलेजमध्ये पहिले अधिवेशन भरले, त्याचे अध्यक्ष व्योमेशचंद्र बॅनर्जी होते.",
+        },
+        {
+          q: "Which social reformer established 'Satyashodhak Samaj' in 1873?",
+          qMr: "१८७३ मध्ये 'सत्यशोधक समाजाची' स्थापना कोणत्या समाजसुधारकांनी केली?",
+          corr: "Mahatma Jyotirao Phule (महात्मा ज्योतिराव फुले)",
+          wrongs: ["Dr. B. R. Ambedkar (डॉ. बाबासाहेब आंबेडकर)", "Rajarshi Chhatrapati Shahu Maharaj (राजारर्षी शाहू महाराज)", "Maharshi Vitthal Ramji Shinde (महर्षी विठ्ठल रामजी शिंदे)"],
+          expMr: "२४ सप्टेंबर १८७३ रोजी महात्मा ज्योतिराव फुले यांनी पुण्यात सत्यशोधक समाजाची स्थापना केली.",
+        },
+        {
+          q: "In which year was Chhatrapati Shivaji Maharaj coronated at Fort Raigad?",
+          qMr: "छत्रपती शिवाजी महाराजांचा राज्याभिषेक रायगडावर कोणत्या वर्षी झाला?",
+          corr: "1674 AD (इ.स. १६७४)",
+          wrongs: ["1680 AD (इ.स. १६८०)", "1665 AD (इ.स. १६६५)", "1657 AD (इ.स. १६५७)"],
+          expMr: "६ जून १६७४ रोजी गागाभट्टांच्या उपस्थितीत रायगडावर छत्रपती शिवाजी महाराजांचा शिवराज्याभिषेक सोहळा संपन्न झाला.",
+        },
+        {
+          q: "Who led the 1857 Revolt in Nashik and Peint region of Maharashtra?",
+          qMr: "महाराष्ट्रात नाशिक-पेठ भागात १८५७ च्या उठावाचे नेतृत्व कोणी केले?",
+          corr: "Bhagoji Naik & Kajar Singh (भागोजी नाईक)",
+          wrongs: ["Rango Bapuji Gupte (रंगो बापूजी गुप्ते)", "Chimasaheb (चिमासाहेब)", "Tatya Tope (तात्या टोपे)"],
+          expMr: "नाशिक, नगर व खान्देश परिसरात भिल्ल समाजाचे नेते भागोजी नाईक यांनी इंग्रजांविरुद्ध तीव्र लढा दिला.",
+        },
+        {
+          q: "Who started the newspapers 'Kesari' and 'Mahratta' in 1881?",
+          qMr: "१८८१ मध्ये 'केसरी' व 'मराठा' ही वृत्तपत्रे कोणी सुरू केली?",
+          corr: "Lokmanya Tilak & Gopal Ganesh Agarkar (लोकमान्य टिळक व गोपाळ गणेश आगरकर)",
+          wrongs: ["Vishnushastri Chiplunkar (विष्णूशास्त्री चिपळूणकर)", "Mahadev Govind Ranade (न्या. रानडे)", "Balshastri Jambhekar (बाळशास्त्री जांभेकर)"],
+          expMr: "केसरी (मराठी) चे पहिले संपादक आगरकर होते आणि मराठा (इंग्रजी) चे संपादक लोकमान्य टिळक होते.",
+        },
+        {
+          q: "Who was the first martyr of the Sanyukta Maharashtra Movement?",
+          qMr: "संयुक्त महाराष्ट्र चळवळीतील पहिले हुतात्मा कोण मानले जातात?",
+          corr: "Baburao Thorat / Shankar Karande (संयुक्त महाराष्ट्राचे हुतात्मे)",
+          wrongs: ["S. M. Joshi (एस. एम. जोशी)", "Acharya Atre (आचार्य अत्रे)", "Senapati Bapat (सेनापती बापट)"],
+          expMr: "संयुक्त महाराष्ट्र चळवळीत एकूण १०६ हुतात्म्यांनी बलिदान दिले. १ मे १९६० रोजी स्वतंत्र महाराष्ट्र राज्य अस्तित्वात आले.",
+        },
+        {
+          q: "Who established 'Bahishkrit Hitakarini Sabha' in 1924 for social upliftment?",
+          qMr: "१९२४ मध्ये 'बहिष्कृत हितकारिणी सभे'ची स्थापना कोणी केली?",
+          corr: "Dr. B. R. Ambedkar (डॉ. बाबासाहेब आंबेडकर)",
+          wrongs: ["Mahatma Phule (महात्मा फुले)", "Chhatrapati Shahu Maharaj (शाहू महाराज)", "Maharshi Karve (महर्षी कर्वे)"],
+          expMr: "'शिका, संघटित व्हा आणि संघर्ष करा' हे ब्रीदवाक्य असलेल्या बहिष्कृत हितकारिणी सभेची स्थापना डॉ. बाबासाहेब आंबेडकरांनी केली.",
+        },
+      ];
+      const item = items[i % items.length];
+      return {
+        subject: "history",
+        qText: item.q,
+        qTextMr: item.qMr,
+        options: shuffleOptions(
+          { text: item.corr },
+          item.wrongs.map((w) => ({ text: w })),
+        ),
+        expMr: item.expMr,
+      };
     },
   ];
 
-  const reasoningTopics = [
-    {
-      template: (i) => {
-        const start = 2 + (i % 10);
-        const diff = 3 + (i % 7);
-        const s = [start, start + diff, start + 2 * diff, start + 3 * diff, start + 4 * diff];
-        const next = start + 5 * diff;
-        return {
-          qText: `Find the next number in the sequence: ${s.join(", ")}, ?`,
-          qTextMr: `संख्या मालिकेतील पुढील पद ओळखा: ${s.join(", ")}, ?`,
-          options: [`${next}`, `${next + 2}`, `${next - 1}`, `${next + 4}`],
-          correct: 0,
-          expMr: `फरक समान (+${diff}) आहे. म्हणून पुढील पद ${next} येईल.`,
-        };
-      },
-    },
-    {
-      template: (i) => {
-        const base = 2 + (i % 8);
-        const s = [base, base * 2, base * 4, base * 8, base * 16];
-        const next = base * 32;
-        return {
-          qText: `Complete the geometric series: ${s.join(", ")}, ?`,
-          qTextMr: `संख्या मालिका पूर्ण करा: ${s.join(", ")}, ?`,
-          options: [`${next}`, `${next + 4}`, `${next - 8}`, `${next + 12}`],
-          correct: 0,
-          expMr: `प्रत्येक पद मागील पदाच्या दुप्पट (× २) आहे. म्हणून ${base * 16} × २ = ${next}.`,
-        };
-      },
-    },
-  ];
-
-  const gkTopics = [
-    {
-      template: (i) => ({
-        qText: `Where is the headquarters of '${["ISRO", "Reserve Bank of India (RBI)", "Bhabha Atomic Research Centre (BARC)", "National Defence Academy (NDA)", "High Court of Bombay", "Maharashtra Police Academy", "Central Railway", "Sahitya Akademi", "NITI Aayog", "Election Commission of India", "DRDO", "SEBI", "LIC of India", "NABARD", "BCCI", "SBI", "UPSC", "State Election Commission (MH)", "YASHADA", "MPSC"][i % 20]}' located?`,
-        qTextMr: `'${["इस्रो (ISRO)", "भारतीय रिझर्व्ह बँक (RBI)", "भाभा अणुसंशोधन केंद्र (BARC)", "राष्ट्रीय संरक्षण प्रबोधिनी (NDA)", "मुंबई उच्च न्यायालय", "महाराष्ट्र पोलीस अकादमी (MPA)", "मध्य रेल्वे मुख्यालय", "साहित्य अकादमी", "नीती आयोग (NITI Aayog)", "भारतीय निवडणूक आयोग", "डीआरडीओ (DRDO)", "सेबी (SEBI)", "भारतीय आयुर्विमा महामंडळ (LIC)", "नाबार्ड (NABARD)", "बीसीसीआय (BCCI)", "भारतीय स्टेट बँक (SBI)", "केंद्रीय लोकसेवा आयोग (UPSC)", "राज्य निवडणूक आयोग (महाराष्ट्र)", "यशदा (YASHADA)", "महाराष्ट्र लोकसेवा आयोग (MPSC)"][i % 20]}' चे मुख्यालय कोठे आहे?`,
-        options: [
-          ["बंगळुरू (Bengaluru)", "मुंबई (Mumbai)", "तुर्भे / मुंबई (Mumbai)", "खडकवासला, पुणे (Pune)", "मुंबई (Mumbai)", "नाशिक (Nashik)", "सीएसएमटी, मुंबई (Mumbai)", "नवी दिल्ली (New Delhi)", "नवी दिल्ली (New Delhi)", "नवी दिल्ली (New Delhi)", "नवी दिल्ली (New Delhi)", "मुंबई (Mumbai)", "मुंबई (Mumbai)", "मुंबई (Mumbai)", "मुंबई (Mumbai)", "मुंबई (Mumbai)", "नवी दिल्ली (New Delhi)", "मुंबई (Mumbai)", "पुणे (Pune)", "मुंबई (Mumbai)"][i % 20],
-          "कोलकाता",
-          "हैदराबाद",
-          "चेन्नई",
-        ],
-        correct: 0,
-        expMr: `सदर संस्थेचे अधिकृत मुख्यालय पर्याय क्रमांक १ आहे.`,
-      }),
-    },
-    {
-      template: (i) => ({
-        qText: `Who among the following was associated with '${["सत्यशोधक समाज (१८७३)", "प्रार्थना समाज (१८६७)", "आर्य समाज (१८७५)", "रामकृष्ण मिशन (१८९७)", "मुलींची पहिली शाळा, पुणे (१८४८)", "अखिल भारतीय अस्पृश्यता निवारण परिषद", "शारदा सदन", "भारत सेवक समाज (१९०५)", "बहिष्कृत हितकारिणी सभा (१९२४)", "अभिनव भारत (१९०४)", "रयत शिक्षण संस्था (१९१९)", "मुकनायक पाक्षिक (१९२०)", "केसरी व मराठा वृत्तपत्र (१८८१)", "निबंधमाला (१८७४)", "स्त्री विचारवंती सभा", "सुधारक वृत्तपत्र (१८८८)", "आनंदवन प्रकल्प", "ज्ञानोदय वृत्तपत्र", "हितकारिणी सभा", "होमरूल चळवळ"][i % 20]}'?`,
-        qTextMr: `'${["सत्यशोधक समाज (१८७३)", "प्रार्थना समाज (१८६७)", "आर्य समाज (१८७५)", "रामकृष्ण मिशन (१८९७)", "मुलींची पहिली शाळा, पुणे (१८४८)", "अखिल भारतीय अस्पृश्यता निवारण परिषद", "शारदा सदन", "भारत सेवक समाज (१९०५)", "बहिष्कृत हितकारिणी सभा (१९२४)", "अभिनव भारत (१९०४)", "रयत शिक्षण संस्था (१९१९)", "मुकनायक पाक्षिक (१९२०)", "केसरी व मराठा वृत्तपत्र (१८८१)", "निबंधमाला (१८७४)", "स्त्री विचारवंती सभा", "सुधारक वृत्तपत्र (१८८८)", "आनंदवन प्रकल्प", "ज्ञानोदय वृत्तपत्र", "हितकारिणी सभा", "होमरूल चळवळ"][i % 20]}' च्या स्थापनेशी कोण संबंधित आहेत?`,
-        options: [
-          ["महात्मा ज्योतिराव फुले", "डॉ. आत्माराम पांडुरंग तर्खडकर", "स्वामी दयानंद सरस्वती", "स्वामी विवेकानंद", "सावित्रीबाई व जोतीराव फुले", "महर्षी विठ्ठल रामजी शिंदे", "पंडिता रमाबाई", "गोपाळ कृष्ण गोखले", "डॉ. बाबासाहेब आंबेडकर", "स्वातंत्र्यवीर वि. दा. सावरकर", "कर्मवीर भाऊराव पाटील", "डॉ. बाबासाहेब आंबेडकर", "लोकमान्य टिळक व आगरकर", "विष्णूशास्त्री चिपळूणकर", "सावित्रीबाई फुले", "गोपाळ गणेश आगरकर", "बाबा आमटे", "रेव्हरंड टिळक", "डॉ. आंबेडकर", "लोकमान्य टिळक व ॲनी बेझंट"][i % 20],
-          "दादाभाई नौरोजी",
-          "फिरोजशाह मेहता",
-          "सुरेंद्रनाथ बॅनर्जी",
-        ],
-        correct: 0,
-        expMr: `महाराष्ट्राच्या व भारताच्या समाजसुधारणेत यांचे मोलाचे योगदान आहे.`,
-      }),
-    },
-    {
-      template: (i) => ({
-        qText: `In which district of Maharashtra is '${["कळसूबाई शिखर", "लोणार सरोवर", "अजिंठा-वेरूळ लेणी", "ताडोबा राष्ट्रीय उद्यान", "पेंच राष्ट्रीय उद्यान", "महाबळेश्वर थंड हवेचे ठिकाण", "माथेरान थंड हवेचे ठिकाण", "चिखलदरा थंड हवेचे ठिकाण", "जायकवाडी धरण (नाथसागर)", "कोयना धरण (शिवसागर)", "राधानगरी धरण", "उजनी धरण", "भंडारदरा धरण", "तोतलाडोह धरण", "मुळा धरण", "इगतपुरी थंड हवेचे ठिकाण", "तोरणमाळ पठार", "पन्हाळा किल्ला", "रायगड किल्ला", "सिंधुदुर्ग सागरी किल्ला"][i % 20]}' located?`,
-        qTextMr: `'${["कळसूबाई शिखर", "लोणार सरोवर", "अजिंठा-वेरूळ लेणी", "ताडोबा राष्ट्रीय उद्यान", "पेंच राष्ट्रीय उद्यान", "महाबळेश्वर थंड हवेचे ठिकाण", "माथेरान थंड हवेचे ठिकाण", "चिखलदरा थंड हवेचे ठिकाण", "जायकवाडी धरण (नाथसागर)", "कोयना धरण (शिवसागर)", "राधानगरी धरण", "उजनी धरण", "भंडारदरा धरण", "तोतलाडोह धरण", "मुळा धरण", "इगतपुरी थंड हवेचे ठिकाण", "तोरणमाळ पठार", "पन्हाळा किल्ला", "रायगड किल्ला", "सिंधुदुर्ग सागरी किल्ला"][i % 20]}' महाराष्ट्रातील कोणत्या जिल्ह्यात स्थित आहे?`,
-        options: [
-          ["अहमदनगर (अकोले)", "बुलढाणा", "छत्रपती संभाजीनगर", "चंद्रपूर", "नागपूर", "सातारा", "रायगड", "अमरावती", "छत्रपती संभाजीनगर (पैठण)", "सातारा", "कोल्हापूर", "सोलापूर", "अहमदनगर", "नागपूर", "अहमदनगर", "नाशिक", "नंदुरबार", "कोल्हापूर", "रायगड", "सिंधुदुर्ग (मालवण)"][i % 20],
-          "पुणे",
-          "ठाणे",
-          "सांगली",
-        ],
-        correct: 0,
-        expMr: `महाराष्ट्राच्या भूगोलानुसार हे ठिकाण पर्याय १ च्या जिल्ह्यात आहे.`,
-      }),
+  // 2. Geography of Maharashtra & India (भूगोल)
+  const geographyTemplates = [
+    (i) => {
+      const items = [
+        {
+          q: "Which is the highest peak in Maharashtra?",
+          qMr: "महाराष्ट्रातील सर्वोच्च पर्वतशिखर कोणते आहे?",
+          corr: "Kalsubai - 1646m (कळसूबाई - १६४६ मी.)",
+          wrongs: ["Salher (साल्हेर)", "Mahabaleshwar (महाबळेश्वर)", "Harishchandragad (हरिश्चंद्रगड)"],
+          expMr: "कळसूबाई शिखर हे अहमदनगर जिल्ह्यातील अकोले तालुक्यात असून त्याची उंची १६४६ मीटर आहे.",
+        },
+        {
+          q: "On which river is the Jayakwadi Dam (Nath Sagar) located?",
+          qMr: "जायकवाडी धरण (नाथसागर जलाशय) कोणत्या नदीवर बांधण्यात आले आहे?",
+          corr: "Godavari (गोदावरी)",
+          wrongs: ["Krishna (कृष्णा)", "Bhima (भीमा)", "Tapi (तापी)"],
+          expMr: "जायकवाडी धरण हे छत्रपती संभाजीनगर जिल्ह्यातील पैठण येथे गोदावरी नदीवर आहे.",
+        },
+        {
+          q: "Which soil in Maharashtra is best suited for cotton cultivation?",
+          qMr: "महाराष्ट्रात कापूस पिकासाठी कोणती काळी मृदा सर्वाधिक उपयुक्त मानली जाते?",
+          corr: "Regur / Black Soil (रेगूर / काळी कापसाची मृदा)",
+          wrongs: ["Laterite Soil (जांभी मृदा)", "Alluvial Soil (गाळाची मृदा)", "Red Sandy Soil (तांबडी मृदा)"],
+          expMr: "बेसाल्ट खडकाच्या विदारणातून तयार झालेली रेगूर (काळी) मृदा ओलावा टिकवून ठेवते व कापूस उत्पादनासाठी उत्तम असते.",
+        },
+        {
+          q: "In which district is Tadoba-Andhari National Park located?",
+          qMr: "ताडोबा-अंधारी राष्ट्रीय व्याघ्र प्रकल्प कोणत्या जिल्ह्यात आहे?",
+          corr: "Chandrapur (चंद्रपूर)",
+          wrongs: ["Nagpur (नागपूर)", "Amravati (अमरावती)", "Gadchiroli (गडचिरोली)"],
+          expMr: "ताडोबा हे महाराष्ट्रातील पहिले व प्रमुख राष्ट्रीय उद्यान चंद्रपूर जिल्ह्यात आहे.",
+        },
+        {
+          q: "Which is the largest river system in Maharashtra by basin area?",
+          qMr: "महाराष्ट्राचे सर्वाधिक क्षेत्र (सुमारे ४९%) कोणत्या नदीच्या खोऱ्याने व्यापले आहे?",
+          corr: "Godavari Basin (गोदावरी खोरे)",
+          wrongs: ["Krishna Basin (कृष्णा खोरे)", "Bhima Basin (भीमा खोरे)", "Tapi Basin (तापी खोरे)"],
+          expMr: "गोदावरी नदी त्र्यंबकेश्वर (नाशिक) येथे उगम पावते आणि तिला 'दक्षिण भारताची गंगा' म्हणतात.",
+        },
+        {
+          q: "Which pass (Ghat) connects Mumbai to Pune through the Sahyadri range?",
+          qMr: "मुंबई आणि पुणे यांना जोडणारा सह्याद्रीतील प्रसिद्ध घाट कोणता?",
+          corr: "Bhor Ghat / Khandala Ghat (बोरघाट / खंडाळा घाट)",
+          wrongs: ["Thal Ghat / Kasara (थळघाट)", "Varandha Ghat (वरंधा घाट)", "Amboli Ghat (आंबोली घाट)"],
+          expMr: "मुंबई-पुणे राष्ट्रीय महामार्ग बोरघाटातून जातो, तर मुंबई-नाशिक महामार्ग थळघाटातून जातो.",
+        },
+        {
+          q: "Lonar crater lake in Buldhana was created by which phenomenon?",
+          qMr: "बुलढाणा जिल्ह्यातील प्रसिद्ध लोणार सरोवर कशामुळे तयार झाले आहे?",
+          corr: "Meteorite Impact (उल्कापातामुळे)",
+          wrongs: ["Volcanic Eruption (ज्वालामुखी उद्रेक)", "Earthquake (भूकंप)", "Glacial Erosion (हिमनदी कार्य)"],
+          expMr: "लोणार सरोवर हे उल्कापातामुळे तयार झालेले खऱ्या पाण्याचे बेसाल्टिक सरोवर असून जागतिक वारसा स्थळ आहे.",
+        },
+      ];
+      const item = items[i % items.length];
+      return {
+        subject: "geography",
+        qText: item.q,
+        qTextMr: item.qMr,
+        options: shuffleOptions(
+          { text: item.corr },
+          item.wrongs.map((w) => ({ text: w })),
+        ),
+        expMr: item.expMr,
+      };
     },
   ];
 
+  // 3. Constitution & Indian Polity (राज्यघटना व नागरिकशास्त्र)
+  const constitutionTemplates = [
+    (i) => {
+      const items = [
+        {
+          q: "Who was the Chairman of the Drafting Committee of the Indian Constitution?",
+          qMr: "भारतीय राज्यघटनेच्या मसुदा समितीचे अध्यक्ष कोण होते?",
+          corr: "Dr. B. R. Ambedkar (डॉ. बाबासाहेब आंबेडकर)",
+          wrongs: ["Dr. Rajendra Prasad (डॉ. राजेंद्र प्रसाद)", "Pandit Jawaharlal Nehru (पं. जवाहरलाल नेहरू)", "B. N. Rau (बी. एन. राव)"],
+          expMr: "२९ ऑगस्ट १९४७ रोजी स्थापन झालेल्या मसुदा समितीचे अध्यक्ष भारतरत्न डॉ. बाबासाहेब आंबेडकर होते.",
+        },
+        {
+          q: "Under which Article of the Constitution are Fundamental Rights guaranteed?",
+          qMr: "भारतीय राज्यघटनेच्या कोणत्या कलमान्वये नागरिकांना मूलभूत हक्क प्रदान करण्यात आले आहेत?",
+          corr: "Articles 12 to 35 (कलम १२ ते ३५ - भाग ३)",
+          wrongs: ["Articles 36 to 51 (कलम ३६ ते ५१)", "Articles 51A (कलम ५१ अ)", "Articles 1 to 4 (कलम १ ते ४)"],
+          expMr: "राज्यघटनेच्या भाग ३ मधील कलम १२ ते ३५ दरम्यान ६ मूलभूत हक्क देण्यात आले आहेत.",
+        },
+        {
+          q: "Which constitutional amendment added the words 'Socialist, Secular and Integrity' to the Preamble?",
+          qMr: "कोणत्या घटनादुरुस्तीने राज्यघटनेच्या उद्देशपत्रिकेत 'समाजवादी, धर्मनिरपेक्ष व अखंडता' हे शब्द जोडले गेले?",
+          corr: "42nd Constitutional Amendment 1976 (४२ वी घटनादुरुस्ती १९७६)",
+          wrongs: ["44th Amendment 1978 (४४ वी घटनादुरुस्ती)", "73rd Amendment 1992 (७३ वी घटनादुरुस्ती)", "86th Amendment 2002 (८६ वी घटनादुरुस्ती)"],
+          expMr: "१९७६ च्या ४२ व्या घटनादुरुस्तीला 'लघु राज्यघटना' (Mini Constitution) असेही म्हटले जाते.",
+        },
+        {
+          q: "Under which Article can the Supreme Court issue Writs for enforcement of Fundamental Rights?",
+          qMr: "मूलभूत हक्कांच्या संरक्षणासाठी सर्वोच्च न्यायालय कोणत्या कलमान्वये आदेश/रिट्स (Writs) जारी करते?",
+          corr: "Article 32 (कलम ३२ - घटनात्मक उपायांचा हक्क)",
+          wrongs: ["Article 226 (कलम २२६)", "Article 14 (कलम १४)", "Article 21 (कलम २१)"],
+          expMr: "डॉ. आंबेडकरांनी कलम ३२ ला 'घटनेचा आत्मा आणि हृदय' म्हटले आहे. उच्च न्यायालयाला कलम २२६ अन्वये अधिकार आहेत.",
+        },
+        {
+          q: "Which Constitutional Amendment gave constitutional status to Panchayati Raj institutions in India?",
+          qMr: "भारतात पंचायत राज व्यवस्थेला घटनात्मक दर्जा कोणत्या घटनादुरुस्तीने मिळाला?",
+          corr: "73rd Constitutional Amendment 1992 (७३ वी घटनादुरुस्ती १९९२)",
+          wrongs: ["74th Amendment (७४ वी घटनादुरुस्ती)", "52nd Amendment (५२ वी घटनादुरुस्ती)", "61st Amendment (६१ वी घटनादुरुस्ती)"],
+          expMr: "७३ व्या घटनादुरुस्तीने संविधानात भाग ९ व ११ वी अनुसूची समाविष्ट केली.",
+        },
+        {
+          q: "What is the minimum age required to become the President of India?",
+          qMr: "भारताचे राष्ट्रपती होण्यासाठी किमान वयोमर्यादा किती वर्षे असावी लागते?",
+          corr: "35 Years (३५ वर्षे)",
+          wrongs: ["30 Years (३० वर्षे)", "25 Years (२५ वर्षे)", "21 Years (२१ वर्षे)"],
+          expMr: "कलम ५८ नुसार राष्ट्रपती व उपराष्ट्रपती पदासाठी किमान ३५ वर्षे वय पूर्ण असणे आवश्यक आहे.",
+        },
+        {
+          q: "Who is the ex-officio Chairman of the Rajya Sabha in India?",
+          qMr: "भारताच्या राज्यसभेचे पदसिद्ध सभापती कोण असतात?",
+          corr: "Vice-President of India (भारताचे उपराष्ट्रपती)",
+          wrongs: ["Speaker of Lok Sabha (लोकसभा अध्यक्ष)", "Prime Minister (पंतप्रधान)", "Chief Justice of India (सरन्यायाधीश)"],
+          expMr: "कलम ६४ नुसार भारताचे उपराष्ट्रपती हे राज्यसभेचे पदसिद्ध अध्यक्ष/सभापती असतात.",
+        },
+      ];
+      const item = items[i % items.length];
+      return {
+        subject: "constitution",
+        qText: item.q,
+        qTextMr: item.qMr,
+        options: shuffleOptions(
+          { text: item.corr },
+          item.wrongs.map((w) => ({ text: w })),
+        ),
+        expMr: item.expMr,
+      };
+    },
+  ];
+
+  // 4. Marathi Grammar (मराठी व्याकरण)
+  const marathiTemplates = [
+    (i) => {
+      const items = [
+        {
+          q: "Identify the correct compound type (Samas) for the word 'प्रतिदिन (Pratidin)'.",
+          qMr: "'प्रतिदिन' या शब्दाचा समास ओळखा.",
+          corr: "Avyayibhav Samas (अव्ययीभाव समास)",
+          wrongs: ["Tatpurusha Samas (तत्पुरुष समास)", "Dvandva Samas (द्वंद्व समास)", "Bahuvrihi Samas (बहुव्रीही समास)"],
+          expMr: "ज्या सामासिक शब्दातील पहिले पद मुख्य असते व तो शब्द क्रियाविशेषणासारखा कार्य करतो त्यास अव्ययीभाव समास म्हणतात.",
+        },
+        {
+          q: "Identify the experiment (Prayog) type: 'रामाने रावणास मारले.'",
+          qMr: "'रामाने रावणास मारले.' या वाक्यातील प्रयोग ओळखा.",
+          corr: "Bhave Prayog (भावे प्रयोग)",
+          wrongs: ["Kartari Prayog (कर्तरी प्रयोग)", "Karmani Prayog (कर्मणी प्रयोग)", "Mishra Prayog (मिश्र प्रयोग)"],
+          expMr: "कर्ता व कर्म दोघांनाही प्रत्यय असल्यामुळे क्रियापद दोघांनुसार बदलत नाही, म्हणून हा भावे प्रयोग आहे.",
+        },
+        {
+          q: "Choose the correct Sandhi for: 'सत् + जन'",
+          qMr: "'सत् + जन' या शब्दाची योग्य संधी कोणती होईल?",
+          corr: "सज्जन (Sajjan)",
+          wrongs: ["सतजन (Satjan)", "सजन (Sajan)", "सदजन (Sadjan)"],
+          expMr: "व्यंजन संधीच्या नियमानुसार 'त्' पुढे 'ज्' आल्यास 'त्' चा 'ज्' होतो, म्हणून सत् + जन = सज्जन.",
+        },
+        {
+          q: "What is the meaning of the Marathi proverb 'काखेत कळसा गावाला वळसा'?",
+          qMr: "'काखेत कळसा गावाला वळसा' या म्हणीचा योग्य अर्थ सांगा.",
+          corr: "जवळ असलेली वस्तू दूर शोधत फिरणे",
+          wrongs: ["अति हुशारीमुळे नुकसान होणे", "अंगी कमी गुण असून बडबड करणे", "वेळ संपल्यावर काम सुरू करणे"],
+          expMr: "स्वतःजवळच उपलब्ध असणारी वस्तू सर्वत्र शोधणे म्हणजे काखेत कळसा गावाला वळसा.",
+        },
+        {
+          q: "Which of the following is a Mahaprana consonant in Marathi?",
+          qMr: "खालीलपैकी कोणता वर्ण 'महाप्राण' वर्ण म्हणून ओळखला जातो?",
+          corr: "'ह' (Ha)",
+          wrongs: ["'क' (Ka)", "'म' (Ma)", "'य' (Ya)"],
+          expMr: "मराठीत 'ह' हा मुख्य महाप्राण वर्ण आहे, तसेच ज्या वर्णात 'h' चा उच्चार मिसळलेला असतो ते महाप्राण वर्ण असतात.",
+        },
+        {
+          q: "Select the correct synonym for the word 'अवनि (Avani)'.",
+          qMr: "'अवनि' या शब्दाचा अचूक समानार्थी शब्द कोणता?",
+          corr: "पृथ्वी / धरणी (Prithvi / Dharni)",
+          wrongs: ["आकाश (Aakash)", "समुद्र (Samudra)", "वारा (Vara)"],
+          expMr: "अवनि, धरणी, वसुंधरा, क्षिती, मही हे सर्व पृथ्वी या शब्दाचे समानार्थी शब्द आहेत.",
+        },
+      ];
+      const item = items[i % items.length];
+      return {
+        subject: "marathi",
+        qText: item.q,
+        qTextMr: item.qMr,
+        options: shuffleOptions(
+          { text: item.corr },
+          item.wrongs.map((w) => ({ text: w })),
+        ),
+        expMr: item.expMr,
+      };
+    },
+  ];
+
+  // 5. English Language & Grammar
+  const englishTemplates = [
+    (i) => {
+      const items = [
+        {
+          q: "Select the correct One Word Substitute: 'A life history of a person written by himself.'",
+          qMr: "'A life history of a person written by himself.' या शब्दसमूहासाठी योग्य शब्द निवडा.",
+          corr: "Autobiography",
+          wrongs: ["Biography", "Calligraphy", "Bibliophile"],
+          expMr: "स्वतःचे चरित्र स्वतः लिहिणे म्हणजे Autobiography (आत्मचरित्र).",
+        },
+        {
+          q: "Choose the correct Antonym for the word: 'TRANSPARENT'",
+          qMr: "'TRANSPARENT' या शब्दाचा योग्य विरुद्धार्थी (Antonym) शब्द निवडा.",
+          corr: "Opaque",
+          wrongs: ["Clear", "Lucid", "Bright"],
+          expMr: "Transparent म्हणजे पारदर्शक, तर Opaque म्हणजे अपारदर्शक.",
+        },
+        {
+          q: "Fill in the blank with appropriate preposition: 'He is proficient _____ Mathematics.'",
+          qMr: "योग्य Preposition निवडा: 'He is proficient _____ Mathematics.'",
+          corr: "in",
+          wrongs: ["at", "with", "on"],
+          expMr: "Proficient या विशेषणानंतर 'in' हे preposition वापरले जाते.",
+        },
+        {
+          q: "Select the correct Passive Voice for: 'The police caught the thief.'",
+          qMr: "'The police caught the thief.' या वाक्याचे Passive Voice मध्ये रूपांतर ओळखा.",
+          corr: "The thief was caught by the police.",
+          wrongs: ["The thief is caught by the police.", "The thief had been caught by the police.", "The thief was being caught by the police."],
+          expMr: "Simple Past Tense चा Passive form: Object + was/were + V3 + by + Subject होतो.",
+        },
+        {
+          q: "What is the meaning of the idiom: 'To spill the beans'?",
+          qMr: "'To spill the beans' या इंग्रजी वाक्प्रचाराचा अर्थ काय आहे?",
+          corr: "To reveal a secret prematurely",
+          wrongs: ["To drop food on the floor", "To work very hard", "To cancel a plan"],
+          expMr: "To spill the beans म्हणजे गुप्त गोष्ट किंवा रहस्य उघड करणे.",
+        },
+      ];
+      const item = items[i % items.length];
+      return {
+        subject: "english",
+        qText: item.q,
+        qTextMr: item.qMr,
+        options: shuffleOptions(
+          { text: item.corr },
+          item.wrongs.map((w) => ({ text: w })),
+        ),
+        expMr: item.expMr,
+      };
+    },
+  ];
+
+  // 6. Quantitative Aptitude / Mathematics (अंकगणित)
+  const mathsTemplates = [
+    (i) => {
+      const p = 2000 + (i % 15) * 500;
+      const r = 8;
+      const t = 3;
+      const si = (p * r * t) / 100;
+      return {
+        subject: "mathematics",
+        qText: `Find the Simple Interest on ₹${p} at the rate of ${r}% per annum for ${t} years.`,
+        qTextMr: `₹${p} रकमेवर दरसाल दरशेकडा ${r} दराने ${t} वर्षांचे सरळव्याज किती होईल?`,
+        options: shuffleOptions(
+          { text: `₹${si}` },
+          [{ text: `₹${si + 60}` }, { text: `₹${si - 40}` }, { text: `₹${si + 120}` }],
+        ),
+        expMr: `सरळव्याज = (मुद्दल × दर × काळ) / १०० = (${p} × ${r} × ${t}) / १०० = ₹${si}.`,
+      };
+    },
+    (i) => {
+      const cp = 500 + (i % 10) * 50;
+      const profit = 20;
+      const sp = cp + (cp * profit) / 100;
+      return {
+        subject: "mathematics",
+        qText: `A product bought for ₹${cp} is sold at a profit of ${profit}%. What is its Selling Price?`,
+        qTextMr: `एका वस्तूची खरेदी किंमत ₹${cp} असून ती ${profit}% नफ्याने विकल्यास तिची विक्री किंमत किती होईल?`,
+        options: shuffleOptions(
+          { text: `₹${sp}` },
+          [{ text: `₹${sp + 25}` }, { text: `₹${sp - 30}` }, { text: `₹${sp + 50}` }],
+        ),
+        expMr: `विक्री किंमत = खरेदी किंमत + नफा = ${cp} + (${cp} × ${profit} / १००) = ₹${sp}.`,
+      };
+    },
+    (i) => {
+      const speedKm = 72 + (i % 5) * 18;
+      const speedMs = (speedKm * 5) / 18;
+      return {
+        subject: "mathematics",
+        qText: `Convert a speed of ${speedKm} km/h into meters per second (m/s).`,
+        qTextMr: `${speedKm} किमी/तास वेगाचे मीटर/सेकंद (m/s) मध्ये रूपांतर किती होईल?`,
+        options: shuffleOptions(
+          { text: `${speedMs} m/s` },
+          [{ text: `${speedMs + 5} m/s` }, { text: `${speedMs - 3} m/s` }, { text: `${speedMs + 10} m/s` }],
+        ),
+        expMr: `किमी/तास ते मी/से करण्यासाठी ५/१८ ने गुणावे: ${speedKm} × (५/१८) = ${speedMs} m/s.`,
+      };
+    },
+  ];
+
+  // 7. Logical Reasoning (बुद्धिमत्ता चाचणी)
+  const reasoningTemplates = [
+    (i) => {
+      const start = 3 + (i % 8);
+      const diff = 4 + (i % 4);
+      const seq = [start, start + diff, start + 2 * diff, start + 3 * diff, start + 4 * diff];
+      const next = start + 5 * diff;
+      return {
+        subject: "reasoning",
+        qText: `Find the next number in the arithmetic series: ${seq.join(", ")}, ?`,
+        qTextMr: `संख्या मालिकेतील पुढील पद ओळखा: ${seq.join(", ")}, ?`,
+        options: shuffleOptions(
+          { text: `${next}` },
+          [{ text: `${next + 2}` }, { text: `${next - diff}` }, { text: `${next + 5}` }],
+        ),
+        expMr: `मालिकेतील प्रत्येक पदात +${diff} ची वाढ होत आहे. म्हणून पुढील पद ${next} येईल.`,
+      };
+    },
+    (i) => {
+      const items = [
+        {
+          q: "In a code language, if 'CAT' is coded as '3120', how is 'DOG' coded?",
+          qMr: "एका सांकेतिक भाषेत 'CAT' ला '3120' लिहिले जाते, तर 'DOG' ला कसे लिहिले जाईल?",
+          corr: "4157 (D=4, O=15, G=7)",
+          wrongs: ["4158", "3147", "4167"],
+          expMr: "प्रत्येक अक्षराचा इंग्रजी वर्णमालेतील अनुक्रमांक लिहिला आहे: D(4), O(15), G(7) = 4157.",
+        },
+        {
+          q: "Pointing to a man, Rahul said, 'He is the only son of my father's father.' How is the man related to Rahul?",
+          qMr: "एका पुरुषाकडे बोट दाखवत राहुल म्हणाला, 'हा माझ्या वडिलांच्या वडिलांचा एकुलता एक मुलगा आहे.' तर तो पुरुष राहुलचा कोण लागतो?",
+          corr: "Father (वडील)",
+          wrongs: ["Brother (भाऊ)", "Uncle (काका)", "Grandfather (आजोबा)"],
+          expMr: "वडिलांचे वडील म्हणजे आजोबा; आजोबांचा एकुलता एक मुलगा म्हणजे स्वतः राहुलचे वडील.",
+        },
+      ];
+      const item = items[i % items.length];
+      return {
+        subject: "reasoning",
+        qText: item.q,
+        qTextMr: item.qMr,
+        options: shuffleOptions(
+          { text: item.corr },
+          item.wrongs.map((w) => ({ text: w })),
+        ),
+        expMr: item.expMr,
+      };
+    },
+  ];
+
+  // 8. General Science (सामान्य विज्ञान)
+  const scienceTemplates = [
+    (i) => {
+      const items = [
+        {
+          q: "Deficiency of which Vitamin causes Night Blindness (रातांधळेपणा)?",
+          qMr: "कोणत्या जीवनसत्त्वाच्या अभावामुळे 'रातांधळेपणा' हा रोग होतो?",
+          corr: "Vitamin A (जीवनसत्त्व अ)",
+          wrongs: ["Vitamin C (जीवनसत्त्व क)", "Vitamin D (जीवनसत्त्व ड)", "Vitamin B12 (जीवनसत्त्व ब१२)"],
+          expMr: "जीवनसत्त्व 'अ' च्या (Retinol) अभावामुळे डोळ्यांचे विकार व रातांधळेपणा होतो.",
+        },
+        {
+          q: "What is the powerhouse of the human cell?",
+          qMr: "सजीवांच्या पेशीचे 'ऊर्जा केंद्र' (Powerhouse of the cell) कोणास म्हणतात?",
+          corr: "Mitochondria (तंतुकणिका)",
+          wrongs: ["Ribosome (रायबोसोम)", "Lysosome (लयकारिका)", "Nucleus (केंद्रक)"],
+          expMr: "तंतुकणिकांमध्ये पेशीय श्वसनातून ATP स्वरूपात ऊर्जा निर्माण होते, म्हणून त्यास ऊर्जा केंद्र म्हणतात.",
+        },
+        {
+          q: "What is the chemical formula of Washing Soda?",
+          qMr: "धुण्याच्या सोड्याचे रासायनिक सूत्र कोणते आहे?",
+          corr: "Na2CO3.10H2O (सोडियम कार्बोनेट)",
+          wrongs: ["NaHCO3 (सोडियम बायकार्बोनेट)", "NaCl (सोडियम क्लोराईड)", "NaOH (सोडियम हायड्रॉक्साईड)"],
+          expMr: "धुण्याचा सोडा = सोडियम कार्बोनेट (Na2CO3), तर खाण्याचा सोडा = सोडियम बायकार्बोनेट (NaHCO3).",
+        },
+        {
+          q: "What is the SI unit of Electric Current?",
+          qMr: "विद्युतधारेचे एस. आय. (SI) एकक कोणते आहे?",
+          corr: "Ampere (अँपिअर)",
+          wrongs: ["Volt (व्होल्ट)", "Ohm (ओहम)", "Watt (वॅट)"],
+          expMr: "विद्युतधारेचे एकक अँपिअर (A), विभवांतराचे व्होल्ट (V) आणि रोधाचे ओहम (Ω) आहे.",
+        },
+      ];
+      const item = items[i % items.length];
+      return {
+        subject: "science",
+        qText: item.q,
+        qTextMr: item.qMr,
+        options: shuffleOptions(
+          { text: item.corr },
+          item.wrongs.map((w) => ({ text: w })),
+        ),
+        expMr: item.expMr,
+      };
+    },
+  ];
+
+  // Distribute 100 questions per exam blueprint:
   for (let qNum = 1; qNum <= 100; qNum++) {
     const seedOffset = examIndex * 100 + qNum;
-    let chosenSubject = "general-knowledge";
-    let qData = null;
+    let generator = null;
 
-    if (qNum <= 25) {
-      chosenSubject = "marathi";
-      const topic = marathiTopics[qNum % marathiTopics.length];
-      qData = topic.template(seedOffset);
-    } else if (qNum <= 50) {
+    if (qNum <= 20) {
+      generator = marathiTemplates[qNum % marathiTemplates.length];
+    } else if (qNum <= 40) {
       if (examType.includes("POLICE")) {
-        chosenSubject = "mathematics";
-        const topic = mathsTopics[qNum % mathsTopics.length];
-        qData = topic.template(seedOffset);
+        generator = mathsTemplates[qNum % mathsTemplates.length];
       } else {
-        chosenSubject = "english";
-        const topic = englishTopics[qNum % englishTopics.length];
-        qData = topic.template(seedOffset);
+        generator = englishTemplates[qNum % englishTemplates.length];
       }
+    } else if (qNum <= 60) {
+      generator = reasoningTemplates[qNum % reasoningTemplates.length];
     } else if (qNum <= 75) {
-      chosenSubject = "reasoning";
-      const topic = reasoningTopics[qNum % reasoningTopics.length];
-      qData = topic.template(seedOffset);
+      generator = constitutionTemplates[qNum % constitutionTemplates.length];
+    } else if (qNum <= 88) {
+      generator = historyTemplates[qNum % historyTemplates.length];
     } else {
-      chosenSubject = "general-knowledge";
-      const topic = gkTopics[qNum % gkTopics.length];
-      qData = topic.template(seedOffset);
+      generator = geographyTemplates[qNum % geographyTemplates.length];
     }
 
-    const options = [
-      { text: qData.options[0], isCorrect: true },
-      { text: qData.options[1], isCorrect: false },
-      { text: qData.options[2], isCorrect: false },
-      { text: qData.options[3], isCorrect: false },
-    ];
+    const qData = generator(seedOffset);
 
     questions.push({
       qNum,
-      subject: chosenSubject,
+      subject: qData.subject,
       qText: `[Q${qNum}] ${qData.qText}`,
       qTextMr: `[प्रश्न ${qNum}] ${qData.qTextMr}`,
-      options,
+      options: qData.options,
       expMr: qData.expMr,
     });
   }
@@ -266,6 +528,9 @@ export function generate100Questions(examType, examIndex) {
 }
 
 export async function runCompleteDatabaseSeed(prismaClient) {
+  console.warn("🌱 Starting Enterprise Production Database Seeding with 10 Topics & Randomized Answer Keys...");
+
+  // 1. Academy Organization
   const org = await prismaClient.organization.upsert({
     where: { slug: "shivneri-academy" },
     update: {},
@@ -282,6 +547,7 @@ export async function runCompleteDatabaseSeed(prismaClient) {
 
   const passwordHash = await bcrypt.hash("demo123", 12);
 
+  // 2. Super Admin User
   const bhavishAdmin = await prismaClient.user.upsert({
     where: { email: "bhavishm009@gmail.com" },
     update: { role: "SUPER_ADMIN", passwordHash },
@@ -293,6 +559,7 @@ export async function runCompleteDatabaseSeed(prismaClient) {
     },
   });
 
+  // Fallback Admin
   await prismaClient.user.upsert({
     where: { email: "admin@example.com" },
     update: { role: "SUPER_ADMIN", passwordHash },
@@ -304,6 +571,7 @@ export async function runCompleteDatabaseSeed(prismaClient) {
     },
   });
 
+  // 3. Demo Users
   await prismaClient.user.upsert({
     where: { email: "academy@example.com" },
     update: { passwordHash, organizationId: org.id },
@@ -335,17 +603,18 @@ export async function runCompleteDatabaseSeed(prismaClient) {
     },
   });
 
+  // 4. Setup All Subjects in Maharashtra Syllabus
   const subjectsData = [
+    { name: "History of Maharashtra & India", nameMr: "इतिहास (महाराष्ट्राचा व भारताचा इतिहास)", slug: "history" },
+    { name: "Geography of Maharashtra & India", nameMr: "भूगोल (महाराष्ट्राचा व भारताचा भूगोल)", slug: "geography" },
+    { name: "Indian Polity & Constitution", nameMr: "भारतीय राज्यघटना व नागरिकशास्त्र", slug: "constitution" },
     { name: "Marathi Grammar", nameMr: "मराठी व्याकरण व शब्दसंग्रह", slug: "marathi" },
-    { name: "English Language", nameMr: "इंग्रजी व्याकरण (English)", slug: "english" },
-    { name: "Mathematics", nameMr: "अंकगणित व संख्याशास्त्र", slug: "mathematics" },
-    { name: "Logical Reasoning", nameMr: "बुद्धिमत्ता चाचणी व तर्कक्षमता", slug: "reasoning" },
-    { name: "Maharashtra & India GK", nameMr: "सामान्य ज्ञान (GK & GS)", slug: "general-knowledge" },
-    { name: "Current Affairs", nameMr: "चालू घडामोडी", slug: "current-affairs" },
-    { name: "History of Maharashtra", nameMr: "महाराष्ट्राचा इतिहास", slug: "history" },
-    { name: "Geography of Maharashtra", nameMr: "महाराष्ट्राचा भूगोल", slug: "geography" },
-    { name: "Indian Polity & Constitution", nameMr: "भारतीय राज्यघटना व पंचायत राज", slug: "constitution" },
-    { name: "General Science", nameMr: "सामान्य विज्ञान", slug: "science" },
+    { name: "English Language & Grammar", nameMr: "इंग्रजी व्याकरण (English Language)", slug: "english" },
+    { name: "Mathematics & Quantitative Aptitude", nameMr: "अंकगणित व संख्यात्मक अभियोग्यता", slug: "mathematics" },
+    { name: "Logical Reasoning & Mental Ability", nameMr: "बुद्धिमत्ता चाचणी व तर्कक्षमता", slug: "reasoning" },
+    { name: "General Science", nameMr: "सामान्य विज्ञान (भौतिक, रसायन व जीवशास्त्र)", slug: "science" },
+    { name: "Economics & Budget", nameMr: "अर्थव्यवस्था व शासकीय योजना", slug: "economics" },
+    { name: "Current Affairs & Static GK", nameMr: "चालू घडामोडी व सामान्य ज्ञान", slug: "general-knowledge" },
   ];
 
   const subjectMap = {};
@@ -358,80 +627,206 @@ export async function runCompleteDatabaseSeed(prismaClient) {
     subjectMap[s.slug] = rec.id;
   }
 
+  // 5. Build 27 Exams Blueprint: EXACTLY 10 LIVE EXAMS + 17 DRAFT EXAMS
   const examsMeta = [
-    ...Array.from({ length: 10 }, (_, i) => ({
-      title: `Maharashtra Police Bharti 2025 Grand Mock Test ${String(i + 1).padStart(2, "0")} (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ${String(i + 1).padStart(2, "0")})`,
-      slug: `police-bharti-mock-${String(i + 1).padStart(2, "0")}`,
+    // --- 10 LIVE EXAMS (Exams 1 to 10) ---
+    {
+      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 01 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०१)",
+      slug: "police-bharti-mock-01",
       examType: "POLICE_BHARTI",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
-      description: `महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ${i + 1} - १०० गुणांची मोफत ऑनलाइन टेस्ट.`,
-    })),
-    ...Array.from({ length: 5 }, (_, i) => ({
-      title: `Maharashtra Talathi Bharti Grand Mock Test ${String(i + 1).padStart(2, "0")} (तलाठी भरती सराव परीक्षा - ${String(i + 1).padStart(2, "0")})`,
-      slug: `talathi-mock-${String(i + 1).padStart(2, "0")}`,
-      examType: "TALATHI",
-      durationMinutes: 120,
-      passingMarks: 45,
+      status: "LIVE",
+      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०१ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+    },
+    {
+      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 02 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०२)",
+      slug: "police-bharti-mock-02",
+      examType: "POLICE_BHARTI",
+      durationMinutes: 90,
+      passingMarks: 40,
       negativeMarks: 0,
-      description: `TCS पॅटर्ननुसार तलाठी भरती १०० प्रश्नांचा संपूर्ण सराव पेपर ${i + 1}.`,
-    })),
-    ...Array.from({ length: 2 }, (_, i) => ({
-      title: `MPSC Rajyaseva GS Paper 1 Prelims Grand Mock ${String(i + 1).padStart(2, "0")} (राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन)`,
-      slug: `mpsc-rajyaseva-mock-${String(i + 1).padStart(2, "0")}`,
+      status: "LIVE",
+      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०२ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+    },
+    {
+      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 03 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०३)",
+      slug: "police-bharti-mock-03",
+      examType: "POLICE_BHARTI",
+      durationMinutes: 90,
+      passingMarks: 40,
+      negativeMarks: 0,
+      status: "LIVE",
+      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०३ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+    },
+    {
+      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 04 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०४)",
+      slug: "police-bharti-mock-04",
+      examType: "POLICE_BHARTI",
+      durationMinutes: 90,
+      passingMarks: 40,
+      negativeMarks: 0,
+      status: "LIVE",
+      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०४ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+    },
+    {
+      title: "MPSC Rajyaseva GS Paper 1 Prelims Grand Mock 01 (राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन - ०१)",
+      slug: "mpsc-rajyaseva-mock-01",
       examType: "MPSC_RAJYASEVA",
       durationMinutes: 120,
       passingMarks: 50,
       negativeMarks: 0.25,
-      description: `एमपीएससी राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन १०० वस्तुनिष्ठ प्रश्न - संच ${i + 1}.`,
-    })),
-    ...Array.from({ length: 2 }, (_, i) => ({
-      title: `MPSC Group B & C (Combine) Prelims Grand Mock ${String(i + 1).padStart(2, "0")} (संयुक्त पूर्व परीक्षा गट ब व क)`,
-      slug: `mpsc-combine-mock-${String(i + 1).padStart(2, "0")}`,
+      status: "LIVE",
+      description: "एमपीएससी राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन १०० वस्तुनिष्ठ प्रश्न - संच ०१.",
+    },
+    {
+      title: "MPSC Rajyaseva GS Paper 1 Prelims Grand Mock 02 (राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन - ०२)",
+      slug: "mpsc-rajyaseva-mock-02",
+      examType: "MPSC_RAJYASEVA",
+      durationMinutes: 120,
+      passingMarks: 50,
+      negativeMarks: 0.25,
+      status: "LIVE",
+      description: "एमपीएससी राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन १०० वस्तुनिष्ठ प्रश्न - संच ०२.",
+    },
+    {
+      title: "MPSC Group B & C (Combine) Prelims Grand Mock 01 (संयुक्त पूर्व परीक्षा गट ब व क - ०१)",
+      slug: "mpsc-combine-mock-01",
       examType: "MPSC_COMBINE",
       durationMinutes: 60,
       passingMarks: 45,
       negativeMarks: 0.25,
-      description: `एमपीएससी गट ब व गट क संयुक्त पूर्व परीक्षेसाठी १०० प्रश्नांची सराव टेस्ट ${i + 1}.`,
-    })),
-    ...Array.from({ length: 2 }, (_, i) => ({
-      title: `Zilla Parishad (ZP) Arogya Sevak & Gramsevak Grand Test ${String(i + 1).padStart(2, "0")} (जिल्हा परिषद भरती विशेष)`,
-      slug: `zp-gramsevak-mock-${String(i + 1).padStart(2, "0")}`,
+      status: "LIVE",
+      description: "एमपीएससी गट ब व गट क संयुक्त पूर्व परीक्षेसाठी १०० प्रश्नांची सराव टेस्ट ०१.",
+    },
+    {
+      title: "Maharashtra Talathi Bharti Grand Mock Test 01 (तलाठी भरती सराव परीक्षा - ०१)",
+      slug: "talathi-mock-01",
+      examType: "TALATHI",
+      durationMinutes: 120,
+      passingMarks: 45,
+      negativeMarks: 0,
+      status: "LIVE",
+      description: "TCS पॅटर्ननुसार तलाठी भरती १०० प्रश्नांचा संपूर्ण सराव पेपर ०१.",
+    },
+    {
+      title: "Zilla Parishad (ZP) Arogya Sevak & Gramsevak Grand Test 01 (जिल्हा परिषद भरती विशेष - ०१)",
+      slug: "zp-gramsevak-mock-01",
       examType: "ZILLA_PARISHAD",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
-      description: `जिल्हा परिषद अंतर्गत आरोग्य सेवक व ग्रामसेवक १०० प्रश्नांचा सराव संच ${i + 1}.`,
-    })),
-    ...Array.from({ length: 2 }, (_, i) => ({
-      title: `Maharashtra Vanrakshak (Forest Guard) Grand CBT Mock ${String(i + 1).padStart(2, "0")} (वनरक्षक भरती सराव परीक्षा)`,
-      slug: `vanrakshak-mock-${String(i + 1).padStart(2, "0")}`,
+      status: "LIVE",
+      description: "जिल्हा परिषद अंतर्गत आरोग्य सेवक व ग्रामसेवक १०० प्रश्नांचा सराव संच ०१.",
+    },
+    {
+      title: "Maharashtra Vanrakshak (Forest Guard) Grand CBT Mock 01 (वनरक्षक भरती सराव परीक्षा - ०१)",
+      slug: "vanrakshak-mock-01",
       examType: "VANRAKSHAK",
       durationMinutes: 90,
       passingMarks: 45,
       negativeMarks: 0,
-      description: `वनरक्षक भरती १०० प्रश्न - पर्यावरण, वने, जैवविविधता व भूगोल - संच ${i + 1}.`,
+      status: "LIVE",
+      description: "वनरक्षक भरती १०० प्रश्न - पर्यावरण, वने, जैवविविधता व भूगोल - संच ०१.",
+    },
+
+    // --- 17 DRAFT EXAMS (Available in Admin to Publish Anytime) ---
+    ...Array.from({ length: 6 }, (_, i) => ({
+      title: `Maharashtra Police Bharti 2025 Grand Mock Test ${String(i + 5).padStart(2, "0")} (पोलीस भरती संच - ${String(i + 5).padStart(2, "0")})`,
+      slug: `police-bharti-mock-${String(i + 5).padStart(2, "0")}`,
+      examType: "POLICE_BHARTI",
+      durationMinutes: 90,
+      passingMarks: 40,
+      negativeMarks: 0,
+      status: "DRAFT",
+      description: `महाराष्ट्र पोलीस भरती १०० गुणांचा सराव संच ${i + 5} (मसुदा / Draft).`,
     })),
-    ...Array.from({ length: 2 }, (_, i) => ({
-      title: `Saralseva Marathi Grammar & GK 100-Question Master Test ${String(i + 1).padStart(2, "0")} (सरळसेवा विशेष १०० प्रश्न)`,
-      slug: `saralseva-gk-marathi-${String(i + 1).padStart(2, "0")}`,
+    ...Array.from({ length: 4 }, (_, i) => ({
+      title: `Maharashtra Talathi Bharti Grand Mock Test ${String(i + 2).padStart(2, "0")} (तलाठी भरती संच - ${String(i + 2).padStart(2, "0")})`,
+      slug: `talathi-mock-${String(i + 2).padStart(2, "0")}`,
+      examType: "TALATHI",
+      durationMinutes: 120,
+      passingMarks: 45,
+      negativeMarks: 0,
+      status: "DRAFT",
+      description: `TCS पॅटर्न तलाठी भरती १०० प्रश्नांचा सराव संच ${i + 2} (Draft).`,
+    })),
+    {
+      title: "MPSC Group B & C (Combine) Prelims Grand Mock 02 (संयुक्त पूर्व परीक्षा - ०२)",
+      slug: "mpsc-combine-mock-02",
+      examType: "MPSC_COMBINE",
+      durationMinutes: 60,
+      passingMarks: 45,
+      negativeMarks: 0.25,
+      status: "DRAFT",
+      description: "एमपीएससी गट ब व गट क संयुक्त पूर्व परीक्षा १०० प्रश्न संच ०२ (Draft).",
+    },
+    {
+      title: "Zilla Parishad (ZP) Arogya Sevak & Gramsevak Grand Test 02 (जिल्हा परिषद संच - ०२)",
+      slug: "zp-gramsevak-mock-02",
+      examType: "ZILLA_PARISHAD",
+      durationMinutes: 90,
+      passingMarks: 40,
+      negativeMarks: 0,
+      status: "DRAFT",
+      description: "जिल्हा परिषद भरती १०० प्रश्न संच ०२ (Draft).",
+    },
+    {
+      title: "Maharashtra Vanrakshak (Forest Guard) Grand CBT Mock 02 (वनरक्षक संच - ०२)",
+      slug: "vanrakshak-mock-02",
+      examType: "VANRAKSHAK",
+      durationMinutes: 90,
+      passingMarks: 45,
+      negativeMarks: 0,
+      status: "DRAFT",
+      description: "वनरक्षक भरती १०० प्रश्न संच ०२ (Draft).",
+    },
+    {
+      title: "Saralseva Marathi Grammar & GK 100-Question Master Test 01 (सरळसेवा विशेष - ०१)",
+      slug: "saralseva-gk-marathi-01",
       examType: "SARALSEVA",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
-      description: `सरळसेवा भरती १०० गुणांचा मास्टर सराव पेपर ${i + 1}.`,
-    })),
-    ...Array.from({ length: 2 }, (_, i) => ({
-      title: `TCS / IBPS Quantitative Aptitude & Reasoning 100-Question Grand Mock ${String(i + 1).padStart(2, "0")} (अंकगणित व बुद्धिमत्ता विशेष)`,
-      slug: `tcs-ibps-maths-reasoning-${String(i + 1).padStart(2, "0")}`,
+      status: "DRAFT",
+      description: "सरळसेवा भरती १०० गुणांचा मास्टर सराव पेपर ०१ (Draft).",
+    },
+    {
+      title: "Saralseva Marathi Grammar & GK 100-Question Master Test 02 (सरळसेवा विशेष - ०२)",
+      slug: "saralseva-gk-marathi-02",
       examType: "SARALSEVA",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
-      description: `TCS व IBPS पॅटर्नवरील अंकगणित व बुद्धिमत्ता १०० प्रश्नांचा महासराव संच ${i + 1}.`,
-    })),
+      status: "DRAFT",
+      description: "सरळसेवा भरती १०० गुणांचा मास्टर सराव पेपर ०२ (Draft).",
+    },
+    {
+      title: "TCS / IBPS Quantitative Aptitude & Reasoning 100-Question Grand Mock 01 (अंकगणित व बुद्धिमत्ता - ०१)",
+      slug: "tcs-ibps-maths-reasoning-01",
+      examType: "SARALSEVA",
+      durationMinutes: 90,
+      passingMarks: 40,
+      negativeMarks: 0,
+      status: "DRAFT",
+      description: "TCS/IBPS पॅटर्न अंकगणित व बुद्धिमत्ता १०० प्रश्न संच ०१ (Draft).",
+    },
+    {
+      title: "TCS / IBPS Quantitative Aptitude & Reasoning 100-Question Grand Mock 02 (अंकगणित व बुद्धिमत्ता - ०२)",
+      slug: "tcs-ibps-maths-reasoning-02",
+      examType: "SARALSEVA",
+      durationMinutes: 90,
+      passingMarks: 40,
+      negativeMarks: 0,
+      status: "DRAFT",
+      description: "TCS/IBPS पॅटर्न अंकगणित व बुद्धिमत्ता १०० प्रश्न संच ०२ (Draft).",
+    },
   ];
+
+  console.warn(`🚀 Seeding ${examsMeta.length} Exams (10 LIVE, 17 DRAFT) with 100 Syllabus-Verified Questions Each...`);
+
+  let totalQuestionsCount = 0;
 
   for (let idx = 0; idx < examsMeta.length; idx++) {
     const meta = examsMeta[idx];
@@ -441,7 +836,7 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       where: { slug: meta.slug },
       update: {
         title: meta.title,
-        status: "LIVE",
+        status: meta.status,
         isFree: true,
         visibilityMode: "FREE_GLOBAL",
         price: 0,
@@ -465,13 +860,17 @@ export async function runCompleteDatabaseSeed(prismaClient) {
         isFree: true,
         price: 0,
         visibilityMode: "FREE_GLOBAL",
-        status: "LIVE",
+        status: meta.status,
         createdBy: bhavishAdmin.id,
         description: meta.description,
       },
     });
 
+    // Clear old links to re-link fresh questions with randomized option orders
     await prismaClient.examQuestion.deleteMany({
+      where: { examId: exam.id },
+    });
+    await prismaClient.examQuestionSnapshot.deleteMany({
       where: { examId: exam.id },
     });
 
@@ -499,8 +898,15 @@ export async function runCompleteDatabaseSeed(prismaClient) {
             })),
           },
         },
+        include: {
+          options: true,
+        },
       });
 
+      // Find the ID of the correct option
+      const correctOption = createdQ.options.find((o) => o.isCorrect);
+
+      // Create ExamQuestion record
       await prismaClient.examQuestion.create({
         data: {
           examId: exam.id,
@@ -510,26 +916,62 @@ export async function runCompleteDatabaseSeed(prismaClient) {
           negativeMarks: meta.negativeMarks,
         },
       });
+
+      // Create Snapshot for fast CBT attempt delivery
+      await prismaClient.examQuestionSnapshot.create({
+        data: {
+          examId: exam.id,
+          sourceQuestionId: createdQ.id,
+          position: q.qNum,
+          marks: 1,
+          negativeMarks: meta.negativeMarks,
+          snapshot: {
+            id: createdQ.id,
+            questionText: q.qText,
+            questionTextMr: q.qTextMr,
+            explanation: q.expMr,
+            explanationMr: q.expMr,
+            marks: 1,
+            negativeMarks: meta.negativeMarks,
+            subject: q.subject,
+            correctOptionId: correctOption?.id || null,
+            options: createdQ.options.map((o) => ({
+              id: o.id,
+              text: o.optionText,
+              textMr: o.optionTextMr,
+              order: o.optionOrder,
+              isCorrect: o.isCorrect,
+            })),
+          },
+        },
+      });
+
+      totalQuestionsCount++;
     }
   }
 
+  // Practice Notification
   await prismaClient.notification.create({
     data: {
-      title: "🎯 महाराष्ट्र पोलीस भरती १० नवीन सराव पेपर्स उपलब्ध!",
-      message: "महाराष्ट्र पोलीस भरती २०२५ साठी १०० प्रश्नांचे १० पूर्ण सराव संच आणि इतर सर्व परीक्षांचे पेपर्स लाइव्ह झाले आहेत. आताच सराव सुरू करा!",
+      title: "🎯 १० महासराव परीक्षा थेट लाइव्ह!",
+      message: "पोलीस भरती, एमपीएससी राज्यसेवा, संयुक्त गट ब व क, तलाठी आणि जिल्हा परिषद परीक्षांचे १० संपूर्ण १०० प्रश्नांचे पेपर्स लाइव्ह झाले आहेत. लगेच सराव सुरू करा!",
       type: "FREE_EXAM",
-      scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
+      scheduledAt: new Date(),
       data: {
         url: "/student/exams",
-        badge: "Police Bharti 10 Mocks",
+        badge: "10 Live Mega Mocks",
       },
     },
   });
 
+  console.warn(`🎉 Seeding Complete: 10 LIVE Exams and 17 Draft Exams created (${totalQuestionsCount} Questions with Randomized Answer Keys).`);
+
   return {
     success: true,
     totalExamsSeeded: examsMeta.length,
-    totalQuestionsSeeded: examsMeta.length * 100,
+    liveExams: 10,
+    draftExams: 17,
+    totalQuestionsSeeded: totalQuestionsCount,
     superAdminEmail: bhavishAdmin.email,
   };
 }
