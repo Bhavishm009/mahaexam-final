@@ -103,10 +103,35 @@ export default function AdminProfilePage() {
 
   if (loading) {
     return (
-      <div className="grid min-h-[50vh] place-items-center font-sans">
-        <div className="flex items-center gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
-          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-          <span>Loading admin profile...</span>
+      <div className="mx-auto max-w-4xl space-y-6 font-sans">
+        {/* Header Banner Shimmer */}
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-4">
+              <div className="animate-shimmer h-16 w-16 rounded-2xl" />
+              <div className="space-y-2">
+                <div className="animate-shimmer h-7 w-48 rounded-xl" />
+                <div className="animate-shimmer h-4 w-64 rounded-lg" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <div className="animate-shimmer h-12 w-28 rounded-xl" />
+              <div className="animate-shimmer h-12 w-28 rounded-xl" />
+            </div>
+          </div>
+        </div>
+
+        {/* Form Card Shimmer */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8 space-y-6">
+          <div className="animate-shimmer h-6 w-56 rounded-lg" />
+          <div className="grid gap-5 sm:grid-cols-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="space-y-2">
+                <div className="animate-shimmer h-4 w-32 rounded-md" />
+                <div className="animate-shimmer h-11 w-full rounded-xl" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -227,8 +252,9 @@ export default function AdminProfilePage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                मोबाईल नंबर (Phone Number)
+              <label className="mb-1.5 flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-300">
+                <Phone className="h-3.5 w-3.5 text-slate-500" />
+                <span>मोबाईल नंबर (Phone Number)</span>
               </label>
               <input
                 type="tel"
