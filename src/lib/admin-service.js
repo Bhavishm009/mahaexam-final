@@ -24,8 +24,17 @@ export async function adminStats() {
 export async function listOrganizations() {
   return prisma.organization.findMany({
     include: {
-      subscriptions: { include: { plan: true }, orderBy: { createdAt: "desc" }, take: 1 },
       _count: { select: { users: true, exams: true, batches: true } },
+      users: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          phone: true,
+          status: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

@@ -7,11 +7,17 @@ import bcrypt from "bcryptjs";
 import { sendAcademyCredentialsEmail } from "@/lib/email-service";
 
 export async function GET() {
-  const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
-  if (!s || !["SUPER_ADMIN", "ADMIN"].includes(s.role)) {
-    return NextResponse.json({ error: "Forbidden: Super Admin access required" }, { status: 403 });
+  try {
+    const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+    if (!s || !["SUPER_ADMIN", "ADMIN"].includes(s.role)) {
+      return NextResponse.json({ error: "Forbidden: Super Admin access required" }, { status: 403 });
+    }
+    const organizations = await listOrganizations();
+    return NextResponse.json({ organizations });
+  } catch (error) {
+    console.error("GET /api/admin/organizations error:", error);
+    return NextResponse.json({ error: error.message || "Failed to fetch organizations", organizations: [] }, { status: 500 });
   }
-  return NextResponse.json({ organizations: await listOrganizations() });
 }
 
 export async function POST(request) {

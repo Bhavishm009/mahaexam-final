@@ -165,13 +165,16 @@ export default function OrganizationsPage() {
         !search ||
         o.name?.toLowerCase().includes(s) ||
         o.district?.toLowerCase().includes(s) ||
-        o.email?.toLowerCase().includes(s);
+        o.email?.toLowerCase().includes(s) ||
+        o.users?.some(
+          (u) => u.name?.toLowerCase().includes(s) || u.email?.toLowerCase().includes(s),
+        );
 
       const matchesDistrict = districtFilter === "ALL" || o.district === districtFilter;
       const matchesPlan =
         planFilter === "ALL" ||
-        o.subscriptions?.[0]?.plan?.name === planFilter ||
-        o.subscriptionPlan === planFilter;
+        o.subscriptionPlan === planFilter ||
+        o.subscriptionPlan?.toUpperCase() === planFilter?.toUpperCase();
 
       return matchesSearch && matchesDistrict && matchesPlan;
     });
@@ -531,8 +534,9 @@ export default function OrganizationsPage() {
                         </div>
                         <div>
                           <div>{o.name}</div>
-                          <div className="font-mono text-[11px] font-normal text-slate-400">
-                            {o.email || o.slug}
+                          <div className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
+                            {o.users?.[0]?.name ? `${o.users[0].name} · ` : ""}
+                            {o.email || o.users?.[0]?.email || o.slug}
                           </div>
                         </div>
                       </div>
@@ -544,7 +548,7 @@ export default function OrganizationsPage() {
                       </span>
                     </td>
                     <td className="p-4 font-bold text-slate-700 dark:text-slate-300">
-                      {o._count?.users || 0}
+                      {o._count?.users || o.users?.length || 0}
                     </td>
                     <td className="p-4 font-bold text-slate-700 dark:text-slate-300">
                       {o._count?.batches || 0}
@@ -554,7 +558,7 @@ export default function OrganizationsPage() {
                     </td>
                     <td className="p-4">
                       <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-bold text-blue-800 dark:bg-blue-950/80 dark:text-blue-300">
-                        {o.subscriptions?.[0]?.plan?.name || o.subscriptionPlan || "ACTIVE"}
+                        {o.subscriptionPlan || "ACTIVE"}
                       </span>
                     </td>
                     <td className="p-4 text-right">
