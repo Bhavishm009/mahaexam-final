@@ -26,6 +26,7 @@ import {
   UserCheck,
   Sparkles,
   Globe,
+  Activity,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/components/language-provider";
