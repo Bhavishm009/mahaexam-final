@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Eye, CheckCircle2 } from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES } from "@/lib/exam-types";
 
 const steps = ["Basic Details", "Questions", "Rules", "Assign", "Preview & Publish"];
@@ -8,6 +10,7 @@ export default function ExamBuilder() {
   const [draft, setDraft] = useState(null);
   const [step, setStep] = useState(1);
   const [message, setMessage] = useState("");
+  const [publishedExam, setPublishedExam] = useState(null);
   const [search, setSearch] = useState("");
   const [bank, setBank] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -63,7 +66,12 @@ export default function ExamBuilder() {
       body: JSON.stringify(schedule),
     });
     const d = await r.json();
-    setMessage(r.ok ? `Exam created: ${d.exam.title}` : (d.errors || [d.error]).join(", "));
+    if (r.ok) {
+      setPublishedExam(d.exam);
+      setMessage(`Exam created successfully: ${d.exam.title}`);
+    } else {
+      setMessage((d.errors || [d.error]).join(", "));
+    }
   }
   if (!draft) {
     return (
@@ -399,7 +407,23 @@ export default function ExamBuilder() {
           )}
         </div>
         {message && (
-          <div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{message}</div>
+          <div className="mt-4 space-y-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs font-bold text-blue-950 dark:border-blue-800 dark:bg-blue-950/70 dark:text-blue-200">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span>{message}</span>
+            </div>
+            {publishedExam && (
+              <div>
+                <Link
+                  href={`/exam/${publishedExam.slug || publishedExam.id}/review`}
+                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-blue-500"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  <span>🔍 Review Exam Paper &amp; Answer Keys (परीक्षेचे पुनरावलोकन करा)</span>
+                </Link>
+              </div>
+            )}
+          </div>
         )}
         <div className="mt-6 flex justify-between">
           <button

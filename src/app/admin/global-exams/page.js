@@ -7,6 +7,7 @@ import {
   Plus,
   Trash2,
   ExternalLink,
+  Eye,
   Tag,
   Calendar,
   Clock,
@@ -767,13 +768,22 @@ export default function GlobalExamsPage() {
                     </button>
 
                     <Link
+                      href={`/exam/${x.slug || x.id}/review`}
+                      className="inline-flex items-center gap-1 rounded-xl border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                      title="Review Full Exam Paper & Answer Keys"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>Review Paper</span>
+                    </Link>
+
+                    <Link
                       href={`/exam/${x.slug || x.id}`}
                       target="_blank"
                       className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                      title="Preview Preflight Page"
+                      title="Preview Student Preflight View"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
-                      <span>Preview</span>
+                      <span>Student View</span>
                     </Link>
 
                     <button

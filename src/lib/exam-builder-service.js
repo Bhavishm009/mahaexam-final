@@ -55,7 +55,7 @@ export async function createExamWithSnapshot({ session, data }) {
         ? "COACHING"
         : "GLOBAL";
   const status = data.publishImmediately ? "SCHEDULED" : "DRAFT";
-  return prisma.$transaction(async (tx) => {
+  const createdExam = await prisma.$transaction(async (tx) => {
     const exam = await tx.exam.create({
       data: {
         title: data.title,
@@ -123,6 +123,29 @@ export async function createExamWithSnapshot({ session, data }) {
         },
       })),
     });
+
+    await tx.examQuestion.createMany({
+      data: questions.map((q, i) => ({
+        examId: exam.id,
+        questionId: q.id,
+        questionOrder: i + 1,
+        marks: Number(q.marks || 1),
+        negativeMarks: Number(data.negativeMarks || q.negativeMarks || 0),
+      })),
+      skipDuplicates: true,
+    });
+
     return exam;
   });
+
+  if (createdExam.status === "SCHEDULED" || createdExam.status === "LIVE") {
+    try {
+      const { scheduleExamNotifications } = await import("@/lib/exam-scheduler-service");
+      await scheduleExamNotifications(createdExam, { isReschedule: false });
+    } catch (err) {
+      console.warn("Scheduler notification warning:", err);
+    }
+  }
+
+  return createdExam;
 }

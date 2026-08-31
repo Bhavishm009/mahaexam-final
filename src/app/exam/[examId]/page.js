@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
 import {
@@ -13,6 +15,8 @@ import {
   FileText,
   ChevronRight,
   Zap,
+  Eye,
+  FileCheck2,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 
@@ -195,11 +199,44 @@ export default async function ExamPublicPage({ params }) {
         ],
       };
 
+  const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+  const isPrivilegedUser =
+    session && ["SUPER_ADMIN", "COACHING_ADMIN", "TEACHER"].includes(session.role);
+
   return (
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <PublicNavbar />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Admin/Teacher Review Banner */}
+        {isPrivilegedUser && (
+          <div className="mb-6 flex flex-col justify-between gap-3 rounded-2xl border border-blue-200 bg-blue-50/90 p-4 shadow-sm dark:border-blue-900/60 dark:bg-blue-950/70 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+                <FileCheck2 className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-wider text-blue-900 dark:text-blue-300">
+                  {session.role === "SUPER_ADMIN"
+                    ? "👑 Super Admin Preview Mode"
+                    : "👨‍🏫 Faculty / Coaching Admin Preview Mode"}
+                </div>
+                <p className="text-xs text-blue-800 dark:text-blue-200">
+                  You are previewing this examination as an Administrator / Faculty. You can inspect all questions, correct answers, and manage schedules.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href={`/exam/${exam.slug || exam.id}/review`}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+            >
+              <Eye className="h-4 w-4" />
+              <span>🔍 Review All Questions &amp; Answer Keys (प्रश्नांची पडताळणी)</span>
+            </Link>
+          </div>
+        )}
+
         {/* Breadcrumbs */}
         <div className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
           <Link href="/" className="transition hover:text-blue-600 dark:hover:text-white">
