@@ -138,8 +138,13 @@ function NavLinks({ role, close }) {
   return (
     <nav className="space-y-1">
       {items.map((item) => {
-        const active =
-          pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
+        const isRootDashboard =
+          item.href === "/admin" ||
+          item.href === "/student/dashboard" ||
+          item.href === "/coaching/dashboard";
+        const active = isRootDashboard
+          ? pathname === item.href
+          : pathname === item.href || pathname.startsWith(item.href + "/");
         const Icon = item.icon;
         const label = language === "mr" ? item.labelMr : item.labelEn;
 

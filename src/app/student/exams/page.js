@@ -10,6 +10,8 @@ export default function StudentExams() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("ALL");
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
 
   useEffect(() => {
     fetch("/api/student/exams")
@@ -166,7 +168,7 @@ export default function StudentExams() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredExams.map((e) => (
+            {filteredExams.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((e) => (
               <article
                 key={e.id}
                 className="group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
@@ -255,6 +257,34 @@ export default function StudentExams() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {filteredExams.length > pageSize && (
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              Showing page <strong>{currentPage}</strong> of{" "}
+              <strong>{Math.ceil(filteredExams.length / pageSize)}</strong> ({filteredExams.length} tests)
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className="rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:text-slate-200"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                disabled={currentPage >= Math.ceil(filteredExams.length / pageSize)}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:text-slate-200"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

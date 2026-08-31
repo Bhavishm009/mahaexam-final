@@ -9,6 +9,8 @@ export default function CoachingStudentsPage() {
   const [batches, setBatches] = useState([]);
   const [invites, setInvites] = useState([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const [form, setForm] = useState({
     name: "",
@@ -251,14 +253,19 @@ export default function CoachingStudentsPage() {
               </p>
             </div>
 
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search students..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-900 outline-none focus:border-amber-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-              />
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Search students..."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-900 outline-none focus:border-amber-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                />
+              </div>
             </div>
           </div>
 
@@ -273,7 +280,7 @@ export default function CoachingStudentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {filtered.map((s) => (
+                {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((s) => (
                   <tr
                     key={s.id}
                     className="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
@@ -311,6 +318,33 @@ export default function CoachingStudentsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Footer */}
+          {filtered.length > pageSize && (
+            <div className="flex items-center justify-between border-t border-slate-100 p-4 dark:border-slate-800 text-xs">
+              <span className="text-slate-500">
+                Page {currentPage} of {Math.ceil(filtered.length / pageSize)} ({filtered.length} total)
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="rounded-xl border border-slate-200 px-3 py-1.5 font-bold disabled:opacity-40 dark:border-slate-800"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={currentPage >= Math.ceil(filtered.length / pageSize)}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="rounded-xl border border-slate-200 px-3 py-1.5 font-bold disabled:opacity-40 dark:border-slate-800"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

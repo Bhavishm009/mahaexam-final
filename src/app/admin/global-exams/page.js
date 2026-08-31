@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Globe, Plus, Trash2, ExternalLink, Tag } from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES, EXAM_STATUSES } from "@/lib/exam-types";
@@ -11,6 +11,10 @@ export default function GlobalExamsPage() {
   const [updatingId, setUpdatingId] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [hasNegativeMarking, setHasNegativeMarking] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const [form, setForm] = useState({
     title: "",
@@ -44,6 +48,23 @@ export default function GlobalExamsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  const filteredExams = useMemo(() => {
+    return exams.filter((x) => {
+      const matchSearch =
+        !searchTerm ||
+        x.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        x.slug?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchCategory =
+        categoryFilter === "ALL" || x.examType === categoryFilter;
+      return matchSearch && matchCategory;
+    });
+  }, [exams, searchTerm, categoryFilter]);
+
+  const paginatedExams = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredExams.slice(start, start + pageSize);
+  }, [filteredExams, currentPage, pageSize]);
 
   async function create(e) {
     e.preventDefault();
@@ -410,7 +431,7 @@ export default function GlobalExamsPage() {
 
         {/* Right List: Manage All Global Exams with Status Controls */}
         <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white">
                 All Published Global Papers
@@ -420,8 +441,37 @@ export default function GlobalExamsPage() {
               </p>
             </div>
             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-              {exams.length} Global Exams
+              {filteredExams.length} / {exams.length} Exams
             </span>
+          </div>
+
+          {/* Search & Category Filter */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input
+              type="text"
+              placeholder="Search exams by title or slug..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white sm:flex-1"
+            />
+            <select
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-900 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+            >
+              <option value="ALL">All Categories</option>
+              {MAHARASHTRA_EXAM_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {loading ? (
@@ -432,7 +482,7 @@ export default function GlobalExamsPage() {
             </div>
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {exams.map((x) => (
+              {paginatedExams.map((x) => (
                 <div
                   key={x.id}
                   className="flex flex-col justify-between gap-4 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center"
@@ -537,11 +587,38 @@ export default function GlobalExamsPage() {
                 </div>
               ))}
 
-              {!exams.length && (
+              {!paginatedExams.length && (
                 <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                  No global examinations found. Create one using the form on the left.
+                  No global examinations match your criteria.
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Pagination Footer */}
+          {filteredExams.length > pageSize && (
+            <div className="flex items-center justify-between border-t border-slate-100 pt-4 text-xs dark:border-slate-800">
+              <span className="text-slate-500 dark:text-slate-400">
+                Page {currentPage} of {Math.ceil(filteredExams.length / pageSize)}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={currentPage >= Math.ceil(filteredExams.length / pageSize)}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </section>
