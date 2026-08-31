@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { scheduleExamNotifications } from "@/lib/exam-scheduler-service";
 
 export async function GET() {
   const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
@@ -81,27 +82,7 @@ export async function POST(request) {
     }
 
     if (b.sendNotification !== false) {
-      const students = await prisma.user.findMany({
-        where: { role: "STUDENT", status: "ACTIVE" },
-        select: { id: true },
-      });
-      if (students.length) {
-        await prisma.studentNotification.createMany({
-          data: students.map((x) => ({
-            userId: x.id,
-            type: "EXAM",
-            title: b.notificationTitle || "New Free Examination Available",
-            message: b.notificationMessage || `${exam.title} is now available for all students.`,
-          })),
-        });
-      }
-      await prisma.globalExamNotification.create({
-        data: {
-          examId: exam.id,
-          title: b.notificationTitle || "New Free Examination Available",
-          message: b.notificationMessage || `${exam.title} is now available for all students.`,
-        },
-      });
+      await scheduleExamNotifications(exam, { isReschedule: false });
     }
     return NextResponse.json({ exam }, { status: 201 });
   } catch (e) {
@@ -169,6 +150,10 @@ export async function PATCH(request) {
       where: { id },
       data: dataToUpdate,
     });
+
+    if (startAt !== undefined || status === "SCHEDULED") {
+      await scheduleExamNotifications(updated, { isReschedule: true });
+    }
 
     return NextResponse.json({ exam: updated, success: true });
   } catch (e) {

@@ -2,7 +2,18 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Globe, Plus, Trash2, ExternalLink, Tag } from "lucide-react";
+import {
+  Globe,
+  Plus,
+  Trash2,
+  ExternalLink,
+  Tag,
+  Calendar,
+  Clock,
+  X,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES, EXAM_STATUSES } from "@/lib/exam-types";
 
 export default function GlobalExamsPage() {
@@ -15,6 +26,12 @@ export default function GlobalExamsPage() {
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  // Reschedule Modal State
+  const [rescheduleModalExam, setRescheduleModalExam] = useState(null);
+  const [newStartAt, setNewStartAt] = useState("");
+  const [newEndAt, setNewEndAt] = useState("");
+  const [rescheduling, setRescheduling] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -29,8 +46,6 @@ export default function GlobalExamsPage() {
     price: 0,
     startAt: "",
     endAt: "",
-    notificationTitle: "नवीन परीक्षा उपलब्ध!",
-    notificationMessage: "नवीन सराव परीक्षा उपलब्ध झाली आहे. आताच परीक्षा द्या आणि निकाल पहा.",
     sendNotification: true,
   });
 
@@ -68,7 +83,7 @@ export default function GlobalExamsPage() {
 
   async function create(e) {
     e.preventDefault();
-    setStatusMessage({ type: "info", text: "Creating global exam..." });
+    setStatusMessage({ type: "info", text: "Creating & Scheduling global examination..." });
     const payload = {
       ...form,
       negativeMarks: hasNegativeMarking ? Number(form.negativeMarks || 0.25) : 0,
@@ -83,11 +98,16 @@ export default function GlobalExamsPage() {
       setStatusMessage({ type: "error", text: d.error || "Failed to create exam" });
       return;
     }
-    setStatusMessage({ type: "success", text: "Global examination published successfully!" });
+    setStatusMessage({
+      type: "success",
+      text: "Global examination published & notifications dispatched successfully!",
+    });
     setForm({
       ...form,
       title: "",
       slug: "",
+      startAt: "",
+      endAt: "",
     });
     load();
     setTimeout(() => setStatusMessage(null), 4000);
@@ -107,6 +127,41 @@ export default function GlobalExamsPage() {
       return;
     }
     setExams((prev) => prev.map((x) => (x.id === id ? { ...x, status: newStatus } : x)));
+  }
+
+  async function handleReschedule(e) {
+    e.preventDefault();
+    if (!rescheduleModalExam || !newStartAt) {
+      alert("Please specify a valid start date & time.");
+      return;
+    }
+    setRescheduling(true);
+    try {
+      const res = await fetch("/api/admin/global-exams", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: rescheduleModalExam.id,
+          startAt: newStartAt,
+          endAt: newEndAt || null,
+          status: "SCHEDULED",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(
+          `✅ Exam Rescheduled Successfully!\n\n📢 Immediate reschedule notification dispatched to all students, and automatic reminders set for 1hr before, 10min before, and Go-Live!`,
+        );
+        setRescheduleModalExam(null);
+        load();
+      } else {
+        alert("❌ Error: " + (data.error || "Failed to reschedule"));
+      }
+    } catch (err) {
+      alert("❌ " + err.message);
+    } finally {
+      setRescheduling(false);
+    }
   }
 
   async function toggleFreePaid(exam) {
@@ -166,8 +221,8 @@ export default function GlobalExamsPage() {
             </h1>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Publish state-level examinations with custom pricing (Free/Paid) and optional negative
-            marking.
+            Publish state-level examinations, schedule start/end dates, set 1hr & 10min alerts, and
+            manage pricing.
           </p>
         </div>
 
@@ -182,15 +237,97 @@ export default function GlobalExamsPage() {
 
       {statusMessage && (
         <div
-          className={`rounded-2xl p-4 text-xs font-semibold ${
+          className={`flex items-center gap-2 rounded-2xl p-4 text-xs font-semibold ${
             statusMessage.type === "success"
               ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
               : statusMessage.type === "error"
-                ? "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                : "border border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+              ? "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+              : "border border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
           }`}
         >
-          {statusMessage.text}
+          {statusMessage.type === "success" ? (
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          ) : (
+            <AlertCircle className="h-4 w-4" />
+          )}
+          <span>{statusMessage.text}</span>
+        </div>
+      )}
+
+      {/* Reschedule Exam Modal */}
+      {rescheduleModalExam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  Reschedule Examination
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRescheduleModalExam(null)}
+                className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleReschedule} className="mt-4 space-y-4">
+              <div className="rounded-2xl bg-blue-50/70 p-3 text-xs text-blue-900 dark:bg-blue-950/50 dark:text-blue-300">
+                <strong>Exam:</strong> {rescheduleModalExam.title}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  New Start Date & Time (नवीन सुरू होण्याची वेळ) *
+                </label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={newStartAt}
+                  onChange={(e) => setNewStartAt(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  End Date & Time (पर्यायी समाप्ती वेळ)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={newEndAt}
+                  onChange={(e) => setNewEndAt(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-3 text-[11px] text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                🔔 <strong>Automated Notifications:</strong> Saving will dispatch an immediate
+                reschedule notice to all target students and set reminders at <strong>1 hour before</strong>,{" "}
+                <strong>10 minutes before</strong>, and <strong>Go-Live</strong>.
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRescheduleModalExam(null)}
+                  className="rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={rescheduling}
+                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white transition hover:bg-blue-500 disabled:opacity-50"
+                >
+                  {rescheduling ? "Scheduling & Alerting..." : "Confirm & Reschedule"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -201,11 +338,11 @@ export default function GlobalExamsPage() {
           <div className="flex items-center gap-2">
             <Plus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             <h2 className="text-base font-black text-slate-900 dark:text-white">
-              Create Global Examination
+              Create & Schedule Global Exam
             </h2>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Publish an open paper with instant notification broadcast across Maharashtra.
+            Publish an open paper with scheduled start time and automated reminder alerts.
           </p>
 
           <form onSubmit={create} className="mt-5 space-y-3.5">
@@ -257,6 +394,40 @@ export default function GlobalExamsPage() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Scheduled Start & End Time */}
+            <div className="grid grid-cols-2 gap-2.5 rounded-2xl border border-blue-100 bg-blue-50/40 p-3 dark:border-blue-950 dark:bg-blue-950/20">
+              <div>
+                <label className="flex items-center gap-1 text-[11px] font-bold text-blue-950 dark:text-blue-300">
+                  <Calendar className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  <span>Start Date & Time</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.startAt}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      startAt: e.target.value,
+                      status: e.target.value ? "SCHEDULED" : form.status,
+                    })
+                  }
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-1 text-[11px] font-bold text-blue-950 dark:text-blue-300">
+                  <Clock className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  <span>End Date & Time</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.endAt}
+                  onChange={(e) => setForm({ ...form, endAt: e.target.value })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                />
+              </div>
             </div>
 
             {/* Free vs Paid Selection */}
@@ -417,14 +588,14 @@ export default function GlobalExamsPage() {
                 onChange={(e) => setForm({ ...form, sendNotification: e.target.checked })}
                 className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"
               />
-              <span>Send notification banner to all students</span>
+              <span>Send notification alerts (Instant, 1hr, 10min, Go-Live)</span>
             </label>
 
             <button
               type="submit"
               className="mt-2 w-full rounded-2xl bg-blue-600 py-3 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-95"
             >
-              Publish Global Examination
+              Publish & Schedule Examination
             </button>
           </form>
         </section>
@@ -437,7 +608,7 @@ export default function GlobalExamsPage() {
                 All Published Global Papers
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Manage Live/Draft/Archived status and Free/Paid pricing directly.
+                Manage Live/Draft/Archived status, reschedule times, and Free/Paid pricing.
               </p>
             </div>
             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
@@ -505,6 +676,20 @@ export default function GlobalExamsPage() {
                         <Tag className="h-3 w-3" />
                         {x.isFree ? "100% Free" : `Paid (₹${x.price})`}
                       </button>
+                      {x.startAt && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300">
+                          <Calendar className="h-3 w-3" />
+                          <span>
+                            {new Date(x.startAt).toLocaleString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                          </span>
+                        </span>
+                      )}
                       <span className="font-mono text-xs text-slate-400 dark:text-slate-500">
                         /{x.slug || x.id}
                       </span>
@@ -551,10 +736,10 @@ export default function GlobalExamsPage() {
                           x.status === "LIVE"
                             ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
                             : x.status === "SCHEDULED"
-                              ? "border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
-                              : x.status === "DRAFT"
-                                ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                                : "border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                            ? "border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                            : x.status === "DRAFT"
+                            ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                            : "border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                         }`}
                       >
                         {EXAM_STATUSES.map((s) => (
@@ -564,6 +749,22 @@ export default function GlobalExamsPage() {
                         ))}
                       </select>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRescheduleModalExam(x);
+                        setNewStartAt(
+                          x.startAt ? new Date(x.startAt).toISOString().slice(0, 16) : "",
+                        );
+                        setNewEndAt(x.endAt ? new Date(x.endAt).toISOString().slice(0, 16) : "");
+                      }}
+                      className="inline-flex items-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 active:scale-95 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300"
+                      title="Reschedule Exam Date & Time"
+                    >
+                      <Calendar className="h-3.5 w-3.5 text-indigo-500" />
+                      <span>Reschedule</span>
+                    </button>
 
                     <Link
                       href={`/exam/${x.slug || x.id}`}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { scheduleExamNotifications } from "@/lib/exam-scheduler-service";
 
 export async function GET() {
   const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
@@ -101,6 +102,13 @@ export async function POST(request) {
           negativeMarks: Number(b.negativeMarks || 0.25),
         })),
         skipDuplicates: true,
+      });
+    }
+
+    if (b.sendNotification !== false) {
+      await scheduleExamNotifications(exam, {
+        isReschedule: false,
+        batchIds: b.batchIds || [],
       });
     }
 

@@ -225,7 +225,7 @@ export default function CreateExam() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   Duration (Mins)
@@ -234,20 +234,36 @@ export default function CreateExam() {
                   type="number"
                   value={form.durationMinutes}
                   onChange={(e) => update("durationMinutes", e.target.value)}
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Scheduled Start
+                  Start Date & Time
                 </label>
                 <input
                   type="datetime-local"
                   value={form.startAt}
                   onChange={(e) => update("startAt", e.target.value)}
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-2 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
                 />
               </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  End Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.endAt || ""}
+                  onChange={(e) => update("endAt", e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-2 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-2.5 text-[11px] text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300">
+              🔔 <strong>Automatic Alerts:</strong> Target students receive 4 automated notifications:
+              Upon scheduling, <strong>1 hour before</strong>, <strong>10 minutes before</strong>, and at <strong>Go-Live</strong>.
             </div>
 
             {/* Explicit Negative Marking Toggle */}

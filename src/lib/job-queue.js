@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { executeExamJob } from "@/lib/exam-scheduler-service";
 
 export async function enqueueJob(type, payload, runAt = new Date()) {
   return prisma.job.create({ data: { type, payload, runAt } });
@@ -26,7 +27,13 @@ export async function processPendingJobs(limit = 25) {
         continue;
       }
 
-      if (job.type === "EXAM_REMINDER") {
+      if (
+        job.type === "EXAM_REMINDER_1HR" ||
+        job.type === "EXAM_REMINDER_10MIN" ||
+        job.type === "EXAM_GO_LIVE"
+      ) {
+        await executeExamJob(job);
+      } else if (job.type === "EXAM_REMINDER") {
         await prisma.notification.create({
           data: {
             userId: job.payload.userId,
