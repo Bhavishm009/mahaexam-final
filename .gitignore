@@ -35,3 +35,6 @@ yarn-error.log*
 .idea/
 .system_generated/
 *.log
+
+.vercel
+.env*.local

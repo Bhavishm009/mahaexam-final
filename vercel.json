@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "npx prisma generate && npm run build",
-  "crons": [{ "path": "/api/internal/jobs/process", "schedule": "*/5 * * * *" }]
+  "crons": [{ "path": "/api/internal/jobs/process", "schedule": "0 5 * * *" }]
 }
