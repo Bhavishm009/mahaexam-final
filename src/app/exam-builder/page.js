@@ -214,19 +214,6 @@ export default function ExamBuilder() {
 
           <div>
             <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Unique Slug Identifier *
-            </label>
-            <input
-              required
-              value={form.slug}
-              placeholder="e.g. police-bharti-test-01"
-              onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase() })}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs text-slate-900 outline-none focus:border-blue-600 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
               Exam Category (परीक्षेचा प्रकार) *
             </label>
             <select

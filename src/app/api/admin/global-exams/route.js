@@ -32,16 +32,23 @@ export async function POST(request) {
   }
   try {
     const b = await request.json();
-    if (!b.title || !b.slug || !b.durationMinutes || !b.totalQuestions) {
+    if (!b.title || !b.durationMinutes || !b.totalQuestions) {
       return NextResponse.json(
-        { error: "title, slug, durationMinutes and totalQuestions are required" },
+        { error: "title, durationMinutes and totalQuestions are required" },
         { status: 422 },
       );
     }
+    const cleanSlug = (b.slug || b.title || "exam")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+    const generatedSlug = b.slug ? cleanSlug : `${cleanSlug || "exam"}-${Math.random().toString(36).substring(2, 6)}`;
+
     const exam = await prisma.exam.create({
       data: {
         title: b.title,
-        slug: b.slug,
+        slug: generatedSlug,
         description: b.description || null,
         examType: b.examType || "Police Bharti",
         language: b.language || "mr",

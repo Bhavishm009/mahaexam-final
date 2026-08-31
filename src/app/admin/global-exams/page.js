@@ -369,19 +369,6 @@ export default function GlobalExamsPage() {
 
             <div>
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Unique Slug URL *
-              </label>
-              <input
-                placeholder="e.g. police-bharti-mock-01"
-                value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 font-mono text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Exam Category (परीक्षेचा प्रकार) *
               </label>
               <select

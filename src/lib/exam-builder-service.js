@@ -55,11 +55,20 @@ export async function createExamWithSnapshot({ session, data }) {
         ? "COACHING"
         : "GLOBAL";
   const status = data.publishImmediately ? "SCHEDULED" : "DRAFT";
+  const cleanSlug = (data.slug || data.title || "exam")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+  const generatedSlug = data.slug
+    ? cleanSlug
+    : `${cleanSlug || "exam"}-${Math.random().toString(36).substring(2, 6)}`;
+
   const createdExam = await prisma.$transaction(async (tx) => {
     const exam = await tx.exam.create({
       data: {
         title: data.title,
-        slug: data.slug,
+        slug: generatedSlug,
         description: data.description || null,
         examType: data.examType || "MOCK_TEST",
         language: data.language || "mr",

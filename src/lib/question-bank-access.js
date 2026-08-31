@@ -64,16 +64,11 @@ export async function listQuestionsForExamBuilder(session, filters = {}) {
     where,
     orderBy: { createdAt: "desc" },
     take: Math.min(Number(filters.limit || 100), 200),
-    select: {
-      id: true,
-      questionText: true,
-      questionTextMr: true,
-      difficulty: true,
-      marks: true,
-      negativeMarks: true,
-      visibilityMode: true,
-      organizationId: true,
-      createdAt: true,
+    include: {
+      subject: true,
+      topic: true,
+      organization: { select: { name: true } },
+      options: { orderBy: { optionOrder: "asc" } },
     },
   });
 }
