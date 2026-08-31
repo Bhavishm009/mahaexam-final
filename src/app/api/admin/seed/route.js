@@ -25,22 +25,26 @@ export async function POST(request) {
       authorized = true;
     }
 
-    // Check Super Admin session
+    // Check Super Admin session from cookies
     if (!authorized) {
-      const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
-      if (session?.role === "SUPER_ADMIN") {
-        authorized = true;
+      const cookieStore = await cookies();
+      const token = cookieStore.get(COOKIE)?.value;
+      if (token) {
+        const session = await verifySessionToken(token);
+        if (session && session.role === "SUPER_ADMIN") {
+          authorized = true;
+        }
       }
     }
 
     if (!authorized) {
       return NextResponse.json(
-        { error: "Unauthorized. Super Admin login or valid secret token required." },
-        { status: 401 },
+        { error: "Access Denied: Only Super Admin can perform database seeding and configuration." },
+        { status: 403 },
       );
     }
 
-    console.warn("🌱 Triggering Database Seeding via API...");
+    console.warn("🌱 Triggering Database Seeding via Super Admin API...");
     const result = await runCompleteDatabaseSeed(prisma);
 
     return NextResponse.json({

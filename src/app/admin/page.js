@@ -213,6 +213,96 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Super Admin Database Management & Schema Migration Center */}
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50/60 via-purple-50/40 to-transparent p-6 dark:border-slate-800 dark:from-blue-950/20 dark:via-purple-950/10">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-sm shadow-blue-500/20">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Super Admin Only
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Safe Upsert Mode
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                Database Seeding & Schema Migration Center
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Safely seed 2,000+ verified questions across 10 topics, publish 10 live mock exams, and manage Prisma database schema migrations without data loss.
+              </p>
+            </div>
+
+            <div className="shrink-0">
+              <button
+                type="button"
+                onClick={triggerSeed}
+                disabled={seeding}
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-emerald-500/25 transition hover:from-emerald-500 hover:to-teal-500 active:scale-95 disabled:opacity-50"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>{seeding ? "Seeding 2000+ Qs & 10 Live Exams..." : "Run Safe Database Seed (Super Admin)"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 p-6 md:grid-cols-2">
+          {/* Left Column: What Seed Does */}
+          <div className="space-y-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-800/40">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
+              📦 What Database Seeding Performs Safely
+            </h4>
+            <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span><strong>10 Syllabus Topics:</strong> History, Geography, Constitution, Marathi Grammar, English, Maths, Reasoning, Science, Economics, GK.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span><strong>200+ Verified Questions Per Topic:</strong> Total 2,000+ distinct questions with full Marathi & English explanations.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span><strong>Randomized Answer Keys:</strong> Correct answers randomized evenly across Options 1, 2, 3, and 4.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span><strong>10 LIVE + 17 DRAFT Exams:</strong> 100 unique questions each with 0 duplicates within any exam.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span><strong>Zero Data Loss:</strong> Preserves existing student accounts, test attempts, results, and academy subscriptions.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Right Column: How to Migrate Schema Safely */}
+          <div className="space-y-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-5 dark:border-blue-900/30 dark:bg-blue-950/20">
+            <h4 className="text-xs font-black uppercase tracking-wider text-blue-900 dark:text-blue-300">
+              ⚡ How to Migrate Prisma Schema Changes (Safe Production Workflow)
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              Whenever you update <code>prisma/schema.prisma</code>, run these safe commands in your terminal or deployment pipeline:
+            </p>
+            <div className="space-y-2 rounded-xl bg-slate-900 p-3 text-[11px] font-mono text-emerald-400 dark:bg-slate-950">
+              <p className="text-slate-400"># 1. Update Prisma Client types</p>
+              <p className="text-white">npx prisma generate</p>
+              <p className="mt-1 text-slate-400"># 2. Push schema changes without dropping data</p>
+              <p className="text-white">npx prisma db push</p>
+              <p className="mt-1 text-slate-400"># 3. Seed / sync question bank &amp; exams</p>
+              <p className="text-white">node prisma/seed.js</p>
+            </div>
+            <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+              ⚠️ Never run <code>prisma migrate reset</code> on production, as it drops all tables!
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Quick Navigation Panel */}
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h3 className="text-base font-black text-slate-900 dark:text-white">
