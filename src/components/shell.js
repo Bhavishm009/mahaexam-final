@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Menu,
@@ -27,9 +27,11 @@ import {
   Sparkles,
   Globe,
   Activity,
+  UserCircle,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/components/language-provider";
+import { getInitials } from "@/lib/avatar";
 
 const navDefinitions = {
   student: [
@@ -95,6 +97,12 @@ const navDefinitions = {
       href: "/coaching/subscription",
       icon: CreditCard,
     },
+    {
+      labelMr: "माझे प्रोफाइल",
+      labelEn: "My Profile",
+      href: "/coaching/profile",
+      icon: User,
+    },
   ],
   admin: [
     {
@@ -127,6 +135,12 @@ const navDefinitions = {
     { labelMr: "उत्पन्न", labelEn: "Finance", href: "/admin/finance", icon: Wallet },
     { labelMr: "युजर्स", labelEn: "Users", href: "/admin/users", icon: Users },
     { labelMr: "प्लॅन्स", labelEn: "Plans", href: "/admin/plans", icon: Settings },
+    {
+      labelMr: "माझे प्रोफाइल",
+      labelEn: "My Profile",
+      href: "/admin/profile",
+      icon: User,
+    },
   ],
 };
 
@@ -177,8 +191,30 @@ function NavLinks({ role, close }) {
 export function Shell({ children, role = "student", user }) {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user || null);
   const router = useRouter();
   const { language, toggleLanguage } = useLanguage();
+
+  useEffect(() => {
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    async function loadCurrentUser() {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (res.ok && data.authenticated && data.user) {
+          setCurrentUser(data.user);
+        }
+      } catch {
+        // ignore network error
+      }
+    }
+    loadCurrentUser();
+  }, []);
 
   async function handleLogout() {
     try {
@@ -195,6 +231,14 @@ export function Shell({ children, role = "student", user }) {
     SUPER_ADMIN: "सुपर ॲडमिन (Super Admin)",
   };
 
+  const userInitials = getInitials(currentUser?.name);
+  const profileUrl =
+    role === "admin"
+      ? "/admin/profile"
+      : role === "coaching"
+      ? "/coaching/profile"
+      : "/student/profile";
+
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       {/* Sidebar Desktop */}
@@ -210,7 +254,7 @@ export function Shell({ children, role = "student", user }) {
                 Maha<span className="text-blue-600 dark:text-blue-400">Exam</span>
               </div>
               <div className="text-[10px] font-semibold text-slate-400">
-                {roleLabels[user?.role] || role}
+                {roleLabels[currentUser?.role] || roleLabels[user?.role] || role}
               </div>
             </div>
           </Link>
@@ -224,19 +268,23 @@ export function Shell({ children, role = "student", user }) {
         {/* Bottom User Card */}
         <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
           <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-2.5 dark:bg-slate-900">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-100 font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                {user?.name?.[0]?.toUpperCase() || "U"}
+            <Link
+              href={profileUrl}
+              className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-slate-200/60 dark:hover:bg-slate-800"
+              title="माझे प्रोफाइल पहा"
+            >
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-100 font-black text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                {userInitials}
               </div>
               <div className="min-w-0 truncate">
                 <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
-                  {user?.name || "User"}
+                  {currentUser?.name || user?.name || "User"}
                 </div>
                 <div className="truncate text-[10px] text-slate-400">
-                  {user?.email || "Account"}
+                  {currentUser?.email || user?.email || "Account"}
                 </div>
               </div>
-            </div>
+            </Link>
             <button
               type="button"
               onClick={handleLogout}
@@ -288,26 +336,42 @@ export function Shell({ children, role = "student", user }) {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 pr-2.5 text-xs font-bold text-slate-800 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               >
-                <div className="grid h-7 w-7 place-items-center rounded-xl bg-blue-600 font-bold text-white">
-                  {user?.name?.[0]?.toUpperCase() || "U"}
+                <div className="grid h-7 w-7 place-items-center rounded-xl bg-blue-600 font-black text-white">
+                  {userInitials}
                 </div>
-                <span className="hidden sm:inline">{user?.name?.split(" ")[0] || "Account"}</span>
+                <span className="hidden sm:inline">
+                  {currentUser?.name?.split(" ")[0] || user?.name?.split(" ")[0] || "Account"}
+                </span>
                 <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
                   <div className="border-b border-slate-100 px-3 py-2 text-xs dark:border-slate-800">
-                    <div className="font-bold text-slate-900 dark:text-white">{user?.name}</div>
-                    <div className="truncate text-[10px] text-slate-400">{user?.email}</div>
+                    <div className="font-bold text-slate-900 dark:text-white">
+                      {currentUser?.name || user?.name || "User"}
+                    </div>
+                    <div className="truncate text-[10px] text-slate-400">
+                      {currentUser?.email || user?.email || "Account"}
+                    </div>
                   </div>
+
+                  <Link
+                    href={profileUrl}
+                    onClick={() => setUserMenuOpen(false)}
+                    className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  >
+                    <UserCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
+                  </Link>
+
                   <button
                     type="button"
                     onClick={handleLogout}
                     className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>लॉगआउट करा</span>
+                    <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
                   </button>
                 </div>
               )}
@@ -360,7 +424,7 @@ export function Shell({ children, role = "student", user }) {
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 py-3 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
               >
                 <LogOut className="h-4 w-4" />
-                <span>लॉगआउट करा</span>
+                <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
               </button>
             </div>
           </div>

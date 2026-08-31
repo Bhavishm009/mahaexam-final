@@ -10,8 +10,13 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
-  KeyRound,
+  GraduationCap,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
+import { getInitials } from "@/lib/avatar";
+import { PasskeyManager } from "@/components/passkey-manager";
+import { ChangePasswordCard } from "@/components/change-password-card";
 
 const maharashtraDistricts = [
   "Pune",
@@ -83,13 +88,11 @@ export default function StudentProfilePage() {
     name: "",
     email: "",
     phone: "",
-    preferredLanguage: "en",
+    preferredLanguage: "mr",
     targetExam: "",
     education: "",
     district: "",
     taluka: "",
-    newPassword: "",
-    confirmPassword: "",
   });
 
   const [profileMeta, setProfileMeta] = useState(null);
@@ -106,13 +109,11 @@ export default function StudentProfilePage() {
             name: u.name || "",
             email: u.email || "",
             phone: u.phone || "",
-            preferredLanguage: u.preferredLanguage || "en",
+            preferredLanguage: u.preferredLanguage || "mr",
             targetExam: sp.targetExam || "",
             education: sp.education || "",
             district: sp.district || "",
             taluka: sp.taluka || "",
-            newPassword: "",
-            confirmPassword: "",
           });
           setProfileMeta({
             role: u.role,
@@ -139,22 +140,6 @@ export default function StudentProfilePage() {
     e.preventDefault();
     setMessage({ type: "", text: "" });
 
-    if (form.newPassword && form.newPassword.length < 6) {
-      setMessage({
-        type: "error",
-        text: "New password must be at least 6 characters.",
-      });
-      return;
-    }
-
-    if (form.newPassword && form.newPassword !== form.confirmPassword) {
-      setMessage({
-        type: "error",
-        text: "New password and Confirm password do not match.",
-      });
-      return;
-    }
-
     setSaving(true);
     try {
       const res = await fetch("/api/student/profile", {
@@ -168,7 +153,6 @@ export default function StudentProfilePage() {
           education: form.education,
           district: form.district,
           taluka: form.taluka,
-          newPassword: form.newPassword || undefined,
         }),
       });
       const data = await res.json();
@@ -176,9 +160,8 @@ export default function StudentProfilePage() {
       if (res.ok) {
         setMessage({
           type: "success",
-          text: "Profile updated successfully! All changes have been saved.",
+          text: "✅ Profile updated successfully! All changes have been saved.",
         });
-        setForm((prev) => ({ ...prev, newPassword: "", confirmPassword: "" }));
       } else {
         setMessage({
           type: "error",
@@ -199,19 +182,14 @@ export default function StudentProfilePage() {
     return (
       <div className="grid min-h-[50vh] place-items-center font-sans">
         <div className="flex items-center gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
           <span>Loading student profile...</span>
         </div>
       </div>
     );
   }
 
-  const initials = (form.name || "Student")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = getInitials(form.name);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 font-sans text-slate-900 dark:text-slate-100">
@@ -256,327 +234,213 @@ export default function StudentProfilePage() {
         </div>
       </div>
 
-      {/* Notifications / Alerts */}
+      {/* Global Alerts */}
       {message.text && (
         <div
-          className={`animate-in fade-in flex items-start gap-3 rounded-2xl p-4 text-sm font-semibold duration-200 ${
+          className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${
             message.type === "success"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-              : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+              ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
+              : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
           }`}
         >
           {message.type === "success" ? (
-            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           ) : (
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
           )}
-          <div className="flex-1">{message.text}</div>
+          <span>{message.text}</span>
         </div>
       )}
 
       {/* Profile Form */}
       <form onSubmit={handleSave} className="space-y-6">
-        {/* Personal & Contact Information Card */}
+        {/* Personal Details */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
             <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span>Personal & Contact Information</span>
+            <span>वैयक्तिक माहिती (Personal Details)</span>
           </h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Update your basic details for rank reports and certificates.
+            आपले नाव आणि संपर्क माहिती अद्ययावत ठेवा.
           </p>
 
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
-            {/* Full Name */}
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Full Name <span className="text-rose-500">*</span>
+                पूर्ण नाव (Full Name) *
               </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g. Rahul Shinde"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
-                />
-              </div>
+              <input
+                type="text"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="उदा. राहुल शिंदे"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
+              />
             </div>
 
-            {/* Email (Read-only) */}
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Email Address <span className="font-normal text-slate-400">(Registered)</span>
+                ईमेल पत्ता (Email)
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="email"
-                  disabled
-                  value={form.email}
-                  className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400"
-                />
-              </div>
+              <input
+                type="email"
+                disabled
+                value={form.email}
+                className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-500"
+              />
             </div>
 
-            {/* Mobile Phone */}
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Mobile Number
+                मोबाईल नंबर (Phone)
               </label>
-              <div className="relative">
-                <Phone className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="e.g. 9876543210"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
-                />
-              </div>
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="१० अंकी मोबाईल नंबर"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
+              />
             </div>
 
-            {/* Preferred Language */}
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Preferred Interface Language
+                पसंतीची भाषा (Preferred Language)
               </label>
               <select
                 value={form.preferredLanguage}
                 onChange={(e) => setForm({ ...form, preferredLanguage: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
               >
-                <option value="en">English</option>
                 <option value="mr">मराठी (Marathi)</option>
+                <option value="en">English (इंग्रजी)</option>
               </select>
             </div>
           </div>
         </div>
 
-        {/* Academic & Target Exam Card */}
+        {/* Academic Details */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
-            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span>Target Exam & Location</span>
+            <BookOpen className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+            <span>शैक्षणिक व परीक्षा तपशील (Target Exam & Education)</span>
           </h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Personalizes your mock test recommendations and district rankings.
+            आपण तयारी करत असलेली परीक्षा निवडा ज्यामुळे योग्य टेस्ट्स सुचवता येतील.
           </p>
 
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
-            {/* Target Exam */}
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Primary Target Exam
+                टार्गेट परीक्षा (Target Exam)
               </label>
               <select
                 value={form.targetExam}
                 onChange={(e) => setForm({ ...form, targetExam: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
               >
-                <option value="">-- Select Target Exam --</option>
-                {targetExams.map((exam) => (
-                  <option key={exam} value={exam}>
-                    {exam}
+                <option value="">-- परीक्षा निवडा --</option>
+                {targetExams.map((ex) => (
+                  <option key={ex} value={ex}>
+                    {ex}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Education Qualification */}
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Highest Education Qualification
+                शिक्षण / पात्रता (Education Qualification)
               </label>
               <select
                 value={form.education}
                 onChange={(e) => setForm({ ...form, education: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
               >
-                <option value="">-- Select Qualification --</option>
-                {educationList.map((edu) => (
-                  <option key={edu} value={edu}>
-                    {edu}
+                <option value="">-- शिक्षण निवडा --</option>
+                {educationList.map((ed) => (
+                  <option key={ed} value={ed}>
+                    {ed}
                   </option>
                 ))}
               </select>
             </div>
-
-            {/* District */}
-            <div>
-              <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Home District (Maharashtra)
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <select
-                  value={form.district}
-                  onChange={(e) => setForm({ ...form, district: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
-                >
-                  <option value="">-- Select District --</option>
-                  {maharashtraDistricts.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Taluka */}
-            <div>
-              <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Taluka (Optional)
-              </label>
-              <input
-                type="text"
-                value={form.taluka}
-                onChange={(e) => setForm({ ...form, taluka: e.target.value })}
-                placeholder="e.g. Haveli, Baramati"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
-              />
-            </div>
           </div>
         </div>
 
-        {/* Biometric & Push Notification Settings Card */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
-                <KeyRound className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                <span>फिंगरप्रिंट व बायोमेट्रिक लॉगिन (Passkey / WebAuthn)</span>
-              </h2>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                पासवर्ड न टाकता थेट फिंगरप्रिंट / Face ID द्वारे १-क्लिक मध्ये सुरक्षित लॉगिन करा.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  if (typeof window === "undefined" || !window.PublicKeyCredential) {
-                    alert("This browser / device does not support WebAuthn Passkeys.");
-                    return;
-                  }
-                  const optRes = await fetch("/api/auth/webauthn/register/options", {
-                    method: "POST",
-                  });
-                  const options = await optRes.json();
-                  if (!optRes.ok) {
-                    throw new Error(options.error || "Failed to start registration");
-                  }
-
-                  options.challenge = Uint8Array.from(
-                    atob(options.challenge.replace(/-/g, "+").replace(/_/g, "/")),
-                    (c) => c.charCodeAt(0),
-                  );
-                  options.user.id = Uint8Array.from(
-                    atob(options.user.id.replace(/-/g, "+").replace(/_/g, "/")),
-                    (c) => c.charCodeAt(0),
-                  );
-
-                  const credential = await navigator.credentials.create({
-                    publicKey: options,
-                  });
-
-                  if (!credential) {
-                    throw new Error("Registration was cancelled");
-                  }
-
-                  const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-                  const clientDataJSON = btoa(
-                    String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)),
-                  );
-                  const attestationObject = btoa(
-                    String.fromCharCode(...new Uint8Array(credential.response.attestationObject)),
-                  );
-
-                  const verifyRes = await fetch("/api/auth/webauthn/register/verify", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      id: credential.id,
-                      rawId,
-                      type: credential.type,
-                      response: { clientDataJSON, attestationObject },
-                    }),
-                  });
-                  const d = await verifyRes.json();
-                  if (d.success) {
-                    alert("✅ " + d.message);
-                  } else {
-                    alert("❌ " + (d.error || "Registration failed"));
-                  }
-                } catch (e) {
-                  if (e.name !== "NotAllowedError") {
-                    alert("❌ " + e.message);
-                  }
-                }
-              }}
-              className="inline-flex items-center gap-2 rounded-2xl border border-indigo-500/20 bg-indigo-50 px-5 py-2.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 active:scale-95 dark:border-indigo-500/30 dark:bg-indigo-950/40 dark:text-indigo-300"
-            >
-              <KeyRound className="h-4 w-4" />
-              <span>Register Biometric / Fingerprint</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Change Password Card */}
+        {/* Location Details */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
-            <KeyRound className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span>Security & Password (Optional)</span>
+            <MapPin className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <span>स्थान व पत्ता (Location Details)</span>
           </h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Leave blank if you do not want to change your password.
+            जिल्हा आणि तालुका रँकिंगसाठी आवश्यक माहिती.
           </p>
 
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                New Password
+                जिल्हा (District)
               </label>
-              <input
-                type="password"
-                value={form.newPassword}
-                onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-                placeholder="Minimum 6 characters"
+              <select
+                value={form.district}
+                onChange={(e) => setForm({ ...form, district: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
-              />
+              >
+                <option value="">-- जिल्हा निवडा --</option>
+                {maharashtraDistricts.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Confirm New Password
+                तालुका / शहर (Taluka / City)
               </label>
               <input
-                type="password"
-                value={form.confirmPassword}
-                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                placeholder="Re-enter new password"
+                type="text"
+                value={form.taluka}
+                onChange={(e) => setForm({ ...form, taluka: e.target.value })}
+                placeholder="उदा. हवेली, बारामती"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
               />
             </div>
           </div>
-        </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-glow transition-all hover:bg-blue-500 active:scale-95 disabled:opacity-60"
-          >
-            <Save className="h-4 w-4" />
-            <span>{saving ? "Saving Changes..." : "Update Profile"}</span>
-          </button>
+          <div className="mt-6 flex justify-end">
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-8 py-3 text-xs font-bold text-white shadow-glow transition-all hover:bg-blue-500 active:scale-95 disabled:opacity-60"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>बदल सेव्ह होत आहेत...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  <span>माहिती सेव्ह करा (Save Details)</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
+
+      {/* Change Password Card */}
+      <ChangePasswordCard />
+
+      {/* Passkey & Biometrics Card */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <PasskeyManager />
+      </div>
     </div>
   );
 }

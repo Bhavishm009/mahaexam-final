@@ -15,6 +15,7 @@ import {
   X,
   Building2,
 } from "lucide-react";
+import { getInitials } from "@/lib/avatar";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -559,7 +560,7 @@ export default function AdminUsersPage() {
                     <td className="py-3.5 pl-2">
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 font-black text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                          {u.name?.slice(0, 2)?.toUpperCase() || "U"}
+                          {getInitials(u.name)}
                         </div>
                         <div>
                           <div className="font-bold text-slate-900 dark:text-white">{u.name}</div>
