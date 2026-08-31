@@ -1,0 +1,1623 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  COACHING_ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  INVITED
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum CoachingStatus {
+  INDIVIDUAL
+  COACHING
+}
+
+enum BatchStatus {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionType {
+  MCQ_SINGLE
+  MCQ_MULTIPLE
+  TRUE_FALSE
+  DESCRIPTIVE
+}
+
+enum ExamStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+  EXPIRED
+}
+
+enum ViolationType {
+  TAB_SWITCH
+  WINDOW_BLUR
+  FULLSCREEN_EXIT
+  COPY_ATTEMPT
+  PASTE_ATTEMPT
+  RIGHT_CLICK
+}
+
+enum AccessStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+model Organization {
+  id                    String                  @id @default(cuid())
+  name                  String
+  slug                  String                  @unique
+  email                 String?
+  phone                 String?
+  address               String?
+  district              String?
+  state                 String                  @default("Maharashtra")
+  status                OrganizationStatus      @default(ACTIVE)
+  subscriptionPlan      String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  users                 User[]
+  batches               Batch[]
+  coachingBatches       CoachingBatch[]
+  questions             Question[]
+  exams                 Exam[]
+  notifications         Notification[]
+  payments              Payment[]               @relation("PaymentOrganization")
+  subscriptions         Subscription[]
+  coachingSubscriptions CoachingSubscription[]
+  teacherProfiles       TeacherProfile[]
+  auditLogs             AuditLog[]
+  questionBankQuestions QuestionBankQuestion[]
+  examDrafts            ExamDraft[]
+  calendarEvents        ExamCalendarEvent[]
+  paymentOrders         PaymentOrder[]
+  coachingAuditLogs     CoachingAuditLog[]
+  coachingNotifications CoachingNotification[]
+  questionImportBatches QuestionImportBatch[]
+  questionShareGrants   QuestionShareGrant[]
+  examAggregates        CoachingExamAggregate[]
+  coachingExamProducts  CoachingExamProduct[]
+  marketplaceTransfers  MarketplaceTransfer[]
+  payoutAccount         CoachingPayoutAccount?
+  coachingInvites       CoachingInvite[]
+}
+
+model User {
+  id                         String                      @id @default(cuid())
+  organizationId             String?
+  name                       String
+  email                      String?                     @unique
+  phone                      String?                     @unique
+  passwordHash               String?
+  role                       UserRole
+  status                     UserStatus                  @default(ACTIVE)
+  preferredLanguage          String                      @default("en")
+  lastLoginAt                DateTime?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  organization               Organization?               @relation(fields: [organizationId], references: [id])
+  studentProfile             StudentProfile?
+  teacherProfile             TeacherProfile?
+  batchesTaught              Batch[]                     @relation("BatchTeacher")
+  questionsCreated           Question[]                  @relation("QuestionCreator")
+  examsCreated               Exam[]                      @relation("ExamCreator")
+  attempts                   ExamAttempt[]               @relation("ExamAttemptStudent")
+  results                    Result[]                    @relation("ResultStudent")
+  notifications              Notification[]              @relation("NotificationUser")
+  purchases                  Purchase[]
+  payments                   Payment[]                   @relation("PaymentUser")
+  studentPayments            Payment[]                   @relation("PaymentStudent")
+  studentNotificationsLegacy Notification[]              @relation("NotificationStudent")
+  examAssignments            ExamStudent[]
+  violations                 ExamViolation[]
+  sessions                   AuthSession[]
+  examResults                ExamResult[]                @relation("ExamResultStudent")
+  resultSummaries            ExamResultSummary[]         @relation("ExamResultSummaryStudent")
+  examPurchases              ExamPurchase[]              @relation("ExamPurchaseUser")
+  auditLogs                  AuditLog[]
+  emailDeliveries            EmailDelivery[]
+  createdQuestions           QuestionBankQuestion[]
+  examDraftsCreated          ExamDraft[]
+  examDraftStudents          ExamDraftStudent[]
+  examNotifications          ExamNotification[]
+  attemptEvents              ExamAttemptEvent[]
+  paymentOrders              PaymentOrder[]
+  coachingAuditLogs          CoachingAuditLog[]
+  studentNotifications       StudentNotification[]
+  questionImportBatches      QuestionImportBatch[]
+  questionShareGrantsGranted QuestionShareGrant[]
+  examPublishAudits          ExamPublishAudit[]
+  leaderboardEntries         ExamLeaderboard[]
+  performanceSnapshot        StudentPerformanceSnapshot?
+  examEntitlements           ExamEntitlement[]           @relation("ExamEntitlementStudent")
+  batchMemberships           BatchMembership[]
+  pushSubscriptions          PushSubscription[]
+}
+
+model StudentProfile {
+  id             String         @id @default(cuid())
+  userId         String         @unique
+  education      String?
+  dateOfBirth    DateTime?
+  district       String?
+  taluka         String?
+  targetExam     String?
+  profilePhoto   String?
+  coachingStatus CoachingStatus @default(INDIVIDUAL)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batchStudents  BatchStudent[]
+  results        Result[]
+}
+
+model TeacherProfile {
+  id             String       @id @default(cuid())
+  userId         String       @unique
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Batch {
+  id             String           @id @default(cuid())
+  organizationId String
+  name           String
+  examType       String
+  description    String?
+  teacherId      String?
+  startDate      DateTime
+  endDate        DateTime?
+  status         BatchStatus      @default(ACTIVE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  teacher        User?            @relation("BatchTeacher", fields: [teacherId], references: [id])
+  students       BatchStudent[]
+  exams          ExamBatch[]
+  examDrafts     ExamDraftBatch[]
+}
+
+model BatchStudent {
+  id        String         @id @default(cuid())
+  batchId   String
+  studentId String
+  joinedAt  DateTime       @default(now())
+  batch     Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, studentId])
+}
+
+model Subject {
+  id             String              @id @default(cuid())
+  name           String              @unique
+  nameMr         String
+  slug           String              @unique
+  description    String?
+  status         ContentStatus       @default(PUBLISHED)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  topics         Topic[]
+  questions      Question[]
+  resultRows     ResultSubject[]
+  subjectResults SubjectResult[]
+  chapters       Chapter[]
+  resultSubjects ExamResultSubject[]
+}
+
+model Question {
+  id                 String                @id @default(cuid())
+  organizationId     String?
+  subjectId          String
+  topicId            String?
+  questionType       QuestionType          @default(MCQ_SINGLE)
+  questionText       String
+  questionTextMr     String?
+  explanation        String?
+  explanationMr      String?
+  difficulty         Difficulty            @default(MEDIUM)
+  marks              Float                 @default(1)
+  negativeMarks      Float                 @default(0)
+  status             ContentStatus         @default(DRAFT)
+  createdBy          String
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  organization       Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subject            Subject               @relation(fields: [subjectId], references: [id])
+  topic              Topic?                @relation(fields: [topicId], references: [id])
+  creator            User                  @relation("QuestionCreator", fields: [createdBy], references: [id])
+  options            QuestionOption[]
+  examQuestions      ExamQuestion[]
+  attemptAnswers     AttemptAnswer[]
+  chapter            Chapter?              @relation(fields: [chapterId], references: [id])
+  questionTags       QuestionTagMap[]
+  bankQuestion       QuestionBankQuestion?
+  chapterId          String?
+  examDraftQuestions ExamDraftQuestion[]
+  visibilityMode     ExamVisibility        @default(COACHING)
+  createdById        String?
+  shareGrants        QuestionShareGrant[]
+  attemptQuestions   AttemptQuestion[]
+  examAttemptAnswers ExamAttemptAnswer[]
+}
+
+model QuestionOption {
+  id             String              @id @default(cuid())
+  questionId     String
+  optionText     String
+  optionTextMr   String?
+  optionOrder    Int
+  isCorrect      Boolean             @default(false)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  question       Question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  attemptAnswers ExamAttemptAnswer[]
+}
+
+model Exam {
+  id                  String                   @id @default(cuid())
+  organizationId      String?
+  title               String
+  slug                String                   @unique
+  description         String?
+  examType            String
+  language            String                   @default("mr")
+  durationMinutes     Int
+  totalQuestions      Int
+  totalMarks          Float
+  negativeMarks       Float                    @default(0)
+  passingScore        Float?
+  randomizeQuestions  Boolean                  @default(false)
+  randomizeOptions    Boolean                  @default(false)
+  fullscreenRequired  Boolean                  @default(true)
+  violationThreshold  Int                      @default(3)
+  attemptLimit        Int                      @default(1)
+  startAt             DateTime?
+  endAt               DateTime?
+  status              ExamStatus               @default(DRAFT)
+  createdBy           String
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  organization        Organization?            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator             User                     @relation("ExamCreator", fields: [createdBy], references: [id])
+  questions           ExamQuestion[]
+  batches             ExamBatch[]
+  students            ExamStudent[]
+  attempts            ExamAttempt[]            @relation("ExamAttemptExam")
+  results             Result[]                 @relation("ResultExam")
+  purchases           Purchase[]
+  examNotifications   ExamNotification[]
+  notifications       Notification[]
+  calendarEvents      ExamCalendarEvent[]
+  resultSummaries     ExamResultSummary[]      @relation("ExamResultSummaryExam")
+  paymentOrders       PaymentOrder[]
+  visibilityMode      ExamVisibility           @default(COACHING)
+  isFree              Boolean                  @default(false)
+  price               Float                    @default(0)
+  globalNotifications GlobalExamNotification[]
+  questionSnapshots   ExamQuestionSnapshot[]
+  sections            ExamSection[]
+  questionPools       ExamQuestionPool[]
+  publishAudits       ExamPublishAudit[]
+  frozenAt            DateTime?
+  leaderboards        ExamLeaderboard[]
+  coachingAggregates  CoachingExamAggregate[]
+  entitlements        ExamEntitlement[]
+  payments            Payment[]                @relation("PaymentExam")
+  batchAssignments    BatchExamAssignment[]
+  coachingProduct     CoachingExamProduct?
+  examResults         ExamResult[]             @relation("ExamResultExam")
+  examPurchaseRecords ExamPurchase[]           @relation("ExamPurchaseExam")
+}
+
+model ExamQuestion {
+  id            String    @id @default(cuid())
+  examId        String
+  questionId    String
+  questionOrder Int
+  marks         Float
+  negativeMarks Float
+  exam          Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question      Question? @relation(fields: [questionId], references: [id])
+
+  @@unique([examId, questionId])
+}
+
+model ExamBatch {
+  id      String @id @default(cuid())
+  examId  String
+  batchId String
+  exam    Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  batch   Batch  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, batchId])
+}
+
+model ExamStudent {
+  id        String @id @default(cuid())
+  examId    String
+  studentId String
+  exam      Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId])
+}
+
+model ExamAttempt {
+  id                String              @id @default(cuid())
+  examId            String
+  studentId         String
+  startedAt         DateTime
+  expiresAt         DateTime?
+  submittedAt       DateTime?
+  status            AttemptStatus       @default(IN_PROGRESS)
+  totalQuestions    Int                 @default(0)
+  answeredQuestions Int                 @default(0)
+  score             Float?
+  percentage        Float?
+  timeTakenSeconds  Int?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  lastActivityAt    DateTime?
+  exam              Exam                @relation("ExamAttemptExam", fields: [examId], references: [id])
+  student           User                @relation("ExamAttemptStudent", fields: [studentId], references: [id])
+  questions         AttemptQuestion[]
+  answers           AttemptAnswer[]
+  violations        ExamViolation[]
+  result            Result?
+  examResult        ExamResult?         @relation("ExamResultAttempt")
+  secureAnswers     ExamAttemptAnswer[]
+  events            ExamAttemptEvent[]
+  resultSummary     ExamResultSummary?  @relation("ExamResultSummaryAttempt")
+
+  @@index([examId, studentId])
+}
+
+model AttemptQuestion {
+  id              String      @id @default(cuid())
+  attemptId       String
+  questionId      String?
+  questionOrder   Int         @default(0)
+  position        Int         @default(0)
+  sectionName     String?
+  snapshot        Json?
+  selectedOption  String?
+  markedForReview Boolean     @default(false)
+  answeredAt      DateTime?
+  marks           Float       @default(1)
+  negativeMarks   Float       @default(0)
+  attempt         ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question        Question?   @relation(fields: [questionId], references: [id])
+
+  @@unique([attemptId, questionId])
+}
+
+model AttemptAnswer {
+  id               String      @id @default(cuid())
+  attemptId        String
+  questionId       String
+  selectedOptionId String?
+  answeredAt       DateTime?
+  timeSpentSeconds Int         @default(0)
+  isCorrect        Boolean?
+  marksObtained    Float?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  attempt          ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question         Question    @relation(fields: [questionId], references: [id])
+
+  @@unique([attemptId, questionId])
+}
+
+model ExamViolation {
+  id        String        @id @default(cuid())
+  attemptId String
+  type      ViolationType
+  timestamp DateTime      @default(now())
+  metadata  Json?
+  attempt   ExamAttempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  user      User?         @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@index([attemptId, timestamp])
+}
+
+model Result {
+  id               String          @id @default(cuid())
+  attemptId        String          @unique
+  studentId        String
+  examId           String
+  score            Float
+  percentage       Float
+  correctCount     Int
+  wrongCount       Int
+  unansweredCount  Int
+  timeTakenSeconds Int
+  rank             Int?
+  createdAt        DateTime        @default(now())
+  attempt          ExamAttempt     @relation(fields: [attemptId], references: [id])
+  student          User            @relation("ResultStudent", fields: [studentId], references: [id])
+  exam             Exam            @relation("ResultExam", fields: [examId], references: [id])
+  subjectRows      ResultSubject[]
+  studentProfile   StudentProfile? @relation(fields: [studentProfileId], references: [id])
+  studentProfileId String?
+}
+
+model ResultSubject {
+  id              String  @id @default(cuid())
+  resultId        String
+  subjectId       String
+  correctCount    Int
+  wrongCount      Int
+  unansweredCount Int
+  score           Float
+  percentage      Float
+  result          Result  @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  subject         Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([resultId, subjectId])
+}
+
+model Purchase {
+  id           String       @id @default(cuid())
+  userId       String
+  examId       String?
+  productName  String
+  amount       Float
+  paymentId    String
+  accessStatus AccessStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  expiresAt    DateTime?
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam         Exam?        @relation(fields: [examId], references: [id])
+}
+
+model Subscription {
+  id                     String       @id @default(cuid())
+  organizationId         String
+  plan                   String
+  status                 String
+  provider               String       @default("razorpay")
+  providerSubscriptionId String?
+  studentLimit           Int
+  amount                 Float
+  currency               String       @default("INR")
+  startedAt              DateTime
+  renewalAt              DateTime?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  organization           Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ExamResult {
+  id                 String            @id @default(cuid())
+  attemptId          String            @unique
+  examId             String
+  studentId          String
+  score              Float
+  percentage         Float
+  rank               Int?
+  percentile         Float?
+  correctCount       Int
+  wrongCount         Int
+  unansweredCount    Int
+  timeTakenSeconds   Int
+  passed             Boolean?
+  obtainedMarks      Float             @default(0)
+  totalMarks         Float             @default(0)
+  accuracy           Float             @default(0)
+  correct            Int               @default(0)
+  wrong              Int               @default(0)
+  unanswered         Int               @default(0)
+  publishedAt        DateTime?
+  evaluatedAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  attempt            ExamAttempt       @relation("ExamResultAttempt", fields: [attemptId], references: [id], onDelete: Cascade)
+  exam               Exam              @relation("ExamResultExam", fields: [examId], references: [id], onDelete: Cascade)
+  student            User              @relation("ExamResultStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  subjects           SubjectResult[]
+  leaderboardEntries ExamLeaderboard[]
+
+  @@index([examId, score])
+}
+
+model SubjectResult {
+  id              String     @id @default(cuid())
+  resultId        String
+  subjectId       String
+  totalQuestions  Int
+  correctCount    Int
+  wrongCount      Int
+  unansweredCount Int
+  score           Float
+  percentage      Float
+  result          ExamResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  subject         Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+
+  @@unique([resultId, subjectId])
+}
+
+model SubscriptionPlan {
+  id            String                 @id @default(cuid())
+  name          String
+  slug          String                 @unique
+  description   String?
+  price         Float
+  billingPeriod BillingPeriod          @default(MONTHLY)
+  maxStudents   Int?
+  maxBatches    Int?
+  maxExams      Int?
+  features      Json?
+  active        Boolean                @default(true)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  subscriptions CoachingSubscription[]
+}
+
+model CoachingSubscription {
+  id                     String             @id @default(cuid())
+  organizationId         String
+  planId                 String
+  status                 SubscriptionStatus @default(PENDING)
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  razorpaySubscriptionId String?            @unique
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  organization           Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan                   SubscriptionPlan   @relation(fields: [planId], references: [id], onDelete: Restrict)
+  payments               Payment[]          @relation("PaymentSubscription")
+
+  @@index([organizationId, status])
+}
+
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+}
+
+model AuditLog {
+  id             String        @id @default(cuid())
+  organizationId String?
+  userId         String?
+  action         String
+  resourceType   String
+  resourceId     String?
+  metadata       Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime      @default(now())
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  type        String
+  status      JobStatus @default(PENDING)
+  payload     Json
+  attempts    Int       @default(0)
+  runAt       DateTime  @default(now())
+  lockedAt    DateTime?
+  completedAt DateTime?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, runAt])
+}
+
+model EmailDelivery {
+  id         String      @id @default(cuid())
+  userId     String?
+  email      String
+  template   String
+  subject    String
+  status     EmailStatus @default(PENDING)
+  providerId String?
+  metadata   Json?
+  sentAt     DateTime?
+  createdAt  DateTime    @default(now())
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([email, createdAt])
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Chapter {
+  id             String              @id @default(cuid())
+  subjectId      String
+  name           String
+  nameMr         String?
+  slug           String
+  sortOrder      Int                 @default(0)
+  active         Boolean             @default(true)
+  subject        Subject             @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics         Topic[]
+  questions      Question[]
+  resultChapters ExamResultChapter[]
+
+  @@unique([subjectId, slug])
+}
+
+model QuestionTag {
+  id        String           @id @default(cuid())
+  name      String           @unique
+  questions QuestionTagMap[]
+}
+
+model QuestionTagMap {
+  questionId String
+  tagId      String
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag        QuestionTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, tagId])
+}
+
+model QuestionBankQuestion {
+  id             String             @id @default(cuid())
+  questionId     String
+  organizationId String?
+  source         String             @default("PLATFORM")
+  difficulty     QuestionDifficulty @default(MEDIUM)
+  explanation    String?
+  explanationMr  String?
+  isApproved     Boolean            @default(false)
+  createdById    String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  question       Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  organization   Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  createdBy      User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([questionId])
+}
+
+enum QuestionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model ExamDraft {
+  id                   String              @id @default(cuid())
+  organizationId       String?
+  createdById          String
+  title                String
+  description          String?
+  examType             String?
+  language             String              @default("both")
+  durationMinutes      Int
+  totalMarks           Float               @default(0)
+  totalQuestions       Int                 @default(0)
+  negativeMarking      Boolean             @default(false)
+  defaultNegativeMarks Float               @default(0)
+  passingScore         Float?
+  fullscreenRequired   Boolean             @default(true)
+  randomizeQuestions   Boolean             @default(false)
+  randomizeOptions     Boolean             @default(false)
+  instructions         Json?
+  status               DraftStatus         @default(DRAFT)
+  step                 Int                 @default(1)
+  settings             Json?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  organization         Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  createdBy            User                @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  questions            ExamDraftQuestion[]
+  batches              ExamDraftBatch[]
+  students             ExamDraftStudent[]
+}
+
+model ExamDraftQuestion {
+  id            String    @id @default(cuid())
+  draftId       String
+  questionId    String
+  order         Int
+  marks         Float     @default(1)
+  negativeMarks Float     @default(0)
+  source        String    @default("MANUAL")
+  draft         ExamDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  question      Question  @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([draftId, questionId])
+}
+
+model ExamDraftBatch {
+  draftId String
+  batchId String
+  draft   ExamDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  batch   Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@id([draftId, batchId])
+}
+
+model ExamDraftStudent {
+  draftId   String
+  studentId String
+  draft     ExamDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([draftId, studentId])
+}
+
+enum DraftStatus {
+  DRAFT
+  READY
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+model ExamNotification {
+  id          String                     @id @default(cuid())
+  examId      String
+  userId      String
+  type        ExamNotificationType
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  readAt      DateTime?
+  status      NotificationDeliveryStatus @default(PENDING)
+  createdAt   DateTime                   @default(now())
+  exam        Exam                       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user        User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, userId, type])
+}
+
+model ExamCalendarEvent {
+  id             String            @id @default(cuid())
+  examId         String
+  organizationId String?
+  title          String
+  startAt        DateTime
+  endAt          DateTime?
+  eventType      CalendarEventType @default(EXAM)
+  createdAt      DateTime          @default(now())
+  exam           Exam              @relation(fields: [examId], references: [id], onDelete: Cascade)
+  organization   Organization?     @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, startAt])
+}
+
+enum ExamNotificationType {
+  ASSIGNED
+  REMINDER_24H
+  REMINDER_1H
+  REMINDER_15M
+  STARTED
+  RESULT
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum CalendarEventType {
+  EXAM
+}
+
+model ExamAttemptEvent {
+  id        String           @id @default(cuid())
+  attemptId String
+  userId    String
+  type      AttemptEventType
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  attempt   ExamAttempt      @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, createdAt])
+}
+
+model ExamAttemptAnswer {
+  id         String          @id @default(cuid())
+  attemptId  String
+  questionId String
+  optionId   String?
+  textAnswer String?
+  marked     Boolean         @default(false)
+  answeredAt DateTime?
+  updatedAt  DateTime        @updatedAt
+  attempt    ExamAttempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question   Question        @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  option     QuestionOption? @relation(fields: [optionId], references: [id], onDelete: SetNull)
+
+  @@unique([attemptId, questionId])
+}
+
+enum AttemptEventType {
+  STARTED
+  ANSWER_SAVED
+  QUESTION_MARKED
+  QUESTION_UNMARKED
+  TAB_HIDDEN
+  FULLSCREEN_EXIT
+  COPY_ATTEMPT
+  PASTE_ATTEMPT
+  NETWORK_OFFLINE
+  NETWORK_ONLINE
+  TIMER_SYNC
+  AUTO_SUBMITTED
+  MANUAL_SUBMITTED
+  SUBMIT_RETRY
+}
+
+model ExamResultSummary {
+  id               String              @id @default(cuid())
+  attemptId        String              @unique
+  studentId        String
+  examId           String
+  totalQuestions   Int
+  answered         Int
+  correct          Int
+  wrong            Int
+  unanswered       Int
+  totalMarks       Float
+  obtainedMarks    Float
+  percentage       Float
+  passed           Boolean
+  rank             Int?
+  percentile       Float?
+  evaluatedAt      DateTime            @default(now())
+  attempt          ExamAttempt         @relation("ExamResultSummaryAttempt", fields: [attemptId], references: [id], onDelete: Cascade)
+  student          User                @relation("ExamResultSummaryStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  exam             Exam                @relation("ExamResultSummaryExam", fields: [examId], references: [id], onDelete: Cascade)
+  subjectBreakdown ExamResultSubject[]
+  chapterBreakdown ExamResultChapter[]
+
+  @@index([examId, obtainedMarks])
+}
+
+model ExamResultSubject {
+  id         String            @id @default(cuid())
+  resultId   String
+  subjectId  String
+  total      Float
+  obtained   Float
+  correct    Int
+  wrong      Int
+  unanswered Int
+  result     ExamResultSummary @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  subject    Subject           @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+
+  @@unique([resultId, subjectId])
+}
+
+model ExamResultChapter {
+  id         String            @id @default(cuid())
+  resultId   String
+  chapterId  String
+  total      Float
+  obtained   Float
+  correct    Int
+  wrong      Int
+  unanswered Int
+  result     ExamResultSummary @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  chapter    Chapter           @relation(fields: [chapterId], references: [id], onDelete: Restrict)
+
+  @@unique([resultId, chapterId])
+}
+
+model PaymentOrder {
+  id                String          @id @default(cuid())
+  userId            String
+  examId            String?
+  organizationId    String?
+  provider          PaymentProvider @default(RAZORPAY)
+  providerOrderId   String          @unique
+  providerPaymentId String?         @unique
+  amount            Int
+  currency          String          @default("INR")
+  status            PaymentStatus   @default(CREATED)
+  receipt           String          @unique
+  notes             Json?
+  failureReason     String?
+  paidAt            DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  exam              Exam?           @relation(fields: [examId], references: [id], onDelete: SetNull)
+  organization      Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  events            PaymentEvent[]
+  purchase          ExamPurchase?
+
+  @@index([userId, status, createdAt])
+}
+
+model PaymentEvent {
+  id              String       @id @default(cuid())
+  paymentOrderId  String
+  providerEventId String       @unique
+  eventType       String
+  payload         Json
+  processed       Boolean      @default(false)
+  processedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  paymentOrder    PaymentOrder @relation(fields: [paymentOrderId], references: [id], onDelete: Cascade)
+
+  @@index([paymentOrderId, createdAt])
+}
+
+model CoachingAuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  actorId        String
+  action         String
+  resourceType   String
+  resourceId     String?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor          User         @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, createdAt])
+}
+
+model CoachingNotification {
+  id             String                   @id @default(cuid())
+  organizationId String
+  title          String
+  message        String
+  type           CoachingNotificationType @default(INFO)
+  readAt         DateTime?
+  createdAt      DateTime                 @default(now())
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+enum CoachingNotificationType {
+  INFO
+  WARNING
+  EXAM
+  PAYMENT
+  SYSTEM
+}
+
+model StudentNotification {
+  id        String                  @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      StudentNotificationType @default(INFO)
+  readAt    DateTime?
+  createdAt DateTime                @default(now())
+  user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+enum StudentNotificationType {
+  INFO
+  EXAM
+  RESULT
+  PAYMENT
+  SYSTEM
+}
+
+enum ExamVisibility {
+  COACHING
+  GLOBAL
+  FREE_GLOBAL
+}
+
+model GlobalExamNotification {
+  id        String   @id @default(cuid())
+  examId    String
+  title     String
+  message   String
+  createdAt DateTime @default(now())
+  exam      Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId, createdAt])
+}
+
+model QuestionImportBatch {
+  id             String               @id @default(cuid())
+  organizationId String?
+  createdById    String
+  filename       String
+  status         QuestionImportStatus @default(PENDING)
+  totalRows      Int                  @default(0)
+  validRows      Int                  @default(0)
+  invalidRows    Int                  @default(0)
+  duplicateRows  Int                  @default(0)
+  importedRows   Int                  @default(0)
+  errors         Json?
+  createdAt      DateTime             @default(now())
+  completedAt    DateTime?
+  createdBy      User                 @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  organization   Organization?        @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+}
+
+enum QuestionImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model QuestionShareGrant {
+  id             String       @id @default(cuid())
+  questionId     String
+  organizationId String
+  grantedById    String
+  createdAt      DateTime     @default(now())
+  question       Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  grantedBy      User         @relation(fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([questionId, organizationId])
+}
+
+model ExamQuestionSnapshot {
+  id               String   @id @default(cuid())
+  examId           String
+  sourceQuestionId String?
+  position         Int
+  sectionName      String?
+  marks            Float    @default(1)
+  negativeMarks    Float    @default(0)
+  snapshot         Json
+  createdAt        DateTime @default(now())
+  exam             Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, position])
+}
+
+model ExamSection {
+  id               String @id @default(cuid())
+  examId           String
+  name             String
+  position         Int
+  marksPerQuestion Float  @default(1)
+  negativeMarks    Float  @default(0)
+  questionCount    Int    @default(0)
+  exam             Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, position])
+}
+
+model ExamQuestionPool {
+  id            String                @id @default(cuid())
+  examId        String
+  name          String
+  sectionName   String?
+  questionCount Int
+  selectionMode QuestionSelectionMode @default(RANDOM)
+  difficulty    String?
+  subjectId     String?
+  topic         String?
+  createdAt     DateTime              @default(now())
+  exam          Exam                  @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId])
+}
+
+model ExamPublishAudit {
+  id           String            @id @default(cuid())
+  examId       String
+  actorId      String
+  action       ExamPublishAction
+  snapshotHash String
+  metadata     Json?
+  createdAt    DateTime          @default(now())
+  exam         Exam              @relation(fields: [examId], references: [id], onDelete: Cascade)
+  actor        User              @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([examId, createdAt])
+}
+
+enum QuestionSelectionMode {
+  FIXED
+  RANDOM
+  POOL
+}
+
+enum ExamPublishAction {
+  PUBLISHED
+  UNPUBLISHED
+  FROZEN
+  DUPLICATED
+}
+
+model ExamLeaderboard {
+  id         String     @id @default(cuid())
+  examId     String
+  resultId   String
+  studentId  String
+  rank       Int
+  score      Float
+  percentile Float?
+  createdAt  DateTime   @default(now())
+  exam       Exam       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  result     ExamResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Restrict)
+
+  @@unique([examId, resultId])
+}
+
+model CoachingExamAggregate {
+  id             String       @id @default(cuid())
+  organizationId String
+  examId         String
+  attempts       Int          @default(0)
+  completed      Int          @default(0)
+  passed         Int          @default(0)
+  averageScore   Float        @default(0)
+  averagePercent Float        @default(0)
+  passPercentage Float        @default(0)
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam           Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, examId])
+}
+
+enum NotificationType {
+  EXAM_SCHEDULED
+  EXAM_REMINDER
+  RESULT
+  EXAM
+  EXAM_RESULT
+  SYSTEM
+  FREE_EXAM
+  COACHING_EXAM
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+}
+
+enum PaymentProvider {
+  RAZORPAY
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  SUCCESS
+  PAID
+  AUTHORIZED
+  CAPTURED
+  VERIFIED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PurchaseStatus {
+  PAID
+  REFUNDED
+  CANCELLED
+}
+
+enum EntitlementSource {
+  FREE_GLOBAL
+  COACHING
+  PAYMENT
+  ADMIN
+}
+
+enum EntitlementStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum WebhookEventStatus {
+  RECEIVED
+  PROCESSED
+  IGNORED
+  FAILED
+}
+
+enum MembershipStatus {
+  ACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+enum TransferStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+  REVERSED
+}
+
+enum PayoutAccountStatus {
+  PENDING_KYC
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model Topic {
+  id        String        @id @default(cuid())
+  subjectId String?
+  chapterId String?
+  name      String
+  nameMr    String?
+  slug      String
+  status    ContentStatus @default(PUBLISHED)
+  sortOrder Int           @default(0)
+  active    Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  subject   Subject?      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  chapter   Chapter?      @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  questions Question[]
+
+  @@unique([subjectId, slug])
+  @@index([chapterId, sortOrder])
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  userId         String?
+  studentId      String?
+  organizationId String?
+  title          String
+  message        String
+  type           NotificationType @default(SYSTEM)
+  data           Json?
+  examId         String?
+  readAt         DateTime?
+  scheduledAt    DateTime?
+  createdAt      DateTime         @default(now())
+  user           User?            @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
+  student        User?            @relation("NotificationStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam           Exam?            @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([studentId, readAt, createdAt])
+  @@index([organizationId, createdAt])
+}
+
+model Payment {
+  id                      String                 @id @default(cuid())
+  userId                  String?
+  organizationId          String?
+  subscriptionId          String?
+  studentId               String?
+  examId                  String?
+  provider                PaymentProvider        @default(RAZORPAY)
+  providerPaymentId       String?
+  providerOrderId         String?
+  orderId                 String?                @unique
+  paymentId               String?                @unique
+  razorpayOrderId         String?                @unique
+  razorpayPaymentId       String?                @unique
+  razorpaySignature       String?
+  signature               String?
+  amount                  Float                  @default(0)
+  amountPaise             Int?
+  currency                String                 @default("INR")
+  status                  PaymentStatus          @default(CREATED)
+  paymentType             String?
+  metadata                Json?
+  rawResponse             Json?
+  receipt                 String?                @unique
+  failureReason           String?
+  refundId                String?
+  verifiedAt              DateTime?
+  paidAt                  DateTime?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  user                    User?                  @relation("PaymentUser", fields: [userId], references: [id], onDelete: SetNull)
+  organization            Organization?          @relation("PaymentOrganization", fields: [organizationId], references: [id], onDelete: SetNull)
+  subscription            CoachingSubscription?  @relation("PaymentSubscription", fields: [subscriptionId], references: [id], onDelete: SetNull)
+  student                 User?                  @relation("PaymentStudent", fields: [studentId], references: [id], onDelete: Restrict)
+  exam                    Exam?                  @relation("PaymentExam", fields: [examId], references: [id], onDelete: Restrict)
+  marketplaceTransfers    MarketplaceTransfer[]
+  payoutAccount           CoachingPayoutAccount? @relation(fields: [coachingPayoutAccountId], references: [id])
+  coachingPayoutAccountId String?
+
+  @@index([userId, status])
+  @@index([studentId, status])
+  @@index([organizationId, status])
+  @@index([examId, status])
+  @@index([providerPaymentId])
+}
+
+model ExamPurchase {
+  id                String         @id @default(cuid())
+  userId            String
+  examId            String
+  paymentOrderId    String?        @unique
+  amount            Int
+  currency          String         @default("INR")
+  status            PurchaseStatus @default(PAID)
+  razorpayOrderId   String?        @unique
+  razorpayPaymentId String?        @unique
+  purchasedAt       DateTime       @default(now())
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  user              User           @relation("ExamPurchaseUser", fields: [userId], references: [id], onDelete: Restrict)
+  exam              Exam           @relation("ExamPurchaseExam", fields: [examId], references: [id], onDelete: Restrict)
+  paymentOrder      PaymentOrder?  @relation(fields: [paymentOrderId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, examId])
+  @@index([examId, status])
+}
+
+model ExamEntitlement {
+  id             String            @id @default(cuid())
+  studentId      String
+  examId         String
+  source         EntitlementSource
+  status         EntitlementStatus @default(ACTIVE)
+  paymentId      String?
+  organizationId String?
+  startsAt       DateTime          @default(now())
+  expiresAt      DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  student        User              @relation("ExamEntitlementStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  exam           Exam              @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, examId])
+  @@index([studentId, status])
+  @@index([examId, status])
+}
+
+model PaymentWebhookEvent {
+  id           String             @id @default(cuid())
+  provider     PaymentProvider    @default(RAZORPAY)
+  eventId      String
+  eventType    String
+  signature    String
+  payload      Json
+  status       WebhookEventStatus @default(RECEIVED)
+  processedAt  DateTime?
+  errorMessage String?
+  createdAt    DateTime           @default(now())
+
+  @@unique([provider, eventId])
+  @@index([eventType, createdAt])
+}
+
+model CoachingBatch {
+  id             String                @id @default(cuid())
+  organizationId String
+  name           String
+  code           String                @unique
+  isActive       Boolean               @default(true)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships    BatchMembership[]
+  exams          BatchExamAssignment[]
+  coachingInvites CoachingInvite[]
+
+  @@index([organizationId, isActive])
+}
+
+model BatchMembership {
+  id        String           @id @default(cuid())
+  batchId   String
+  studentId String
+  status    MembershipStatus @default(ACTIVE)
+  joinedAt  DateTime         @default(now())
+  batch     CoachingBatch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  student   User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, studentId])
+  @@index([studentId, status])
+}
+
+model BatchExamAssignment {
+  id         String        @id @default(cuid())
+  batchId    String
+  examId     String
+  startsAt   DateTime?
+  endsAt     DateTime?
+  assignedAt DateTime      @default(now())
+  batch      CoachingBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  exam       Exam          @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, examId])
+}
+
+model CoachingExamProduct {
+  id             String       @id @default(cuid())
+  organizationId String
+  examId         String       @unique
+  price          Float
+  platformFeePct Float        @default(20)
+  coachSharePct  Float        @default(80)
+  isPublished    Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  exam           Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+}
+
+model MarketplaceTransfer {
+  id                 String                @id @default(cuid())
+  paymentId          String
+  organizationId     String
+  grossAmount        Float
+  platformFee        Float
+  coachingShare      Float
+  status             TransferStatus        @default(PENDING)
+  razorpayTransferId String?
+  failureReason      String?
+  createdAt          DateTime              @default(now())
+  processedAt        DateTime?
+  payment            Payment               @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  organization       Organization          @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  events             PayoutTransferEvent[]
+
+  @@unique([paymentId, organizationId])
+  @@index([organizationId, status])
+}
+
+model CoachingPayoutAccount {
+  id                String              @id @default(cuid())
+  organizationId    String              @unique
+  provider          PaymentProvider     @default(RAZORPAY)
+  razorpayAccountId String?             @unique
+  status            PayoutAccountStatus @default(PENDING_KYC)
+  kycStatus         KycStatus           @default(PENDING)
+  accountEmail      String?
+  accountName       String?
+  approvedAt        DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+}
+
+model PayoutTransferEvent {
+  id                    String              @id @default(cuid())
+  marketplaceTransferId String
+  eventId               String              @unique
+  eventType             String
+  razorpayTransferId    String?
+  status                TransferStatus
+  payload               Json?
+  createdAt             DateTime            @default(now())
+  marketplaceTransfer   MarketplaceTransfer @relation(fields: [marketplaceTransferId], references: [id], onDelete: Cascade)
+
+  @@index([marketplaceTransferId, createdAt])
+}
+
+model StudentPerformanceSnapshot {
+  id              String   @id @default(cuid())
+  studentId       String   @unique
+  examsCompleted  Int      @default(0)
+  averagePercent  Float    @default(0)
+  averageAccuracy Float    @default(0)
+  bestPercent     Float    @default(0)
+  updatedAt       DateTime @updatedAt
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model PushSubscription {
+  id          String   @id @default(cuid())
+  endpoint    String   @unique
+  p256dh      String
+  auth        String
+  userId      String?
+  userAgent   String?
+  ipAddress   String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+}
+
+model CoachingInvite {
+  id             String         @id @default(cuid())
+  organizationId String
+  batchId        String?
+  code           String         @unique
+  name           String?
+  maxUses        Int?           @default(0)
+  usedCount      Int            @default(0)
+  isActive       Boolean        @default(true)
+  expiresAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  batch          CoachingBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, isActive])
+  @@index([code])
+}
+

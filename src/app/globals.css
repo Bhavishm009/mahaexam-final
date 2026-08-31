@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --primary: 221 83% 53%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --border: 214 32% 91%;
+}
+
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  --card: 224 71% 7%;
+  --card-foreground: 213 31% 91%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 47% 11%;
+  --muted: 223 47% 11%;
+  --muted-foreground: 215 20% 65%;
+  --border: 223 47% 14%;
+}
+
+@font-face {
+  font-family: "Sakal Marathi";
+  src:
+    url("/fonts/SakalMarathi-Normal.eot?#iefix") format("embedded-opentype"),
+    url("/fonts/SakalMarathi-Normal.ttf") format("truetype"),
+    url("/fonts/SakalMarathi-Normal.svg#SakalMarathi-Normal") format("svg");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 88%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Sakal Marathi";
+  src: url("/fonts/SakalMarathi-Normal.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 88%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Sakal Marathi";
+  src: url("/fonts/SakalMarathi-Normal.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 88%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
+  font-family:
+    "Sakal Marathi",
+    "Mukta",
+    "Noto Sans Devanagari",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Marathi & Devanagari specific font class */
+.font-marathi {
+  font-family: "Sakal Marathi", "Mukta", "Noto Sans Devanagari", "Plus Jakarta Sans", sans-serif;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  line-height: 1.25;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Helper for perfectly vertically centered text in buttons & badges */
+.btn-text,
+.badge-text {
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+/* Skeleton Loading Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(241, 245, 249, 0.6) 0%,
+    rgba(226, 232, 240, 0.9) 50%,
+    rgba(241, 245, 249, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.6) 0%,
+    rgba(51, 65, 85, 0.9) 50%,
+    rgba(30, 41, 59, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+}
+
+/* Custom modern utilities */
+@layer utilities {
+  .safe-area-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-radial-gradient {
+    background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.12), transparent 70%);
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .glass-dark {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

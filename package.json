@@ -1,0 +1,56 @@
+{
+  "name": "maharashtra-exam-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "typecheck": "tsc --noEmit -p jsconfig.json",
+    "prisma:validate": "prisma validate",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run prisma:validate",
+    "prisma:format": "prisma format"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.14.0",
+    "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "jose": "^6.0.10",
+    "lucide-react": "^0.468.0",
+    "next": "^15.4.6",
+    "next-themes": "^0.4.4",
+    "nodemailer": "^9.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwind-merge": "^2.5.5",
+    "web-push": "^3.6.7",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.3",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.34.0",
+    "eslint-config-next": "^15.5.2",
+    "postcss": "^8.5.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "prisma": "^6.14.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.2"
+  }
+}
