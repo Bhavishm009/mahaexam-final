@@ -363,7 +363,11 @@ export default async function ExamPublicPage({ params }) {
 
               <div className="mt-8">
                 <Link
-                  href={`/exam/${exam.slug || exam.id}/attempt`}
+                  href={
+                    session
+                      ? `/exam/${exam.slug || exam.id}/attempt`
+                      : `/login?next=${encodeURIComponent(`/exam/${exam.slug || exam.id}/attempt`)}`
+                  }
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-500 active:scale-95"
                 >
                   <Zap className="h-4 w-4 text-amber-300" />

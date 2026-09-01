@@ -111,31 +111,33 @@ export default function ExamReviewPage({ params }) {
     );
   }
 
-  // Extract questions from either relation
-  const questionItems =
-    exam.questions?.length > 0
-      ? exam.questions.map((eq, idx) => ({
-          order: eq.questionOrder || idx + 1,
-          marks: eq.marks || 1,
-          negativeMarks: eq.negativeMarks || 0,
-          text: eq.question?.questionTextMr || eq.question?.questionText || "Question",
-          textEn: eq.question?.questionText,
-          explanation: eq.question?.explanationMr || eq.question?.explanation,
-          subject: eq.question?.subject?.name || "General",
-          difficulty: eq.question?.difficulty || "MEDIUM",
-          options: eq.question?.options || [],
-        }))
-      : exam.questionSnapshots?.map((qs, idx) => ({
-          order: qs.position || idx + 1,
-          marks: qs.marks || 1,
-          negativeMarks: qs.negativeMarks || 0,
-          text: qs.snapshot?.questionTextMr || qs.snapshot?.questionText || "Question",
-          textEn: qs.snapshot?.questionText,
-          explanation: qs.snapshot?.explanation,
-          subject: qs.sectionName || "Section",
-          difficulty: qs.snapshot?.difficulty || "MEDIUM",
-          options: qs.snapshot?.options || [],
-        })) || [];
+  // Extract questions from whichever relation has the full question set
+  const hasQuestions =
+    (exam.questions?.length || 0) >= (exam.questionSnapshots?.length || 0) &&
+    (exam.questions?.length || 0) > 0;
+  const questionItems = hasQuestions
+    ? exam.questions.map((eq, idx) => ({
+        order: eq.questionOrder || idx + 1,
+        marks: eq.marks || 1,
+        negativeMarks: eq.negativeMarks || 0,
+        text: eq.question?.questionTextMr || eq.question?.questionText || "Question",
+        textEn: eq.question?.questionText,
+        explanation: eq.question?.explanationMr || eq.question?.explanation,
+        subject: eq.question?.subject?.name || "General",
+        difficulty: eq.question?.difficulty || "MEDIUM",
+        options: eq.question?.options || [],
+      }))
+    : exam.questionSnapshots?.map((qs, idx) => ({
+        order: qs.position || idx + 1,
+        marks: qs.marks || 1,
+        negativeMarks: qs.negativeMarks || 0,
+        text: qs.snapshot?.questionTextMr || qs.snapshot?.questionText || "Question",
+        textEn: qs.snapshot?.questionText,
+        explanation: qs.snapshot?.explanationMr || qs.snapshot?.explanation,
+        subject: qs.sectionName || "Section",
+        difficulty: qs.snapshot?.difficulty || "MEDIUM",
+        options: qs.snapshot?.options || [],
+      })) || [];
 
   return (
     <div className="space-y-6 font-sans">

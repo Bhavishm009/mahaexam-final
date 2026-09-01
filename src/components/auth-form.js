@@ -382,8 +382,8 @@ export function SignupForm() {
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
           >
             {MAHARASHTRA_EXAM_TYPES.map((ex) => (
-              <option key={ex.id} value={ex.name} className="bg-white dark:bg-slate-900">
-                {ex.nameMr} ({ex.name})
+              <option key={ex.id || ex.value} value={ex.value || ex.name} className="bg-white dark:bg-slate-900">
+                {ex.label || `${ex.nameMr} (${ex.name})`}
               </option>
             ))}
           </select>

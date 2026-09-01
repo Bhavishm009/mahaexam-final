@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
@@ -22,16 +22,23 @@ import {
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [openFaq, setOpenFaq] = useState(null);
+  const [dbExams, setDbExams] = useState([]);
+  const [loadingExams, setLoadingExams] = useState(true);
   const { language, t } = useLanguage();
 
-  const categories = [
-    { id: "all", label: t.catAll },
-    { id: "police", label: t.catPolice },
-    { id: "mpsc", label: t.catMpsc },
-    { id: "talathi", label: t.catTalathi },
-    { id: "zp", label: t.catZp },
-    { id: "saralseva", label: t.catSaralseva },
-  ];
+  useEffect(() => {
+    fetch("/api/student/exams")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.exams && Array.isArray(d.exams) && d.exams.length > 0) {
+          setDbExams(d.exams);
+        }
+        setLoadingExams(false);
+      })
+      .catch(() => setLoadingExams(false));
+  }, []);
+
+
 
   const examsData = [
     {
@@ -153,8 +160,88 @@ export default function Home() {
     },
   ];
 
-  const filteredExams =
-    activeCategory === "all" ? examsData : examsData.filter((e) => e.category === activeCategory);
+  const sourceList = useMemo(() => {
+    return dbExams.length > 0 ? dbExams : examsData;
+  }, [dbExams, examsData]);
+
+  const getExamCategory = (e) => {
+    const type = (e.examType || e.category || "").toUpperCase();
+    const slug = (e.slug || e.id || "").toLowerCase();
+    const title = (e.title || e.titleMr || e.titleEn || "").toLowerCase();
+
+    if (type.includes("POLICE") || slug.includes("police") || title.includes("police") || title.includes("पोलीस")) {
+      return { id: "police", labelMr: "पोलीस भरती", labelEn: "Police Bharti" };
+    }
+    if (type.includes("MPSC") || slug.includes("mpsc") || title.includes("mpsc") || title.includes("राज्यसेवा") || title.includes("संयुक्त")) {
+      return { id: "mpsc", labelMr: "एमपीएससी", labelEn: "MPSC Exams" };
+    }
+    if (type.includes("TALATHI") || slug.includes("talathi") || title.includes("talathi") || title.includes("तलाठी")) {
+      return { id: "talathi", labelMr: "तलाठी भरती", labelEn: "Talathi Bharti" };
+    }
+    if (type.includes("ZILLA") || type.includes("ZP") || slug.includes("zp") || slug.includes("gramsevak") || title.includes("जिल्हा परिषद") || title.includes("ग्रामसेवक") || title.includes("आरोग्य")) {
+      return { id: "zp", labelMr: "जिल्हा परिषद (ZP)", labelEn: "Zilla Parishad" };
+    }
+    if (type.includes("SARALSEVA") || type.includes("VANRAKSHAK") || slug.includes("vanrakshak") || slug.includes("saralseva") || title.includes("वनरक्षक") || title.includes("सरळसेवा")) {
+      return { id: "saralseva", labelMr: "सरळसेवा / वनरक्षक", labelEn: "Saralseva & Forest" };
+    }
+    if (type.includes("PYQ") || slug.includes("official") || slug.includes("pyq") || e.isPyq === true || title.includes("मूळ प्रश्नपत्रिका") || title.includes("official paper")) {
+      return { id: "pyq", labelMr: "मूळ PYQ प्रश्नपत्रिका", labelEn: "Official PYQs" };
+    }
+    const fallbackId = type ? type.toLowerCase().replace(/[^a-z0-9]/g, "-") : "other";
+    return { id: fallbackId, labelMr: e.examType || "इतर परीक्षा", labelEn: e.examType || "Other Exams" };
+  };
+
+  const categories = useMemo(() => {
+    const counts = { all: sourceList.length };
+    const infoMap = new Map();
+
+    sourceList.forEach((e) => {
+      const cat = getExamCategory(e);
+      counts[cat.id] = (counts[cat.id] || 0) + 1;
+      if (!infoMap.has(cat.id)) {
+        infoMap.set(cat.id, cat);
+      }
+    });
+
+    const list = [
+      {
+        id: "all",
+        label: `${language === "mr" ? "सर्व परीक्षा" : "All Exams"} (${counts.all})`,
+      },
+    ];
+
+    const preferredOrder = ["police", "mpsc", "talathi", "zp", "saralseva", "pyq"];
+    preferredOrder.forEach((catId) => {
+      if (counts[catId] > 0) {
+        const info = infoMap.get(catId);
+        list.push({
+          id: catId,
+          label: `${language === "mr" ? info.labelMr : info.labelEn} (${counts[catId]})`,
+        });
+      }
+    });
+
+    infoMap.forEach((info, catId) => {
+      if (!preferredOrder.includes(catId) && catId !== "all" && counts[catId] > 0) {
+        list.push({
+          id: catId,
+          label: `${language === "mr" ? info.labelMr : info.labelEn} (${counts[catId]})`,
+        });
+      }
+    });
+
+    return list;
+  }, [sourceList, language]);
+
+  const displayExams = useMemo(() => {
+    return sourceList.filter((e) => {
+      if (activeCategory === "all") {
+        return true;
+      }
+      const cat = getExamCategory(e);
+      return cat.id === activeCategory;
+    });
+  }, [sourceList, activeCategory]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -249,14 +336,13 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h2 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-                {t.mockTestsTitle}
+                {t.mockTestsTitle} ({displayExams.length} उपलब्ध परीक्षा)
               </h2>
               <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
                 {t.mockTestsSubtitle}
               </p>
             </div>
 
-            {/* Category Pills */}
             {/* Category Pills */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
               {categories.map((c) => {
@@ -280,66 +366,89 @@ export default function Home() {
 
             {/* Exams Grid */}
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredExams.map((exam) => (
-                <div
-                  key={exam.id}
-                  className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={`inline-flex items-center justify-center rounded-lg border px-2.5 py-1 text-[11px] font-bold leading-none ${exam.badgeColor}`}
+              {displayExams.map((exam) => {
+                const title =
+                  exam.titleMr || exam.title || (language === "mr" ? exam.titleMr : exam.titleEn);
+                const qCount = exam.totalQuestions || exam.questions || 100;
+                const duration = exam.durationMinutes || exam.duration || 90;
+                const totalMarks = exam.totalMarks || exam.marks || 100;
+                const isPyq =
+                  exam.slug?.includes("pyq") ||
+                  exam.title?.includes("PYQ") ||
+                  exam.title?.includes("मूळ");
+                const badgeText = isPyq
+                  ? "अधिकृत PYQ 100 Qs"
+                  : exam.badgeMr
+                    ? language === "mr"
+                      ? exam.badgeMr
+                      : exam.badgeEn
+                    : "100% मोफत Live";
+                const badgeColor = isPyq
+                  ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700"
+                  : exam.badgeColor ||
+                    "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700";
+
+                return (
+                  <div
+                    key={exam.id || exam.slug}
+                    className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={`inline-flex items-center justify-center rounded-lg border px-2.5 py-1 text-[11px] font-bold leading-none ${badgeColor}`}
+                        >
+                          {badgeText}
+                        </span>
+                        <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold leading-none text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                          {qCount} {t.questionsCount}
+                        </span>
+                      </div>
+
+                      <h3 className="mt-4 text-base font-black leading-snug text-slate-900 dark:text-white line-clamp-2">
+                        {title}
+                      </h3>
+
+                      <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-3 text-center text-xs dark:bg-slate-800/60">
+                        <div className="flex flex-col items-center justify-center gap-1">
+                          <div className="text-[10px] font-medium leading-none text-slate-400">
+                            {t.questionsCount}
+                          </div>
+                          <div className="font-black leading-none text-slate-900 dark:text-white">
+                            {qCount}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center gap-1 border-x border-slate-200/60 dark:border-slate-700/50">
+                          <div className="text-[10px] font-medium leading-none text-slate-400">
+                            {t.minutes}
+                          </div>
+                          <div className="font-black leading-none text-blue-600 dark:text-blue-400">
+                            {duration}m
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center gap-1">
+                          <div className="text-[10px] font-medium leading-none text-slate-400">
+                            {t.marks}
+                          </div>
+                          <div className="font-black leading-none text-emerald-600 dark:text-emerald-400">
+                            {totalMarks}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 border-t border-slate-100 pt-4 dark:border-slate-800">
+                      <Link
+                        href={`/exam/${exam.slug || exam.id}`}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-xs font-bold leading-none text-white shadow-sm transition hover:bg-blue-500 active:scale-95 dark:bg-blue-600 dark:hover:bg-blue-500"
                       >
-                        {language === "mr" ? exam.badgeMr : exam.badgeEn}
-                      </span>
-                      <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold leading-none text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                        {exam.questions} {t.questionsCount}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-4 text-base font-black leading-snug text-slate-900 dark:text-white">
-                      {language === "mr" ? exam.titleMr : exam.titleEn}
-                    </h3>
-
-                    <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-3 text-center text-xs dark:bg-slate-800/60">
-                      <div className="flex flex-col items-center justify-center gap-1">
-                        <div className="text-[10px] font-medium leading-none text-slate-400">
-                          {t.questionsCount}
-                        </div>
-                        <div className="font-black leading-none text-slate-900 dark:text-white">
-                          {exam.questions}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-center justify-center gap-1 border-x border-slate-200/60 dark:border-slate-700/50">
-                        <div className="text-[10px] font-medium leading-none text-slate-400">
-                          {t.minutes}
-                        </div>
-                        <div className="font-black leading-none text-blue-600 dark:text-blue-400">
-                          {exam.duration}m
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-center justify-center gap-1">
-                        <div className="text-[10px] font-medium leading-none text-slate-400">
-                          {t.marks}
-                        </div>
-                        <div className="font-black leading-none text-emerald-600 dark:text-emerald-400">
-                          {exam.marks}
-                        </div>
-                      </div>
+                        <Zap className="h-4 w-4 text-amber-300" />
+                        <span>{t.startExamBtn}</span>
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="mt-6 border-t border-slate-100 pt-4 dark:border-slate-800">
-                    <Link
-                      href={`/exam/${exam.id}`}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-xs font-bold leading-none text-white shadow-sm transition hover:bg-blue-500 active:scale-95 dark:bg-blue-600 dark:hover:bg-blue-500"
-                    >
-                      <Zap className="h-4 w-4 text-amber-300" />
-                      <span>{t.startExamBtn}</span>
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

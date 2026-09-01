@@ -53,6 +53,11 @@ export function SecureExamClient({ examId }) {
 
         const data = await res.json();
         if (!res.ok) {
+          if (res.status === 401 || data.error?.includes("login required")) {
+            const currentPath = window.location.pathname;
+            router.push(`/login?next=${encodeURIComponent(currentPath)}`);
+            return;
+          }
           if (active) {
             setError(data.error || "परीक्षेची माहिती लोड करताना अडचण आली.");
             setLoading(false);

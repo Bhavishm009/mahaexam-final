@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/auth-provider";
 import { PWARegister } from "@/components/pwa-register";
 import { NotificationPermissionPrompt } from "@/components/notification-permission-prompt";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -60,6 +61,7 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <PWARegister />
               <NotificationPermissionPrompt />
+              <Analytics />
               {children}
             </AuthProvider>
           </LanguageProvider>

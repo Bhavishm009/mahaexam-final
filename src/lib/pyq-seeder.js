@@ -766,7 +766,7 @@ export async function runPYQDatabaseSeed(prismaClient) {
       createdQuestions.push(qRec);
     }
 
-    await prismaClient.exam.upsert({
+    const exam = await prismaClient.exam.upsert({
       where: { slug: meta.slug },
       update: {
         title: meta.title,
@@ -792,16 +792,60 @@ export async function runPYQDatabaseSeed(prismaClient) {
         totalMarks: createdQuestions.length,
         description: `एमपीएससी व महाराष्ट्र शासन अधिकृत मूळ १०० वस्तुनिष्ठ प्रश्नपत्रिका. (परीक्षेचे वर्ष: ${meta.examYear} | तारीख: ${meta.examDateStr})`,
         createdBy: admin.id,
-        questions: {
-          create: createdQuestions.map((q, qIdx) => ({
-            questionId: q.id,
-            questionOrder: qIdx + 1,
-            marks: 1,
-            negativeMarks: meta.examType.includes("MPSC") ? 0.25 : 0,
-          })),
-        },
       },
     });
+
+    // Clear old relations and link all 100 created questions
+    await prismaClient.examQuestion.deleteMany({
+      where: { examId: exam.id },
+    });
+    await prismaClient.examQuestionSnapshot.deleteMany({
+      where: { examId: exam.id },
+    });
+
+    for (let qIdx = 0; qIdx < createdQuestions.length; qIdx++) {
+      const q = createdQuestions[qIdx];
+      const correctOption = q.options?.find((o) => o.isCorrect);
+      const negMarks = meta.examType.includes("MPSC") ? 0.25 : 0;
+
+      await prismaClient.examQuestion.create({
+        data: {
+          examId: exam.id,
+          questionId: q.id,
+          questionOrder: qIdx + 1,
+          marks: 1,
+          negativeMarks: negMarks,
+        },
+      });
+
+      await prismaClient.examQuestionSnapshot.create({
+        data: {
+          examId: exam.id,
+          sourceQuestionId: q.id,
+          position: qIdx + 1,
+          marks: 1,
+          negativeMarks: negMarks,
+          snapshot: {
+            id: q.id,
+            questionText: q.questionText,
+            questionTextMr: q.questionTextMr,
+            explanation: q.explanation,
+            explanationMr: q.explanationMr,
+            marks: 1,
+            negativeMarks: negMarks,
+            subject: pyqSubject.slug,
+            correctOptionId: correctOption?.id || null,
+            options: (q.options || []).map((o) => ({
+              id: o.id,
+              text: o.optionText,
+              textMr: o.optionTextMr,
+              order: o.optionOrder,
+              isCorrect: o.isCorrect,
+            })),
+          },
+        },
+      });
+    }
   }
 
   console.warn(
