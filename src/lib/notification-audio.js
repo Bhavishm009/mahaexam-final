@@ -4,11 +4,11 @@
  * and triggers device vibration via navigator.vibrate.
  */
 export function playNotificationSound() {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {return;}
 
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
+    if (!AudioCtx) {return;}
 
     const ctx = new AudioCtx();
     if (ctx.state === "suspended") {
@@ -46,7 +46,7 @@ export function playNotificationSound() {
 }
 
 export function triggerVibration(pattern = [300, 100, 300, 100, 300]) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {return;}
   if ("vibrate" in navigator && typeof navigator.vibrate === "function") {
     try {
       navigator.vibrate(pattern);

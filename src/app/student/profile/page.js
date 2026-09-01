@@ -4,14 +4,11 @@ import { useEffect, useState } from "react";
 import {
   User,
   Mail,
-  Phone,
   BookOpen,
   MapPin,
   Save,
   CheckCircle2,
   AlertCircle,
-  GraduationCap,
-  Sparkles,
   Loader2,
 } from "lucide-react";
 import { getInitials } from "@/lib/avatar";

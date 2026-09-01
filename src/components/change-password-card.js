@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  ShieldCheck,
 } from "lucide-react";
 
 import { fetchJson } from "@/lib/api-client";

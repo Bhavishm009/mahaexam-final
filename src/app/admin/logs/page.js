@@ -114,7 +114,7 @@ export default function AdminLogsPage() {
   }
 
   function getStatusBadge(status) {
-    if (!status) return null;
+    if (!status) {return null;}
     if (status >= 200 && status < 300) {
       return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50";
     }

@@ -19,7 +19,7 @@ async function verifyDetailed() {
   for (const s of subjects) {
     const count = s._count.questions;
     const passed = count >= 200;
-    if (!passed) allTopicsPassed = false;
+    if (!passed) {allTopicsPassed = false;}
     console.log(
       `  ${passed ? "✅" : "❌"} [${s.slug}] ${s.nameMr} (${s.name}): ${count} Questions`,
     );
@@ -41,11 +41,11 @@ async function verifyDetailed() {
   const positionDistribution = { 1: 0, 2: 0, 3: 0, 4: 0 };
 
   for (const q of allQuestions) {
-    if (q.options.length !== 4) invalidOptionsCount++;
+    if (q.options.length !== 4) {invalidOptionsCount++;}
     const correctOptions = q.options.filter((o) => o.isCorrect);
-    if (correctOptions.length !== 1) missingCorrectCount++;
-    if (!q.questionText || !q.questionTextMr) missingTextCount++;
-    if (!q.explanation || !q.explanationMr) missingExpCount++;
+    if (correctOptions.length !== 1) {missingCorrectCount++;}
+    if (!q.questionText || !q.questionTextMr) {missingTextCount++;}
+    if (!q.explanation || !q.explanationMr) {missingExpCount++;}
 
     const sortedOptions = [...q.options].sort((a, b) => a.optionOrder - b.optionOrder);
     const correctIdx = sortedOptions.findIndex((o) => o.isCorrect);
@@ -82,7 +82,7 @@ async function verifyDetailed() {
     const qIds = exam.questions.map((eq) => eq.questionId);
     const uniqueQIds = new Set(qIds);
     const hasDuplicates = qIds.length !== uniqueQIds.size;
-    if (hasDuplicates) anyDuplicateFound = true;
+    if (hasDuplicates) {anyDuplicateFound = true;}
 
     const snapCount = exam.questionSnapshots.length;
     console.log(
