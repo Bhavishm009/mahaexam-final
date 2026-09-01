@@ -119,7 +119,7 @@ export async function deleteUserSafely(userId) {
   await prisma.studentProfile.deleteMany({ where: { userId } });
   await prisma.teacherProfile.deleteMany({ where: { userId } });
   await prisma.authSession.deleteMany({ where: { userId } });
-  await prisma.batchMembership.deleteMany({ where: { userId } });
+  await prisma.batchMembership.deleteMany({ where: { studentId: userId } });
   await prisma.passkeyCredential.deleteMany({ where: { userId } });
   await prisma.pushSubscription.deleteMany({ where: { userId } });
 

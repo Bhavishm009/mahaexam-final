@@ -1,6 +1,7 @@
 import { Plus_Jakarta_Sans, Noto_Sans_Devanagari, Mukta } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
+import { AuthProvider } from "@/components/auth-provider";
 import { PWARegister } from "@/components/pwa-register";
 import { NotificationPermissionPrompt } from "@/components/notification-permission-prompt";
 import "./globals.css";
@@ -56,9 +57,11 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-blue-600 selection:text-white dark:bg-slate-950 dark:text-slate-100">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <LanguageProvider>
-            <PWARegister />
-            <NotificationPermissionPrompt />
-            {children}
+            <AuthProvider>
+              <PWARegister />
+              <NotificationPermissionPrompt />
+              {children}
+            </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

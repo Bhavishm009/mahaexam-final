@@ -1,26 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, BookOpen, Sparkles, ChevronRight, ShieldCheck, Globe, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/components/language-provider";
+import { useAuth } from "@/components/auth-provider";
 
 export function PublicNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user, loading } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
-
-  useEffect(() => {
-    fetch("/api/auth/profile")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.profile) {
-          setUser(data.profile);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const dashboardHref =
     user?.role === "SUPER_ADMIN"
@@ -99,7 +89,9 @@ export function PublicNavbar() {
 
           <ThemeToggle />
 
-          {user ? (
+          {loading && !user ? (
+            <div className="h-8 w-28 animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
+          ) : user ? (
             <Link
               href={dashboardHref}
               className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
@@ -186,24 +178,42 @@ export function PublicNavbar() {
               <span>{t.navPricing}</span>
             </Link>
             <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
-              <Link
-                href="/login"
-                className="w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-              >
-                {t.studentSignIn}
-              </Link>
-              <Link
-                href="/register"
-                className="w-full rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
-              >
-                {t.studentRegister}
-              </Link>
-              <Link
-                href="/coaching/register"
-                className="w-full rounded-xl border border-amber-500/30 bg-amber-500/10 py-2.5 text-center text-xs font-bold text-amber-700 dark:text-amber-400"
-              >
-                {t.coachingRegister}
-              </Link>
+              {loading && !user ? (
+                <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
+              ) : user ? (
+                <Link
+                  href={dashboardHref}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                  >
+                    {t.studentSignIn}
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                  >
+                    {t.studentRegister}
+                  </Link>
+                  <Link
+                    href="/coaching/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full rounded-xl border border-amber-500/30 bg-amber-500/10 py-2.5 text-center text-xs font-bold text-amber-700 dark:text-amber-400"
+                  >
+                    {t.coachingRegister}
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

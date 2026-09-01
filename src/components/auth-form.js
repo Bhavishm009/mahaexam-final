@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, Building2, MapPin, Fingerprint } from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES } from "@/lib/exam-types";
+import { useAuth } from "@/components/auth-provider";
 
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const { setUser, refreshUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +32,12 @@ export function LoginForm() {
         setError(data.error || "लॉगिन अयशस्वी. कृपया योग्य माहिती तपासा.");
         setLoading(false);
         return;
+      }
+
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        await refreshUser();
       }
 
       const next = params.get("next");
@@ -243,6 +251,7 @@ export function LoginForm() {
 
 export function SignupForm() {
   const router = useRouter();
+  const { setUser, refreshUser } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -269,6 +278,11 @@ export function SignupForm() {
         setError(data.error || "नोंदणी अयशस्वी झाली.");
         setLoading(false);
         return;
+      }
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        await refreshUser();
       }
       router.push("/dashboard");
       router.refresh();
