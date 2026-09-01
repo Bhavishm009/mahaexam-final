@@ -33,24 +33,27 @@ export async function getStudentExamAccess(userId, examIdOrSlug) {
     exam.visibilityMode === "FREE_GLOBAL" || (!exam.organizationId && exam.isFree);
 
   // Check direct student assignment
-  const directAssignment = await prisma.examStudent.findUnique({
-    where: { examId_studentId: { examId: exam.id, studentId: userId } },
-  });
-  let isAssigned = Boolean(directAssignment);
+  let isAssigned = false;
+  if (userId) {
+    const directAssignment = await prisma.examStudent.findUnique({
+      where: { examId_studentId: { examId: exam.id, studentId: userId } },
+    });
+    isAssigned = Boolean(directAssignment);
 
-  // Check batch assignment for coaching exams
-  if (!isAssigned && exam.organizationId) {
-    const batchAssignment = await prisma.examBatch.findFirst({
-      where: {
-        examId: exam.id,
-        batch: {
-          students: {
-            some: { studentId: userId },
+    // Check batch assignment for coaching exams
+    if (!isAssigned && exam.organizationId) {
+      const batchAssignment = await prisma.examBatch.findFirst({
+        where: {
+          examId: exam.id,
+          batch: {
+            students: {
+              some: { studentId: userId },
+            },
           },
         },
-      },
-    });
-    isAssigned = Boolean(batchAssignment);
+      });
+      isAssigned = Boolean(batchAssignment);
+    }
   }
 
   if (!isGlobal && !isAssigned) {
@@ -136,110 +139,103 @@ export async function createAssignmentNotifications(examId) {
   return ids.length;
 }
 
-export async function listStudentAvailableExams(userId) {
-  const now = new Date();
-  const [global, assignedDirect, assignedBatches] = await Promise.all([
-    prisma.exam.findMany({
-      where: {
-        AND: [
-          {
-            OR: [
-              { visibilityMode: "FREE_GLOBAL" },
-              { visibilityMode: "GLOBAL", isFree: true },
-              { organizationId: null, isFree: true },
-            ],
-          },
-          { status: { in: ["SCHEDULED", "LIVE"] } },
-          { OR: [{ startAt: null }, { startAt: { lte: now } }] },
-          { OR: [{ endAt: null }, { endAt: { gte: now } }] },
-        ],
-      },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        description: true,
-        examType: true,
-        language: true,
-        durationMinutes: true,
-        totalQuestions: true,
-        totalMarks: true,
-        price: true,
-        isFree: true,
-        visibilityMode: true,
-        startAt: true,
-        endAt: true,
-      },
-    }),
-    prisma.exam.findMany({
-      where: {
-        students: { some: { studentId: userId } },
-        status: { in: ["SCHEDULED", "LIVE"] },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        description: true,
-        examType: true,
-        language: true,
-        durationMinutes: true,
-        totalQuestions: true,
-        totalMarks: true,
-        price: true,
-        isFree: true,
-        visibilityMode: true,
-        startAt: true,
-        endAt: true,
-      },
-    }),
-    prisma.exam.findMany({
-      where: {
-        batches: {
-          some: {
-            batch: {
-              students: {
-                some: { studentId: userId },
+export async function listStudentAvailableExams(userId = null) {
+  const globalExams = await prisma.exam.findMany({
+    where: {
+      status: { in: ["SCHEDULED", "LIVE"] },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      examType: true,
+      language: true,
+      durationMinutes: true,
+      totalQuestions: true,
+      totalMarks: true,
+      price: true,
+      isFree: true,
+      visibilityMode: true,
+      startAt: true,
+      endAt: true,
+    },
+  });
+
+  const map = new Map();
+  for (const e of globalExams) {
+    map.set(e.id, { ...e, source: e.isFree || e.visibilityMode === "FREE_GLOBAL" ? "FREE_GLOBAL" : "COACHING" });
+  }
+
+  if (userId) {
+    const [assignedDirect, assignedBatches] = await Promise.all([
+      prisma.exam.findMany({
+        where: {
+          students: { some: { studentId: userId } },
+          status: { in: ["SCHEDULED", "LIVE"] },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          examType: true,
+          language: true,
+          durationMinutes: true,
+          totalQuestions: true,
+          totalMarks: true,
+          price: true,
+          isFree: true,
+          visibilityMode: true,
+          startAt: true,
+          endAt: true,
+        },
+      }),
+      prisma.exam.findMany({
+        where: {
+          batches: {
+            some: {
+              batch: {
+                students: {
+                  some: { studentId: userId },
+                },
               },
             },
           },
+          status: { in: ["SCHEDULED", "LIVE"] },
         },
-        status: { in: ["SCHEDULED", "LIVE"] },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        description: true,
-        examType: true,
-        language: true,
-        durationMinutes: true,
-        totalQuestions: true,
-        totalMarks: true,
-        price: true,
-        isFree: true,
-        visibilityMode: true,
-        startAt: true,
-        endAt: true,
-      },
-    }),
-  ]);
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          examType: true,
+          language: true,
+          durationMinutes: true,
+          totalQuestions: true,
+          totalMarks: true,
+          price: true,
+          isFree: true,
+          visibilityMode: true,
+          startAt: true,
+          endAt: true,
+        },
+      }),
+    ]);
 
-  const map = new Map();
-  for (const e of global) {
-    map.set(e.id, { ...e, source: "FREE_GLOBAL" });
+    for (const e of assignedDirect) {
+      map.set(e.id, { ...e, source: "COACHING" });
+    }
+    for (const e of assignedBatches) {
+      map.set(e.id, { ...e, source: "COACHING" });
+    }
   }
-  for (const e of assignedDirect) {
-    map.set(e.id, { ...e, source: "COACHING" });
-  }
-  for (const e of assignedBatches) {
-    map.set(e.id, { ...e, source: "COACHING" });
-  }
+
   return [...map.values()];
 }
