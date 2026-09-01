@@ -35,7 +35,7 @@ export async function sendEmailWithProvider({ email, subject, html }) {
     }
   }
   // Safe development fallback: log email to console & audit records
-  console.info(`[EMAIL SENT TO: ${email}] Subject: ${subject}`);
+  console.log(`[EMAIL SENT TO: ${email}] Subject: ${subject}`);
   return { demo: true, delivered: true, to: email, subject };
 }
 
