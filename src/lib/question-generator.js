@@ -3,7 +3,9 @@
 // With verified correct answers, randomized option positions, and rich explanations.
 
 function getMarathiOptionText(opt) {
-  if (opt.textMr) return opt.textMr;
+  if (opt.textMr) {
+    return opt.textMr;
+  }
   if (typeof opt.text === "string") {
     const match = opt.text.match(/\(([\u0900-\u097F\s\d.,\-/]+)\)/);
     if (match && match[1]) {
@@ -41,7 +43,7 @@ function generateHistoryQuestions() {
     { king: "Yajna Sri Satakarni (यज्ञश्री सातकर्णी)", fact: "नाण्यांवर जहाजाचे चित्र कोरून सागरी व्यापारास प्रोत्साहन दिले." },
   ];
 
-  satavahanas.forEach((item, i) => {
+  satavahanas.forEach((item) => {
     list.push({
       subject: "history",
       qText: `Which Satavahana ruler is known for: ${item.fact.split(" ")[0]}?`,
@@ -186,7 +188,6 @@ function generateGeographyQuestions() {
   ];
 
   peaks.forEach((p) => {
-    const wrongHeights = ["1720 m", "1210 m", "1150 m", "1820 m"].slice(0, 3);
     list.push({
       subject: "geography",
       qText: `What is the elevation and location of the peak "${p.name}" in Maharashtra?`,

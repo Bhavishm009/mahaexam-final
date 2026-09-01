@@ -19,8 +19,12 @@ async function resolveQuestions(exam) {
     const seen = new Set();
     return items.filter((q) => {
       const key = q.sourceQuestionId || q.id;
-      if (key && seen.has(key)) return false;
-      if (key) seen.add(key);
+      if (key && seen.has(key)) {
+        return false;
+      }
+      if (key) {
+        seen.add(key);
+      }
       return true;
     });
   };

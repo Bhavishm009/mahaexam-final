@@ -121,11 +121,19 @@ export async function POST(request) {
       const qId = q.id || eq.id || `q-${idx + 1}`;
       const qText = q.questionText || "";
 
-      if (qId && seenQuestionIds.has(qId)) continue;
-      if (qText && seenQuestionTexts.has(qText)) continue;
+      if (qId && seenQuestionIds.has(qId)) {
+        continue;
+      }
+      if (qText && seenQuestionTexts.has(qText)) {
+        continue;
+      }
 
-      if (qId) seenQuestionIds.add(qId);
-      if (qText) seenQuestionTexts.add(qText);
+      if (qId) {
+        seenQuestionIds.add(qId);
+      }
+      if (qText) {
+        seenQuestionTexts.add(qText);
+      }
 
       questions.push({
         id: qId,

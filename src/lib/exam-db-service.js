@@ -62,7 +62,9 @@ export async function startPersistentAttempt({ examId, studentId }) {
   // Deduplicate questions
   const seenQ = new Set();
   const uniqueQuestions = (exam.questions || []).filter((item) => {
-    if (seenQ.has(item.questionId)) return false;
+    if (seenQ.has(item.questionId)) {
+      return false;
+    }
     seenQ.add(item.questionId);
     return true;
   });
