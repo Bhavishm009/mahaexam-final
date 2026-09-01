@@ -20,14 +20,14 @@ export async function POST(request) {
     if (!newPassword || typeof newPassword !== "string" || newPassword.length < 6) {
       return NextResponse.json(
         { error: "New password must be at least 6 characters long." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (newPassword !== confirmPassword) {
       return NextResponse.json(
         { error: "New password and confirmation password do not match." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -45,7 +45,7 @@ export async function POST(request) {
       if (!currentPassword) {
         return NextResponse.json(
           { error: "Current password is required to set a new password." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -53,7 +53,7 @@ export async function POST(request) {
       if (!isMatch) {
         return NextResponse.json(
           { error: "Current password is incorrect. Please enter your valid current password." },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -72,7 +72,7 @@ export async function POST(request) {
   } catch (err) {
     return NextResponse.json(
       { error: err.message || "Failed to change password." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

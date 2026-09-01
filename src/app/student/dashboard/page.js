@@ -165,7 +165,10 @@ function Overview({ d, setTab }) {
               href="/student/exams"
               className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
             >
-              <span>पहा सर्व {d.live.length} परीक्षा आणि मूळ प्रश्नपत्रिका (View All {d.live.length} Live Exams) →</span>
+              <span>
+                पहा सर्व {d.live.length} परीक्षा आणि मूळ प्रश्नपत्रिका (View All {d.live.length}{" "}
+                Live Exams) →
+              </span>
             </Link>
           )}
         </Card>

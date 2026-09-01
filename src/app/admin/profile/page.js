@@ -122,7 +122,7 @@ export default function AdminProfilePage() {
         </div>
 
         {/* Form Card Shimmer */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8 space-y-6">
+        <div className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <div className="animate-shimmer h-6 w-56 rounded-lg" />
           <div className="grid gap-5 sm:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
@@ -145,7 +145,7 @@ export default function AdminProfilePage() {
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 p-6 text-white shadow-xl sm:p-8">
         <div className="relative z-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/15 text-2xl font-black backdrop-blur-md shadow-inner">
+            <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/15 text-2xl font-black shadow-inner backdrop-blur-md">
               {initials}
             </div>
             <div>

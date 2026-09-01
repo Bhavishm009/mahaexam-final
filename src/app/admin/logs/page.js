@@ -2,14 +2,36 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { AlertTriangle, RefreshCw, Search, Terminal, Activity, ArrowLeft } from "lucide-react";
+import {
+  AlertTriangle,
+  RefreshCw,
+  Search,
+  Terminal,
+  Activity,
+  ArrowLeft,
+  Trash2,
+  Clock,
+  Zap,
+  CheckCircle2,
+  ShieldAlert,
+  Server,
+  Layers,
+} from "lucide-react";
+import { fetchJson } from "@/lib/api-client";
 
 export default function AdminLogsPage() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
   const [filter, setFilter] = useState("ALL");
   const [query, setQuery] = useState("");
-  const [errorCount, setErrorCount] = useState(0);
+  const [stats, setStats] = useState({
+    totalCount: 0,
+    errorCount: 0,
+    apiCallCount: 0,
+    avgLatencyMs: 0,
+  });
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const loadLogs = useCallback(async () => {
     try {
@@ -22,13 +44,20 @@ export default function AdminLogsPage() {
         params.set("q", query);
       }
 
-      const r = await fetch(`/api/admin/logs?${params.toString()}`);
-      if (r.ok) {
-        const d = await r.json();
-        setLogs(d.logs || []);
-        setErrorCount(d.errorCount || 0);
+      const { ok, data } = await fetchJson(`/api/admin/logs?${params.toString()}`);
+      if (ok && data.success) {
+        setLogs(data.logs || []);
+        setStats({
+          totalCount: data.totalCount || 0,
+          errorCount: data.errorCount || 0,
+          apiCallCount: data.apiCallCount || 0,
+          avgLatencyMs: data.avgLatencyMs || 0,
+        });
+      } else {
+        setMessage({ type: "error", text: data.error || "Failed to load logs" });
       }
-    } catch {
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to connect to server" });
     } finally {
       setLoading(false);
     }
@@ -38,6 +67,63 @@ export default function AdminLogsPage() {
     loadLogs();
   }, [filter, loadLogs]);
 
+  async function handleClearLogs() {
+    if (
+      !confirm(
+        "Are you sure you want to clear ALL application and API logs? This action cannot be undone.",
+      )
+    ) {
+      return;
+    }
+
+    setClearing(true);
+    setMessage({ type: "", text: "" });
+
+    try {
+      const { ok, data } = await fetchJson("/api/admin/logs", { method: "DELETE" });
+      if (ok && data.success) {
+        setMessage({
+          type: "success",
+          text: "✅ " + (data.message || "Logs cleared successfully."),
+        });
+        await loadLogs();
+      } else {
+        setMessage({ type: "error", text: data.error || "Failed to clear logs." });
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to clear logs." });
+    } finally {
+      setClearing(false);
+    }
+  }
+
+  function getMethodBadge(method) {
+    switch (method?.toUpperCase()) {
+      case "GET":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-800";
+      case "POST":
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800";
+      case "PATCH":
+      case "PUT":
+        return "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800";
+      case "DELETE":
+        return "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800";
+      default:
+        return "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300";
+    }
+  }
+
+  function getStatusBadge(status) {
+    if (!status) return null;
+    if (status >= 200 && status < 300) {
+      return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50";
+    }
+    if (status >= 400 && status < 500) {
+      return "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50";
+    }
+    return "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50";
+  }
+
   return (
     <main className="min-h-screen space-y-6 font-sans text-slate-900 transition-colors dark:text-slate-100">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -46,20 +132,20 @@ export default function AdminLogsPage() {
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/20 px-3 py-1 text-xs font-bold text-rose-300 backdrop-blur-md">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-xs font-bold text-blue-300 backdrop-blur-md">
                   <Activity className="h-3.5 w-3.5" />
-                  Live Diagnostics & Error Monitor
+                  Super Admin API & Diagnostics Dashboard
                 </span>
-                {errorCount > 0 && (
+                {stats.errorCount > 0 && (
                   <span className="rounded-full bg-rose-600 px-2.5 py-0.5 text-xs font-black text-white">
-                    {errorCount} {errorCount === 1 ? "Error" : "Errors"}
+                    {stats.errorCount} {stats.errorCount === 1 ? "Error" : "Errors"}
                   </span>
                 )}
               </div>
-              <h1 className="mt-3 text-2xl font-black sm:text-3xl">System & Error Logs</h1>
+              <h1 className="mt-3 text-2xl font-black sm:text-3xl">API & System Logs</h1>
               <p className="mt-1 text-xs text-slate-300 sm:text-sm">
-                Monitor user runtime exceptions, API errors, test activity, and security audit logs
-                in real time.
+                Monitor all API endpoint calls, status codes, response latencies, server errors, and
+                security audit logs.
               </p>
             </div>
 
@@ -73,25 +159,88 @@ export default function AdminLogsPage() {
                 <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
               </button>
+              <button
+                type="button"
+                onClick={handleClearLogs}
+                disabled={clearing || stats.totalCount === 0}
+                className="inline-flex items-center gap-1.5 rounded-2xl bg-rose-600/80 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-rose-600 active:scale-95 disabled:opacity-40"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Clear Logs</span>
+              </button>
               <Link
                 href="/admin"
                 className="inline-flex items-center gap-1.5 rounded-2xl bg-white/20 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/30"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span>Admin Dashboard</span>
+                <span>Admin Panel</span>
               </Link>
             </div>
           </div>
+
+          {/* Metric Stats Grid */}
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+              <div className="flex items-center gap-2 text-xs font-bold text-blue-200">
+                <Layers className="h-4 w-4 text-blue-400" />
+                <span>Total Recorded Logs</span>
+              </div>
+              <div className="mt-2 text-xl font-black text-white">{stats.totalCount}</div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-200">
+                <Server className="h-4 w-4 text-emerald-400" />
+                <span>API Calls Recorded</span>
+              </div>
+              <div className="mt-2 text-xl font-black text-white">{stats.apiCallCount}</div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+              <div className="flex items-center gap-2 text-xs font-bold text-rose-200">
+                <ShieldAlert className="h-4 w-4 text-rose-400" />
+                <span>Total Errors Logged</span>
+              </div>
+              <div className="mt-2 text-xl font-black text-white">{stats.errorCount}</div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-200">
+                <Zap className="h-4 w-4 text-amber-400" />
+                <span>Avg API Latency</span>
+              </div>
+              <div className="mt-2 text-xl font-black text-white">{stats.avgLatencyMs} ms</div>
+            </div>
+          </div>
         </div>
+
+        {/* Global Alert Messages */}
+        {message.text && (
+          <div
+            className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${
+              message.type === "success"
+                ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
+                : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
+            }`}
+          >
+            {message.type === "success" ? (
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+            )}
+            <span>{message.text}</span>
+          </div>
+        )}
 
         {/* Filters & Search */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             {[
               { id: "ALL", label: "All Logs" },
+              { id: "API_CALL", label: "API Calls ⚡" },
               { id: "ERRORS", label: "Errors Only 🚨" },
+              { id: "APP_ERROR", label: "App Exceptions" },
               { id: "AUTH_LOGIN", label: "Logins" },
-              { id: "EXAM_SUBMIT", label: "Exam Submissions" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -119,7 +268,7 @@ export default function AdminLogsPage() {
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search action, user, route..."
+                placeholder="Search route, user, error..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="h-10 w-64 rounded-2xl border border-slate-200 bg-white pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
@@ -150,12 +299,17 @@ export default function AdminLogsPage() {
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {logs.map((log) => {
-                const isError = log.action === "APP_ERROR";
+                const isError = log.action === "APP_ERROR" || log.action === "API_ERROR";
+                const meta = log.metadata || {};
+                const method = meta.method;
+                const statusCode = meta.statusCode;
+                const durationMs = meta.durationMs;
+
                 return (
                   <div
                     key={log.id}
                     className={`p-4 transition hover:bg-slate-50 dark:hover:bg-slate-800/40 sm:p-5 ${
-                      isError ? "bg-rose-50/50 dark:bg-rose-950/20" : ""
+                      isError ? "bg-rose-50/40 dark:bg-rose-950/20" : ""
                     }`}
                   >
                     <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
@@ -165,7 +319,7 @@ export default function AdminLogsPage() {
                             className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-0.5 text-xs font-black ${
                               isError
                                 ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
-                                : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
+                                : "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
                             }`}
                           >
                             {isError ? (
@@ -175,34 +329,62 @@ export default function AdminLogsPage() {
                             )}
                             {log.action}
                           </span>
-                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                            {log.resourceType}
-                          </span>
-                          {log.resourceId && (
-                            <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                              {log.resourceId}
+
+                          {method && (
+                            <span
+                              className={`rounded-md px-2 py-0.5 font-mono text-[10px] font-extrabold ${getMethodBadge(method)}`}
+                            >
+                              {method}
                             </span>
                           )}
+
+                          {statusCode && (
+                            <span
+                              className={`rounded-md px-2 py-0.5 font-mono text-[10px] font-extrabold ${getStatusBadge(statusCode)}`}
+                            >
+                              {statusCode}
+                            </span>
+                          )}
+
+                          {typeof durationMs === "number" && (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                              <Clock className="h-3 w-3 text-slate-400" />
+                              {durationMs}ms
+                            </span>
+                          )}
+
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                            {log.resourceId || log.resourceType}
+                          </span>
                         </div>
 
-                        {/* Error or Activity description */}
-                        {isError ? (
-                          <div className="text-sm font-bold text-rose-900 dark:text-rose-200">
-                            {log.metadata?.message || "Unknown Application Error"}
-                          </div>
-                        ) : (
-                          <div className="text-xs text-slate-700 dark:text-slate-300">
-                            {log.user
-                              ? `${log.user.name} (${log.user.email} - ${log.user.role})`
-                              : "System/Anonymous"}
-                            {log.organization ? ` • ${log.organization.name}` : ""}
+                        {/* Description / User details */}
+                        <div className="text-xs text-slate-700 dark:text-slate-300">
+                          {log.user ? (
+                            <span>
+                              User:{" "}
+                              <strong className="text-slate-900 dark:text-white">
+                                {log.user.name}
+                              </strong>{" "}
+                              ({log.user.email} · {log.user.role})
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">System / Anonymous</span>
+                          )}
+                          {log.organization ? ` • ${log.organization.name}` : ""}
+                        </div>
+
+                        {/* Error Message if present */}
+                        {(meta.message || meta.error) && (
+                          <div className="mt-1 text-xs font-bold text-rose-800 dark:text-rose-300">
+                            Error: {meta.message || meta.error}
                           </div>
                         )}
 
-                        {/* Stack trace preview if present */}
-                        {log.metadata?.stack && (
+                        {/* Stack trace preview */}
+                        {meta.stack && (
                           <pre className="mt-2 max-h-32 overflow-x-auto rounded-xl bg-slate-900 p-3 font-mono text-[11px] text-rose-300">
-                            {log.metadata.stack}
+                            {meta.stack}
                           </pre>
                         )}
                       </div>
@@ -210,12 +392,14 @@ export default function AdminLogsPage() {
                       <div className="shrink-0 text-right text-[11px] text-slate-400">
                         <div>{new Date(log.createdAt).toLocaleString()}</div>
                         {log.ipAddress && (
-                          <div className="font-mono text-[10px]">IP: {log.ipAddress}</div>
+                          <div className="font-mono text-[10px] text-slate-400">
+                            IP: {log.ipAddress}
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Expandable JSON Metadata */}
+                    {/* Expandable JSON Metadata Payload */}
                     {log.metadata &&
                       Object.keys(log.metadata).length > 0 &&
                       !log.metadata.stack && (

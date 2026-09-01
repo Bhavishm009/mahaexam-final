@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, Building2, MapPin, Fingerprint } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  Phone,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Building2,
+  MapPin,
+  Fingerprint,
+} from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES } from "@/lib/exam-types";
 import { useAuth } from "@/components/auth-provider";
 
@@ -86,9 +97,8 @@ export function LoginForm() {
 
       const allowCredentials = (options.allowCredentials || []).map((c) => ({
         ...c,
-        id: Uint8Array.from(
-          atob(c.id.replace(/-/g, "+").replace(/_/g, "/")),
-          (ch) => ch.charCodeAt(0),
+        id: Uint8Array.from(atob(c.id.replace(/-/g, "+").replace(/_/g, "/")), (ch) =>
+          ch.charCodeAt(0),
         ),
       }));
 
@@ -113,9 +123,7 @@ export function LoginForm() {
       const authenticatorData = btoa(
         String.fromCharCode(...new Uint8Array(assertion.response.authenticatorData)),
       );
-      const signature = btoa(
-        String.fromCharCode(...new Uint8Array(assertion.response.signature)),
-      );
+      const signature = btoa(String.fromCharCode(...new Uint8Array(assertion.response.signature)));
 
       const authRes = await fetch("/api/auth/webauthn/login/verify", {
         method: "POST",
@@ -242,7 +250,9 @@ export function LoginForm() {
           className="inline-flex w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-xs font-bold text-slate-800 transition hover:bg-slate-100 active:scale-95 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
           <Fingerprint className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <span>{biometricLoading ? "Verifying Fingerprint..." : "Login with Fingerprint / Passkey"}</span>
+          <span>
+            {biometricLoading ? "Verifying Fingerprint..." : "Login with Fingerprint / Passkey"}
+          </span>
         </button>
       </form>
     </div>

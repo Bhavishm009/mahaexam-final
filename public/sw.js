@@ -26,12 +26,13 @@ self.addEventListener("activate", (event) => {
 // Web Push Notification Listener
 self.addEventListener("push", (event) => {
   let data = {
-    title: "MahaExam Alert",
+    title: "MahaExam Alert 🔔",
     body: "New Maharashtra Exam Mock Test Available! सराव सुरू करा.",
     url: "/student/exams",
     icon: "/icon-192.svg",
     badge: "/icon-192.svg",
-    tag: "mahaexam-notification",
+    tag: `mahaexam-alert-${Date.now()}`,
+    vibrate: [300, 100, 300, 100, 300],
   };
 
   if (event.data) {
@@ -47,8 +48,11 @@ self.addEventListener("push", (event) => {
     body: data.body,
     icon: data.icon || "/icon-192.svg",
     badge: data.badge || "/icon-192.svg",
-    tag: data.tag || "mahaexam-alert",
-    vibrate: [200, 100, 200],
+    tag: data.tag || `mahaexam-alert-${Date.now()}`,
+    vibrate: data.vibrate || [300, 100, 300, 100, 300],
+    renotify: true,
+    silent: false,
+    requireInteraction: true,
     data: {
       url: data.url || "/",
       timestamp: Date.now(),

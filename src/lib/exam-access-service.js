@@ -166,7 +166,10 @@ export async function listStudentAvailableExams(userId = null) {
 
   const map = new Map();
   for (const e of globalExams) {
-    map.set(e.id, { ...e, source: e.isFree || e.visibilityMode === "FREE_GLOBAL" ? "FREE_GLOBAL" : "COACHING" });
+    map.set(e.id, {
+      ...e,
+      source: e.isFree || e.visibilityMode === "FREE_GLOBAL" ? "FREE_GLOBAL" : "COACHING",
+    });
   }
 
   if (userId) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, ExternalLink } from "lucide-react";
+import { triggerSoundAndVibration } from "@/lib/notification-audio";
 
 export default function NotificationCenter() {
   const router = useRouter();
@@ -14,7 +15,15 @@ export default function NotificationCenter() {
       const r = await fetch("/api/notifications");
       if (r.ok) {
         const d = await r.json();
-        setItems(d.notifications || []);
+        const newNotifications = d.notifications || [];
+        setItems((prev) => {
+          const prevUnread = prev.filter((x) => !x.readAt).length;
+          const newUnread = newNotifications.filter((x) => !x.readAt).length;
+          if (newUnread > prevUnread && prev.length > 0) {
+            triggerSoundAndVibration([300, 100, 300, 100, 300]);
+          }
+          return newNotifications;
+        });
       }
     } catch {}
   }

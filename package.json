@@ -19,7 +19,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run prisma:validate",
-    "prisma:format": "prisma format"
+    "prisma:format": "prisma format",
+    "test:apis": "node scripts/test-all-apis.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",

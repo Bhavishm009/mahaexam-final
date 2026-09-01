@@ -202,7 +202,8 @@ export default function OrganizationsPage() {
             Coaching Institutes & Academies
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            Onboard new academies, dispatch automated credentials, filter by district, and manage access.
+            Onboard new academies, dispatch automated credentials, filter by district, and manage
+            access.
           </p>
         </div>
 
@@ -247,7 +248,9 @@ export default function OrganizationsPage() {
                 <div className="font-bold text-slate-900 dark:text-white">Credentials Sent:</div>
                 <div className="mt-1 font-mono text-slate-700 dark:text-slate-300">
                   Email: <strong>{lastCreated.email}</strong> | Temporary Password:{" "}
-                  <strong className="text-amber-600 dark:text-amber-400">{lastCreated.password}</strong>
+                  <strong className="text-amber-600 dark:text-amber-400">
+                    {lastCreated.password}
+                  </strong>
                 </div>
               </div>
             )}
@@ -518,7 +521,7 @@ export default function OrganizationsPage() {
                   <th className="p-4 font-bold">Batches</th>
                   <th className="p-4 font-bold">Exams</th>
                   <th className="p-4 font-bold">Plan</th>
-                  <th className="p-4 font-bold text-right">Actions</th>
+                  <th className="p-4 text-right font-bold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

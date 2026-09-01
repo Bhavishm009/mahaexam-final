@@ -12,6 +12,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { fetchJson } from "@/lib/api-client";
+
 export function ChangePasswordCard() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -44,7 +46,7 @@ export function ChangePasswordCard() {
 
     setSaving(true);
     try {
-      const res = await fetch("/api/auth/change-password", {
+      const { ok, data } = await fetchJson("/api/auth/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -54,8 +56,7 @@ export function ChangePasswordCard() {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success) {
+      if (ok && data.success) {
         setMessage({
           type: "success",
           text: "✅ Password changed successfully! Your account is now secured with the new password.",

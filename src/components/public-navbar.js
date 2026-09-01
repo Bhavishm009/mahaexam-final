@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, BookOpen, Sparkles, ChevronRight, ShieldCheck, Globe, LayoutDashboard } from "lucide-react";
+import {
+  Menu,
+  X,
+  BookOpen,
+  Sparkles,
+  ChevronRight,
+  ShieldCheck,
+  Globe,
+  LayoutDashboard,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";

@@ -321,9 +321,10 @@ export default function CoachingStudentsPage() {
 
           {/* Pagination Footer */}
           {filtered.length > pageSize && (
-            <div className="flex items-center justify-between border-t border-slate-100 p-4 dark:border-slate-800 text-xs">
+            <div className="flex items-center justify-between border-t border-slate-100 p-4 text-xs dark:border-slate-800">
               <span className="text-slate-500">
-                Page {currentPage} of {Math.ceil(filtered.length / pageSize)} ({filtered.length} total)
+                Page {currentPage} of {Math.ceil(filtered.length / pageSize)} ({filtered.length}{" "}
+                total)
               </span>
               <div className="flex gap-2">
                 <button

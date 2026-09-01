@@ -3,7 +3,9 @@ import { generateFull2000QuestionBank } from "./question-generator.js";
 import { runPYQDatabaseSeed } from "./pyq-seeder.js";
 
 export async function runCompleteDatabaseSeed(prismaClient) {
-  console.warn("🌱 Starting Enterprise Production Database Seeding with 2000+ Verified Questions...");
+  console.warn(
+    "🌱 Starting Enterprise Production Database Seeding with 2000+ Verified Questions...",
+  );
 
   // 1. Organization
   const org = await prismaClient.organization.upsert({
@@ -81,18 +83,58 @@ export async function runCompleteDatabaseSeed(prismaClient) {
 
   // 3. Setup Subjects
   const subjectsData = [
-    { name: "History of Maharashtra & India", nameMr: "इतिहास (महाराष्ट्राचा व भारताचा इतिहास)", slug: "history" },
-    { name: "Geography of Maharashtra & India", nameMr: "भूगोल (महाराष्ट्राचा व भारताचा भूगोल)", slug: "geography" },
-    { name: "Indian Polity & Constitution", nameMr: "भारतीय राज्यघटना व नागरिकशास्त्र", slug: "constitution" },
+    {
+      name: "History of Maharashtra & India",
+      nameMr: "इतिहास (महाराष्ट्राचा व भारताचा इतिहास)",
+      slug: "history",
+    },
+    {
+      name: "Geography of Maharashtra & India",
+      nameMr: "भूगोल (महाराष्ट्राचा व भारताचा भूगोल)",
+      slug: "geography",
+    },
+    {
+      name: "Indian Polity & Constitution",
+      nameMr: "भारतीय राज्यघटना व नागरिकशास्त्र",
+      slug: "constitution",
+    },
     { name: "Marathi Grammar", nameMr: "मराठी व्याकरण व शब्दसंग्रह", slug: "marathi" },
-    { name: "English Language & Grammar", nameMr: "इंग्रजी व्याकरण (English Language)", slug: "english" },
-    { name: "Mathematics & Quantitative Aptitude", nameMr: "अंकगणित व संख्यात्मक अभियोग्यता", slug: "mathematics" },
-    { name: "Logical Reasoning & Mental Ability", nameMr: "बुद्धिमत्ता चाचणी व तर्कक्षमता", slug: "reasoning" },
-    { name: "General Science", nameMr: "सामान्य विज्ञान (भौतिक, रसायन व जीवशास्त्र)", slug: "science" },
+    {
+      name: "English Language & Grammar",
+      nameMr: "इंग्रजी व्याकरण (English Language)",
+      slug: "english",
+    },
+    {
+      name: "Mathematics & Quantitative Aptitude",
+      nameMr: "अंकगणित व संख्यात्मक अभियोग्यता",
+      slug: "mathematics",
+    },
+    {
+      name: "Logical Reasoning & Mental Ability",
+      nameMr: "बुद्धिमत्ता चाचणी व तर्कक्षमता",
+      slug: "reasoning",
+    },
+    {
+      name: "General Science",
+      nameMr: "सामान्य विज्ञान (भौतिक, रसायन व जीवशास्त्र)",
+      slug: "science",
+    },
     { name: "Economics & Budget", nameMr: "अर्थव्यवस्था व शासकीय योजना", slug: "economics" },
-    { name: "Current Affairs & Static GK", nameMr: "चालू घडामोडी व सामान्य ज्ञान", slug: "general-knowledge" },
-    { name: "MPSC Group C Exam Papers", nameMr: "एमपीएससी गट-क परीक्षा सराव संच व PYQ", slug: "mpsc-group-c" },
-    { name: "MPSC Group D Exam Papers", nameMr: "एमपीएससी गट-डी (TCS/IBPS) परीक्षा सराव संच", slug: "mpsc-group-d" },
+    {
+      name: "Current Affairs & Static GK",
+      nameMr: "चालू घडामोडी व सामान्य ज्ञान",
+      slug: "general-knowledge",
+    },
+    {
+      name: "MPSC Group C Exam Papers",
+      nameMr: "एमपीएससी गट-क परीक्षा सराव संच व PYQ",
+      slug: "mpsc-group-c",
+    },
+    {
+      name: "MPSC Group D Exam Papers",
+      nameMr: "एमपीएससी गट-डी (TCS/IBPS) परीक्षा सराव संच",
+      slug: "mpsc-group-d",
+    },
   ];
 
   const subjectMap = {};
@@ -156,25 +198,29 @@ export async function runCompleteDatabaseSeed(prismaClient) {
   const examsMeta = [
     // --- MPSC GROUP C & GROUP D OFFICIAL LIVE PAPERS (LAST 3 YEARS) ---
     {
-      title: "MPSC Group C Combined Prelims 2023 Official Paper (महाराष्ट्र गट-क संयुक्त पूर्व परीक्षा २०२३)",
+      title:
+        "MPSC Group C Combined Prelims 2023 Official Paper (महाराष्ट्र गट-क संयुक्त पूर्व परीक्षा २०२३)",
       slug: "mpsc-group-c-2023-prelims",
       examType: "MPSC_COMBINE",
       durationMinutes: 60,
       passingMarks: 45,
       negativeMarks: 0.25,
       status: "LIVE",
-      description: "एमपीएससी गट-क संयुक्त पूर्व परीक्षा २०२३ प्रत्यक्ष विचारलेले १०० वस्तुनिष्ठ प्रश्न व उत्तरांचे स्पष्टीकरण.",
+      description:
+        "एमपीएससी गट-क संयुक्त पूर्व परीक्षा २०२३ प्रत्यक्ष विचारलेले १०० वस्तुनिष्ठ प्रश्न व उत्तरांचे स्पष्टीकरण.",
       primaryTopic: "mpsc-group-c",
     },
     {
-      title: "MPSC Group C Combined Prelims 2024 Official Paper (महाराष्ट्र गट-क संयुक्त पूर्व परीक्षा २०२४)",
+      title:
+        "MPSC Group C Combined Prelims 2024 Official Paper (महाराष्ट्र गट-क संयुक्त पूर्व परीक्षा २०२४)",
       slug: "mpsc-group-c-2024-prelims",
       examType: "MPSC_COMBINE",
       durationMinutes: 60,
       passingMarks: 45,
       negativeMarks: 0.25,
       status: "LIVE",
-      description: "एमपीएससी गट-क संयुक्त पूर्व परीक्षा २०२४ नवीन पॅटर्ननुसार १०० प्रश्नांची ऑनलाइन लाइव्ह परीक्षा.",
+      description:
+        "एमपीएससी गट-क संयुक्त पूर्व परीक्षा २०२४ नवीन पॅटर्ननुसार १०० प्रश्नांची ऑनलाइन लाइव्ह परीक्षा.",
       primaryTopic: "mpsc-group-c",
     },
     {
@@ -185,22 +231,26 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       passingMarks: 50,
       negativeMarks: 0.25,
       status: "LIVE",
-      description: "एमपीएससी गट-क मुख्य परीक्षा पेपर १ (मराठी, इंग्रजी व सामान्य ज्ञान) १०० गुण लाइव्ह सराव पेपर.",
+      description:
+        "एमपीएससी गट-क मुख्य परीक्षा पेपर १ (मराठी, इंग्रजी व सामान्य ज्ञान) १०० गुण लाइव्ह सराव पेपर.",
       primaryTopic: "mpsc-group-c",
     },
     {
-      title: "MPSC Group D (TCS/IBPS Pattern) 2023 Official Paper (महाराष्ट्र गट-डी भरती परीक्षा २०२३)",
+      title:
+        "MPSC Group D (TCS/IBPS Pattern) 2023 Official Paper (महाराष्ट्र गट-डी भरती परीक्षा २०२३)",
       slug: "mpsc-group-d-2023-tcs-paper",
       examType: "SARALSEVA",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
       status: "LIVE",
-      description: "महाराष्ट्र गट-डी भरती परीक्षा २०२३ TCS/IBPS पॅटर्न १०० प्रश्नांचा अस्सल सराव संच.",
+      description:
+        "महाराष्ट्र गट-डी भरती परीक्षा २०२३ TCS/IBPS पॅटर्न १०० प्रश्नांचा अस्सल सराव संच.",
       primaryTopic: "mpsc-group-d",
     },
     {
-      title: "MPSC Group D (TCS/IBPS Pattern) 2024 Live Paper (महाराष्ट्र गट-डी भरती परीक्षा २०२४ - ऑनलाइन CBT संच)",
+      title:
+        "MPSC Group D (TCS/IBPS Pattern) 2024 Live Paper (महाराष्ट्र गट-डी भरती परीक्षा २०२४ - ऑनलाइन CBT संच)",
       slug: "mpsc-group-d-2024-tcs-paper",
       examType: "SARALSEVA",
       durationMinutes: 90,
@@ -211,80 +261,95 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       primaryTopic: "mpsc-group-d",
     },
     {
-      title: "MPSC Group D 2025-26 TCS Pattern CBT Mega Mock Paper (महाराष्ट्र गट-डी भरती २०२५-२६ महासराव पेपर)",
+      title:
+        "MPSC Group D 2025-26 TCS Pattern CBT Mega Mock Paper (महाराष्ट्र गट-डी भरती २०२५-२६ महासराव पेपर)",
       slug: "mpsc-group-d-2025-grand-mock",
       examType: "SARALSEVA",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
       status: "LIVE",
-      description: "महाराष्ट्र शासन वर्ग ४ / गट-डी भरती २०२५-२६ महासराव पेपर १०० गुण मोफत लाइव्ह सराव.",
+      description:
+        "महाराष्ट्र शासन वर्ग ४ / गट-डी भरती २०२५-२६ महासराव पेपर १०० गुण मोफत लाइव्ह सराव.",
       primaryTopic: "mpsc-group-d",
     },
 
     // --- OTHER LIVE EXAMS ---
     {
-      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 01 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०१)",
+      title:
+        "Maharashtra Police Bharti 2025 Grand Mega Mock 01 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०१)",
       slug: "police-bharti-mock-01",
       examType: "POLICE_BHARTI",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
       status: "LIVE",
-      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०१ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+      description:
+        "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०१ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
     },
     {
-      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 02 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०२)",
+      title:
+        "Maharashtra Police Bharti 2025 Grand Mega Mock 02 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०२)",
       slug: "police-bharti-mock-02",
       examType: "POLICE_BHARTI",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
       status: "LIVE",
-      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०२ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+      description:
+        "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०२ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
     },
     {
-      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 03 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०३)",
+      title:
+        "Maharashtra Police Bharti 2025 Grand Mega Mock 03 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०३)",
       slug: "police-bharti-mock-03",
       examType: "POLICE_BHARTI",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
       status: "LIVE",
-      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०३ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+      description:
+        "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०३ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
     },
     {
-      title: "Maharashtra Police Bharti 2025 Grand Mega Mock 04 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०४)",
+      title:
+        "Maharashtra Police Bharti 2025 Grand Mega Mock 04 (महाराष्ट्र पोलीस शिपाई सराव परीक्षा - ०४)",
       slug: "police-bharti-mock-04",
       examType: "POLICE_BHARTI",
       durationMinutes: 90,
       passingMarks: 40,
       negativeMarks: 0,
       status: "LIVE",
-      description: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०४ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
+      description:
+        "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२५ सराव संच क्रमांक ०४ - १०० गुणांची मोफत ऑनलाइन लाइव्ह टेस्ट.",
     },
     {
-      title: "MPSC Rajyaseva GS Paper 1 Prelims Grand Mock 01 (राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन - ०१)",
+      title:
+        "MPSC Rajyaseva GS Paper 1 Prelims Grand Mock 01 (राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन - ०१)",
       slug: "mpsc-rajyaseva-mock-01",
       examType: "MPSC_RAJYASEVA",
       durationMinutes: 120,
       passingMarks: 50,
       negativeMarks: 0.25,
       status: "LIVE",
-      description: "एमपीएससी राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन १०० वस्तुनिष्ठ प्रश्न - संच ०१.",
+      description:
+        "एमपीएससी राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन १०० वस्तुनिष्ठ प्रश्न - संच ०१.",
     },
     {
-      title: "MPSC Rajyaseva GS Paper 1 Prelims Grand Mock 02 (राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन - ०२)",
+      title:
+        "MPSC Rajyaseva GS Paper 1 Prelims Grand Mock 02 (राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन - ०२)",
       slug: "mpsc-rajyaseva-mock-02",
       examType: "MPSC_RAJYASEVA",
       durationMinutes: 120,
       passingMarks: 50,
       negativeMarks: 0.25,
       status: "LIVE",
-      description: "एमपीएससी राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन १०० वस्तुनिष्ठ प्रश्न - संच ०२.",
+      description:
+        "एमपीएससी राज्यसेवा पूर्व परीक्षा सामान्य अध्ययन १०० वस्तुनिष्ठ प्रश्न - संच ०२.",
     },
     {
-      title: "MPSC Group B & C (Combine) Prelims Grand Mock 01 (संयुक्त पूर्व परीक्षा गट ब व क - ०१)",
+      title:
+        "MPSC Group B & C (Combine) Prelims Grand Mock 01 (संयुक्त पूर्व परीक्षा गट ब व क - ०१)",
       slug: "mpsc-combine-mock-01",
       examType: "MPSC_COMBINE",
       durationMinutes: 60,
@@ -304,7 +369,8 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       description: "TCS पॅटर्ननुसार तलाठी भरती १०० प्रश्नांचा संपूर्ण सराव पेपर ०१.",
     },
     {
-      title: "Zilla Parishad (ZP) Arogya Sevak & Gramsevak Grand Test 01 (जिल्हा परिषद भरती विशेष - ०१)",
+      title:
+        "Zilla Parishad (ZP) Arogya Sevak & Gramsevak Grand Test 01 (जिल्हा परिषद भरती विशेष - ०१)",
       slug: "zp-gramsevak-mock-01",
       examType: "ZILLA_PARISHAD",
       durationMinutes: 90,
@@ -314,7 +380,8 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       description: "जिल्हा परिषद अंतर्गत आरोग्य सेवक व ग्रामसेवक १०० प्रश्नांचा सराव संच ०१.",
     },
     {
-      title: "Maharashtra Vanrakshak (Forest Guard) Grand CBT Mock 01 (वनरक्षक भरती सराव परीक्षा - ०१)",
+      title:
+        "Maharashtra Vanrakshak (Forest Guard) Grand CBT Mock 01 (वनरक्षक भरती सराव परीक्षा - ०१)",
       slug: "vanrakshak-mock-01",
       examType: "VANRAKSHAK",
       durationMinutes: 90,
@@ -396,7 +463,8 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       description: "सरळसेवा भरती १०० गुणांचा मास्टर सराव पेपर ०२ (Draft).",
     },
     {
-      title: "TCS / IBPS Quantitative Aptitude & Reasoning 100-Question Grand Mock 01 (अंकगणित व बुद्धिमत्ता - ०१)",
+      title:
+        "TCS / IBPS Quantitative Aptitude & Reasoning 100-Question Grand Mock 01 (अंकगणित व बुद्धिमत्ता - ०१)",
       slug: "tcs-ibps-maths-reasoning-01",
       examType: "SARALSEVA",
       durationMinutes: 90,
@@ -406,7 +474,8 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       description: "TCS/IBPS पॅटर्न अंकगणित व बुद्धिमत्ता १०० प्रश्न संच ०१ (Draft).",
     },
     {
-      title: "TCS / IBPS Quantitative Aptitude & Reasoning 100-Question Grand Mock 02 (अंकगणित व बुद्धिमत्ता - ०२)",
+      title:
+        "TCS / IBPS Quantitative Aptitude & Reasoning 100-Question Grand Mock 02 (अंकगणित व बुद्धिमत्ता - ०२)",
       slug: "tcs-ibps-maths-reasoning-02",
       examType: "SARALSEVA",
       durationMinutes: 90,
@@ -417,7 +486,9 @@ export async function runCompleteDatabaseSeed(prismaClient) {
     },
   ];
 
-  console.warn(`🚀 Assembling ${examsMeta.length} Exams with 100 Unique Questions Each (GLOBAL DEDUPLICATION across ALL exams)...`);
+  console.warn(
+    `🚀 Assembling ${examsMeta.length} Exams with 100 Unique Questions Each (GLOBAL DEDUPLICATION across ALL exams)...`,
+  );
 
   const globalUsedQuestionIds = new Set();
 
@@ -485,7 +556,9 @@ export async function runCompleteDatabaseSeed(prismaClient) {
       }
     }
 
-    console.warn(`📚 [${idx + 1}/${examsMeta.length}] Configuring ${meta.slug} (${examQuestions.length} unique questions) [Status: ${meta.status}]`);
+    console.warn(
+      `📚 [${idx + 1}/${examsMeta.length}] Configuring ${meta.slug} (${examQuestions.length} unique questions) [Status: ${meta.status}]`,
+    );
 
     const exam = await prismaClient.exam.upsert({
       where: { slug: meta.slug },
@@ -572,8 +645,10 @@ export async function runCompleteDatabaseSeed(prismaClient) {
     }
   }
 
-  console.warn("🎉 Database Seeding Finished: 2,000+ unique questions seeded, 10 LIVE and 17 Draft Exams created with 0 duplicates!");
-  
+  console.warn(
+    "🎉 Database Seeding Finished: 2,000+ unique questions seeded, 10 LIVE and 17 Draft Exams created with 0 duplicates!",
+  );
+
   // Also seed official real PYQs
   await runPYQDatabaseSeed(prismaClient);
 

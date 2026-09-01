@@ -82,9 +82,7 @@ export default function AdminUsersPage() {
         body: JSON.stringify({ id, status: nextStatus }),
       });
       if (res.ok) {
-        setUsers((prev) =>
-          prev.map((u) => (u.id === id ? { ...u, status: nextStatus } : u)),
-        );
+        setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, status: nextStatus } : u)));
       }
     } catch (err) {
       alert("Failed to update status: " + err.message);
@@ -195,7 +193,8 @@ export default function AdminUsersPage() {
             Platform Users Management
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            View, search, filter, suspend, and safely remove students, teachers, and coaching admins.
+            View, search, filter, suspend, and safely remove students, teachers, and coaching
+            admins.
           </p>
         </div>
 
@@ -356,7 +355,7 @@ export default function AdminUsersPage() {
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex justify-end gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowAddUserModal(false)}
@@ -577,10 +576,10 @@ export default function AdminUsersPage() {
                           u.role === "SUPER_ADMIN"
                             ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
                             : u.role === "COACHING_ADMIN"
-                            ? "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
-                            : u.role === "TEACHER"
-                            ? "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300"
-                            : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                              ? "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+                              : u.role === "TEACHER"
+                                ? "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300"
+                                : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                         }`}
                       >
                         {u.role}

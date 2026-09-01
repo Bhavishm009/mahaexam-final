@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import {
-  HelpCircle,
-  Search,
-  Plus,
-  X,
-  CheckCircle2,
-} from "lucide-react";
+import { HelpCircle, Search, Plus, X, CheckCircle2 } from "lucide-react";
 
 export default function CoachingQuestionBankPage() {
   const [questions, setQuestions] = useState([]);
@@ -147,8 +141,8 @@ export default function CoachingQuestionBankPage() {
                         q.difficulty === "EASY"
                           ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                           : q.difficulty === "HARD"
-                          ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
-                          : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+                            ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
+                            : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
                       }`}
                     >
                       {q.difficulty}
@@ -187,7 +181,7 @@ export default function CoachingQuestionBankPage() {
                       >
                         <span>{o.optionTextMr || o.optionText}</span>
                         {o.isCorrect && (
-                          <span className="inline-flex items-center gap-1 rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold text-white shrink-0">
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold text-white">
                             <CheckCircle2 className="h-2.5 w-2.5" />
                             <span>Correct</span>
                           </span>

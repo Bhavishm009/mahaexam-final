@@ -145,15 +145,17 @@ export default function ExamReviewPage({ params }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
               <FileCheck2 className="h-3.5 w-3.5" />
-              {userRole === "SUPER_ADMIN" ? "Super Admin Quality Review" : "Faculty / Teacher Quality Review"}
+              {userRole === "SUPER_ADMIN"
+                ? "Super Admin Quality Review"
+                : "Faculty / Teacher Quality Review"}
             </span>
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                 exam.status === "LIVE"
                   ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                   : exam.status === "SCHEDULED"
-                  ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
-                  : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                    ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
+                    : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
               }`}
             >
               Status: {exam.status}
@@ -256,8 +258,9 @@ export default function ExamReviewPage({ params }) {
               </div>
 
               <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3 text-[11px] text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/40 dark:text-blue-300">
-                🔔 <strong>Automated Alerts Lifecycle:</strong> Scheduling enqueues 4 automated alerts:
-                Immediate schedule notice, <strong>1 hour before</strong>, <strong>10 minutes before</strong>, and at <strong>Go-Live</strong>.
+                🔔 <strong>Automated Alerts Lifecycle:</strong> Scheduling enqueues 4 automated
+                alerts: Immediate schedule notice, <strong>1 hour before</strong>,{" "}
+                <strong>10 minutes before</strong>, and at <strong>Go-Live</strong>.
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
@@ -294,7 +297,7 @@ export default function ExamReviewPage({ params }) {
             <BookOpen className="h-3.5 w-3.5 text-blue-600" />
             <span>Category</span>
           </div>
-          <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">
+          <div className="mt-1 truncate text-sm font-black text-slate-900 dark:text-white">
             {exam.examType || "Mock Test"}
           </div>
         </div>
@@ -381,8 +384,8 @@ export default function ExamReviewPage({ params }) {
                       q.difficulty === "EASY"
                         ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
                         : q.difficulty === "HARD"
-                        ? "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
-                        : "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                          ? "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                          : "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
                     }`}
                   >
                     {q.difficulty}
@@ -412,7 +415,7 @@ export default function ExamReviewPage({ params }) {
                     key={opt.id || oIdx}
                     className={`flex items-start justify-between rounded-2xl border p-3 text-xs transition ${
                       opt.isCorrect
-                        ? "border-emerald-500 bg-emerald-50/80 font-bold text-emerald-900 dark:border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-200 shadow-sm"
+                        ? "border-emerald-500 bg-emerald-50/80 font-bold text-emerald-900 shadow-sm dark:border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-200"
                         : "border-slate-200 bg-slate-50/40 text-slate-700 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-300"
                     }`}
                   >
@@ -424,7 +427,7 @@ export default function ExamReviewPage({ params }) {
                     </div>
 
                     {opt.isCorrect && (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10px] font-black text-white shrink-0 ml-2">
+                      <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10px] font-black text-white">
                         <CheckCircle2 className="h-3 w-3" />
                         <span>अचूक उत्तर</span>
                       </span>
@@ -435,8 +438,10 @@ export default function ExamReviewPage({ params }) {
 
               {/* Explanation / Rationale */}
               {q.explanation && (
-                <div className="mt-4 rounded-2xl bg-blue-50/60 p-3.5 text-xs text-slate-700 dark:bg-blue-950/30 dark:text-slate-300 border border-blue-100/50 dark:border-blue-900/40">
-                  <div className="font-bold text-blue-900 dark:text-blue-300">💡 स्पष्टीकरण (Explanation):</div>
+                <div className="mt-4 rounded-2xl border border-blue-100/50 bg-blue-50/60 p-3.5 text-xs text-slate-700 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-slate-300">
+                  <div className="font-bold text-blue-900 dark:text-blue-300">
+                    💡 स्पष्टीकरण (Explanation):
+                  </div>
                   <div className="mt-1">{q.explanation}</div>
                 </div>
               )}

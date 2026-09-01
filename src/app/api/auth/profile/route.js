@@ -142,9 +142,6 @@ export async function PATCH(request) {
 
     return response;
   } catch (err) {
-    return NextResponse.json(
-      { error: err.message || "Failed to update profile" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: err.message || "Failed to update profile" }, { status: 400 });
   }
 }

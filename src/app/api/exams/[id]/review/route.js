@@ -7,7 +7,10 @@ import { scheduleExamNotifications } from "@/lib/exam-scheduler-service";
 export async function GET(request, { params }) {
   const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
   if (!s || !["SUPER_ADMIN", "COACHING_ADMIN", "TEACHER"].includes(s.role)) {
-    return NextResponse.json({ error: "Forbidden. Admin or Teacher access required." }, { status: 403 });
+    return NextResponse.json(
+      { error: "Forbidden. Admin or Teacher access required." },
+      { status: 403 },
+    );
   }
 
   const { id: examIdOrSlug } = await params;
@@ -50,7 +53,10 @@ export async function GET(request, { params }) {
     // Permission check for coaching admins and teachers
     if (s.role !== "SUPER_ADMIN") {
       if (exam.organizationId && exam.organizationId !== s.organizationId) {
-        return NextResponse.json({ error: "Unauthorized access to this organization's exam" }, { status: 403 });
+        return NextResponse.json(
+          { error: "Unauthorized access to this organization's exam" },
+          { status: 403 },
+        );
       }
     }
 

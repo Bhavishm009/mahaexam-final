@@ -65,7 +65,11 @@ export async function sendWebPushNotification({
       url,
       icon,
       badge: "/icon-192.svg",
-      tag: "mahaexam-broadcast",
+      tag: `mahaexam-alert-${Date.now()}`,
+      vibrate: [300, 100, 300, 100, 300],
+      renotify: true,
+      silent: false,
+      requireInteraction: true,
       data: {
         url,
         timestamp: Date.now(),

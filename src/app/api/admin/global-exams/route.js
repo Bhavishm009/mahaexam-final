@@ -43,7 +43,9 @@ export async function POST(request) {
       .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
-    const generatedSlug = b.slug ? cleanSlug : `${cleanSlug || "exam"}-${Math.random().toString(36).substring(2, 6)}`;
+    const generatedSlug = b.slug
+      ? cleanSlug
+      : `${cleanSlug || "exam"}-${Math.random().toString(36).substring(2, 6)}`;
 
     const exam = await prisma.exam.create({
       data: {

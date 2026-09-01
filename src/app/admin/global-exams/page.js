@@ -77,10 +77,8 @@ export default function GlobalExamsPage() {
         !searchTerm ||
         x.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         x.slug?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchCategory =
-        categoryFilter === "ALL" || x.examType === categoryFilter;
-      const matchStatus =
-        statusFilter === "ALL" || x.status === statusFilter;
+      const matchCategory = categoryFilter === "ALL" || x.examType === categoryFilter;
+      const matchStatus = statusFilter === "ALL" || x.status === statusFilter;
       return matchSearch && matchCategory && matchStatus;
     });
   }, [exams, searchTerm, categoryFilter, statusFilter]);
@@ -249,7 +247,8 @@ export default function GlobalExamsPage() {
             Global Examination Hub
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            Publish state-level examinations, schedule start/end dates, set automated reminder alerts, and manage pricing.
+            Publish state-level examinations, schedule start/end dates, set automated reminder
+            alerts, and manage pricing.
           </p>
         </div>
 
@@ -269,8 +268,8 @@ export default function GlobalExamsPage() {
             statusMessage.type === "success"
               ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
               : statusMessage.type === "error"
-              ? "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-              : "border border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                ? "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+                : "border border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
           }`}
         >
           {statusMessage.type === "success" ? (
@@ -334,8 +333,9 @@ export default function GlobalExamsPage() {
 
               <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-3 text-[11px] text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
                 🔔 <strong>Automated Notifications:</strong> Saving will dispatch an immediate
-                reschedule notice to all target students and set reminders at <strong>1 hour before</strong>,{" "}
-                <strong>10 minutes before</strong>, and <strong>Go-Live</strong>.
+                reschedule notice to all target students and set reminders at{" "}
+                <strong>1 hour before</strong>, <strong>10 minutes before</strong>, and{" "}
+                <strong>Go-Live</strong>.
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
@@ -370,7 +370,8 @@ export default function GlobalExamsPage() {
             </h2>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Publish an open paper with automatic unique slug, schedule time, and reminder notifications.
+            Publish an open paper with automatic unique slug, schedule time, and reminder
+            notifications.
           </p>
 
           <form onSubmit={create} className="mt-5 space-y-4">
@@ -405,7 +406,7 @@ export default function GlobalExamsPage() {
             </div>
 
             {/* Scheduled Start & End Time */}
-            <div className="grid gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-3 sm:grid-cols-2 dark:border-blue-950 dark:bg-blue-950/20">
+            <div className="grid gap-3 rounded-2xl border border-blue-100 bg-blue-50/40 p-3 dark:border-blue-950 dark:bg-blue-950/20 sm:grid-cols-2">
               <div>
                 <label className="flex items-center gap-1 text-[11px] font-bold text-blue-950 dark:text-blue-300">
                   <Calendar className="h-3 w-3 text-blue-600 dark:text-blue-400" />
@@ -564,7 +565,9 @@ export default function GlobalExamsPage() {
                     onChange={(e) => setForm({ ...form, negativeMarks: Number(e.target.value) })}
                     className="w-24 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   />
-                  <span className="text-xs text-slate-500 dark:text-slate-400">marks per wrong MCQ</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    marks per wrong MCQ
+                  </span>
                 </div>
               )}
             </div>
@@ -654,7 +657,10 @@ export default function GlobalExamsPage() {
           {loading ? (
             <div className="space-y-3 py-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+                <div
+                  key={i}
+                  className="h-28 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800"
+                />
               ))}
             </div>
           ) : paginatedExams.length === 0 ? (
@@ -747,14 +753,14 @@ export default function GlobalExamsPage() {
                         disabled={updatingId === x.id}
                         value={x.status}
                         onChange={(e) => updateStatus(x.id, e.target.value)}
-                        className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition outline-none ${
+                        className={`rounded-xl border px-3 py-1.5 text-xs font-bold outline-none transition ${
                           x.status === "LIVE"
                             ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
                             : x.status === "SCHEDULED"
-                            ? "border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
-                            : x.status === "DRAFT"
-                            ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                            : "border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                              ? "border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                              : x.status === "DRAFT"
+                                ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                                : "border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                         }`}
                       >
                         {EXAM_STATUSES.map((s) => (

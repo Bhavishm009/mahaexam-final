@@ -202,7 +202,11 @@ export default function AdminDashboard() {
         loadPushStats();
 
         // Also display notification locally on this browser if supported
-        if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        if (
+          typeof window !== "undefined" &&
+          "Notification" in window &&
+          Notification.permission === "granted"
+        ) {
           try {
             new Notification(pushForm.title, {
               body: pushForm.body,
@@ -256,7 +260,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 font-sans">
       {/* Top Header Banner */}
-      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-8 sm:flex-row sm:items-center">
+      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center md:p-8">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
@@ -272,7 +276,8 @@ export default function AdminDashboard() {
             Platform Administration
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            Central dashboard for managing partner academies, global mock tests, push broadcasts, and system operations.
+            Central dashboard for managing partner academies, global mock tests, push broadcasts,
+            and system operations.
           </p>
         </div>
 
@@ -324,7 +329,7 @@ export default function AdminDashboard() {
                   <div className="animate-shimmer h-4 w-28 rounded-lg" />
                   <div className="animate-shimmer h-9 w-9 rounded-2xl" />
                 </div>
-                <div className="mt-4 animate-shimmer h-9 w-24 rounded-xl" />
+                <div className="animate-shimmer mt-4 h-9 w-24 rounded-xl" />
               </div>
               <div className="mt-5 border-t border-slate-100 pt-3 dark:border-slate-800">
                 <div className="animate-shimmer h-3 w-40 rounded-md" />
@@ -417,7 +422,9 @@ export default function AdminDashboard() {
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {item.label}
                     </span>
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-2xl ${item.bg} ${item.color}`}>
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-2xl ${item.bg} ${item.color}`}
+                    >
                       <Icon className="h-4 w-4" />
                     </div>
                   </div>
@@ -437,7 +444,7 @@ export default function AdminDashboard() {
                   key={item.label}
                   type="button"
                   onClick={item.onClick}
-                  className="group flex flex-col justify-between text-left rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-purple-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+                  className="group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:border-purple-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
                 >
                   {content}
                 </button>
@@ -458,7 +465,10 @@ export default function AdminDashboard() {
       )}
 
       {/* Super Admin Operations Hub with Two Tabs */}
-      <div id="super-admin-tools" className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div
+        id="super-admin-tools"
+        className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      >
         {/* Navigation Tabs Header */}
         <div className="border-b border-slate-200 bg-slate-50/70 px-6 pt-4 dark:border-slate-800 dark:bg-slate-950/40">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -478,7 +488,7 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab("seeding")}
                 className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
                   activeTab === "seeding"
-                    ? "bg-white text-blue-600 shadow-sm border border-slate-200 dark:bg-slate-800 dark:text-blue-400 dark:border-slate-700"
+                    ? "border border-slate-200 bg-white text-blue-600 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-blue-400"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
@@ -491,11 +501,11 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab("push")}
                 className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
                   activeTab === "push"
-                    ? "bg-white text-purple-600 shadow-sm border border-slate-200 dark:bg-slate-800 dark:text-purple-400 dark:border-slate-700"
+                    ? "border border-slate-200 bg-white text-purple-600 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-purple-400"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
-                <Radio className="h-4 w-4 text-purple-500 animate-pulse" />
+                <Radio className="h-4 w-4 animate-pulse text-purple-500" />
                 <span>२. Push Notification &amp; Test Broadcast</span>
                 {pushStats?.activeSubscriptions > 0 && (
                   <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-black text-purple-700 dark:bg-purple-900/60 dark:text-purple-300">
@@ -523,7 +533,8 @@ export default function AdminDashboard() {
                     Database Seeding &amp; Schema Migration Center
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Safely seed 2,700+ verified questions across 10 topics, publish 10 live mock exams, and manage Prisma database schema migrations without data loss.
+                    Safely seed 2,700+ verified questions across 10 topics, publish 10 live mock
+                    exams, and manage Prisma database schema migrations without data loss.
                   </p>
                 </div>
 
@@ -535,7 +546,11 @@ export default function AdminDashboard() {
                     className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-emerald-500/25 transition hover:from-emerald-500 hover:to-teal-500 active:scale-95 disabled:opacity-50"
                   >
                     <Sparkles className="h-4 w-4" />
-                    <span>{seeding ? "Seeding 2,700+ Qs & 10 Live Exams..." : "Run Safe Database Seed (Super Admin)"}</span>
+                    <span>
+                      {seeding
+                        ? "Seeding 2,700+ Qs & 10 Live Exams..."
+                        : "Run Safe Database Seed (Super Admin)"}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -550,23 +565,38 @@ export default function AdminDashboard() {
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                    <span><strong>10 Syllabus Topics:</strong> History, Geography, Constitution, Marathi Grammar, English, Maths, Reasoning, Science, Economics, GK.</span>
+                    <span>
+                      <strong>10 Syllabus Topics:</strong> History, Geography, Constitution, Marathi
+                      Grammar, English, Maths, Reasoning, Science, Economics, GK.
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                    <span><strong>200+ Verified Questions Per Topic:</strong> Total 2,700+ distinct questions with full Marathi &amp; English explanations.</span>
+                    <span>
+                      <strong>200+ Verified Questions Per Topic:</strong> Total 2,700+ distinct
+                      questions with full Marathi &amp; English explanations.
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                    <span><strong>Randomized Answer Keys:</strong> Correct answers randomized evenly across Options 1, 2, 3, and 4.</span>
+                    <span>
+                      <strong>Randomized Answer Keys:</strong> Correct answers randomized evenly
+                      across Options 1, 2, 3, and 4.
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                    <span><strong>10 LIVE + 17 DRAFT Exams:</strong> 100 unique questions each with 0 duplicates within any exam.</span>
+                    <span>
+                      <strong>10 LIVE + 17 DRAFT Exams:</strong> 100 unique questions each with 0
+                      duplicates within any exam.
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                    <span><strong>Zero Data Loss:</strong> Preserves existing student accounts, test attempts, results, and academy subscriptions.</span>
+                    <span>
+                      <strong>Zero Data Loss:</strong> Preserves existing student accounts, test
+                      attempts, results, and academy subscriptions.
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -577,18 +607,22 @@ export default function AdminDashboard() {
                   ⚡ How to Migrate Prisma Schema Changes (Safe Production Workflow)
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  Whenever you update <code>prisma/schema.prisma</code>, run these safe commands in your terminal:
+                  Whenever you update <code>prisma/schema.prisma</code>, run these safe commands in
+                  your terminal:
                 </p>
-                <div className="space-y-2 rounded-xl bg-slate-900 p-3 text-[11px] font-mono text-emerald-400 dark:bg-slate-950">
+                <div className="space-y-2 rounded-xl bg-slate-900 p-3 font-mono text-[11px] text-emerald-400 dark:bg-slate-950">
                   <p className="text-slate-400"># 1. Update Prisma Client types</p>
                   <p className="text-white">npx prisma generate</p>
-                  <p className="mt-1 text-slate-400"># 2. Push schema changes without dropping data</p>
+                  <p className="mt-1 text-slate-400">
+                    # 2. Push schema changes without dropping data
+                  </p>
                   <p className="text-white">npx prisma db push</p>
                   <p className="mt-1 text-slate-400"># 3. Seed / sync question bank &amp; exams</p>
                   <p className="text-white">node prisma/seed.js</p>
                 </div>
-                <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
-                  ⚠️ Never run <code>prisma migrate reset</code> on production, as it drops all tables!
+                <p className="text-[11px] font-medium text-amber-700 dark:text-amber-400">
+                  ⚠️ Never run <code>prisma migrate reset</code> on production, as it drops all
+                  tables!
                 </p>
               </div>
             </div>
@@ -616,7 +650,8 @@ export default function AdminDashboard() {
                     Web Push Notification &amp; Test Broadcast Studio
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Send real-time push alerts to candidate browsers, test alerts on your device, and broadcast exam announcements instantly.
+                    Send real-time push alerts to candidate browsers, test alerts on your device,
+                    and broadcast exam announcements instantly.
                   </p>
                 </div>
 
@@ -704,7 +739,9 @@ export default function AdminDashboard() {
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-xs font-bold">
                     {deviceSubscribed ? (
-                      <span className="text-emerald-600 dark:text-emerald-400">● Subscribed &amp; Ready</span>
+                      <span className="text-emerald-600 dark:text-emerald-400">
+                        ● Subscribed &amp; Ready
+                      </span>
                     ) : (
                       <span className="text-amber-600 dark:text-amber-400">○ Not Subscribed</span>
                     )}
@@ -716,14 +753,18 @@ export default function AdminDashboard() {
                   disabled={pushSubscribing}
                   className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                 >
-                  {pushSubscribing ? "Subscribing..." : deviceSubscribed ? "Re-Subscribe" : "Enable Push"}
+                  {pushSubscribing
+                    ? "Subscribing..."
+                    : deviceSubscribed
+                      ? "Re-Subscribe"
+                      : "Enable Push"}
                 </button>
               </div>
             </div>
 
             {/* Broadcast Composer Form */}
             <div className="mx-6 mb-6 grid gap-6 md:grid-cols-5">
-              <div className="md:col-span-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:col-span-3">
                 <div className="flex items-center gap-2">
                   <Flame className="h-4 w-4 text-orange-500" />
                   <h4 className="text-sm font-black text-slate-900 dark:text-white">
@@ -786,7 +827,9 @@ export default function AdminDashboard() {
                         onChange={(e) => setPushForm({ ...pushForm, target: e.target.value })}
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-purple-600 focus:ring-2 focus:ring-purple-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-purple-500"
                       >
-                        <option value="all">🌐 सर्व नोंदणीकृत साधने (All Subscribed Devices)</option>
+                        <option value="all">
+                          🌐 सर्व नोंदणीकृत साधने (All Subscribed Devices)
+                        </option>
                         <option value="students">🎓 फक्त विद्यार्थी (Students Only)</option>
                         <option value="me">👤 फक्त माझे डिव्हाइस (Test on My Device Only)</option>
                       </select>
@@ -798,11 +841,17 @@ export default function AdminDashboard() {
                       type="checkbox"
                       id="broadcastInApp"
                       checked={pushForm.broadcastInApp}
-                      onChange={(e) => setPushForm({ ...pushForm, broadcastInApp: e.target.checked })}
+                      onChange={(e) =>
+                        setPushForm({ ...pushForm, broadcastInApp: e.target.checked })
+                      }
                       className="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
                     />
-                    <label htmlFor="broadcastInApp" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                      तसेच इन-अॅप बेल नोटिफिकेशन तयार करा (Also create in-app notification bell entry)
+                    <label
+                      htmlFor="broadcastInApp"
+                      className="cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300"
+                    >
+                      तसेच इन-अॅप बेल नोटिफिकेशन तयार करा (Also create in-app notification bell
+                      entry)
                     </label>
                   </div>
 
@@ -840,14 +889,14 @@ export default function AdminDashboard() {
               </div>
 
               {/* Preview Card */}
-              <div className="md:col-span-2 space-y-4">
+              <div className="space-y-4 md:col-span-2">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-800/40">
                   <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">
                     📱 Live Notification Preview (मोबाइल / डेस्कटॉप प्रीव्ह्यू)
                   </h4>
                   <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-md dark:border-slate-700 dark:bg-slate-900">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-bold text-sm shadow-sm">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
                         ME
                       </div>
                       <div className="space-y-1">
@@ -860,7 +909,7 @@ export default function AdminDashboard() {
                         <p className="text-[11px] text-slate-600 dark:text-slate-300">
                           {pushForm.body || "Notification message content..."}
                         </p>
-                        <div className="pt-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                        <div className="flex items-center gap-1 pt-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400">
                           <span>{pushForm.url || "/student/exams"}</span>
                           <ExternalLink className="h-2.5 w-2.5" />
                         </div>
@@ -948,9 +997,7 @@ export default function AdminDashboard() {
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
                     {item.title}
                   </h4>
-                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                    {item.desc}
-                  </p>
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{item.desc}</p>
                 </div>
               </Link>
             );

@@ -2,14 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import {
-  HelpCircle,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  Upload,
-} from "lucide-react";
+import { HelpCircle, Search, ChevronLeft, ChevronRight, CheckCircle2, Upload } from "lucide-react";
 
 export default function QuestionBankPage() {
   const [questions, setQuestions] = useState([]);
@@ -67,7 +60,8 @@ export default function QuestionBankPage() {
             Question Bank (प्रश्न संच)
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            Super Admin and verified faculty repository for all competitive Maharashtra examinations.
+            Super Admin and verified faculty repository for all competitive Maharashtra
+            examinations.
           </p>
         </div>
 
@@ -159,8 +153,8 @@ export default function QuestionBankPage() {
                         q.difficulty === "EASY"
                           ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                           : q.difficulty === "HARD"
-                          ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
-                          : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+                            ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
+                            : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
                       }`}
                     >
                       {q.difficulty}
@@ -206,7 +200,7 @@ export default function QuestionBankPage() {
                           <span>{opt.optionTextMr || opt.optionText || opt.text}</span>
                         </div>
                         {opt.isCorrect && (
-                          <span className="inline-flex items-center gap-1 rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold text-white shrink-0">
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold text-white">
                             <CheckCircle2 className="h-2.5 w-2.5" />
                             <span>अचूक उत्तर</span>
                           </span>

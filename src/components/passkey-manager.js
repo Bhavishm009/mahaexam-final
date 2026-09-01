@@ -11,6 +11,8 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { fetchJson } from "@/lib/api-client";
+
 export function PasskeyManager() {
   const [credentials, setCredentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +22,8 @@ export function PasskeyManager() {
 
   async function loadCredentials() {
     try {
-      const res = await fetch("/api/auth/webauthn/credentials");
-      const data = await res.json();
-      if (res.ok && data.credentials) {
+      const { ok, data } = await fetchJson("/api/auth/webauthn/credentials");
+      if (ok && data.credentials) {
         setCredentials(data.credentials);
       }
     } catch {
@@ -49,21 +50,20 @@ export function PasskeyManager() {
 
     setRegistering(true);
     try {
-      const optRes = await fetch("/api/auth/webauthn/register/options", {
+      const { ok: optOk, data: options } = await fetchJson("/api/auth/webauthn/register/options", {
         method: "POST",
       });
-      const options = await optRes.json();
-      if (!optRes.ok) {
-        throw new Error(options.error || "Failed to start biometric registration");
+      if (!optOk || !options?.challenge) {
+        throw new Error(options?.error || "Failed to start biometric registration");
       }
 
       options.challenge = Uint8Array.from(
         atob(options.challenge.replace(/-/g, "+").replace(/_/g, "/")),
-        (c) => c.charCodeAt(0)
+        (c) => c.charCodeAt(0),
       );
       options.user.id = Uint8Array.from(
         atob(options.user.id.replace(/-/g, "+").replace(/_/g, "/")),
-        (c) => c.charCodeAt(0)
+        (c) => c.charCodeAt(0),
       );
 
       const credential = await navigator.credentials.create({
@@ -76,13 +76,13 @@ export function PasskeyManager() {
 
       const rawId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
       const clientDataJSON = btoa(
-        String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON))
+        String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)),
       );
       const attestationObject = btoa(
-        String.fromCharCode(...new Uint8Array(credential.response.attestationObject))
+        String.fromCharCode(...new Uint8Array(credential.response.attestationObject)),
       );
 
-      const verifyRes = await fetch("/api/auth/webauthn/register/verify", {
+      const { ok: verifyOk, data: d } = await fetchJson("/api/auth/webauthn/register/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -93,8 +93,7 @@ export function PasskeyManager() {
         }),
       });
 
-      const d = await verifyRes.json();
-      if (verifyRes.ok && d.success) {
+      if (verifyOk && d.success) {
         setMessage({
           type: "success",
           text: "✅ Biometric / Passkey added successfully! You can now log in using fingerprint or Face ID.",
@@ -116,7 +115,11 @@ export function PasskeyManager() {
   }
 
   async function handleDeletePasskey(id) {
-    if (!confirm("Are you sure you want to remove this passkey / biometric credential? You will no longer be able to log in with this device.")) {
+    if (
+      !confirm(
+        "Are you sure you want to remove this passkey / biometric credential? You will no longer be able to log in with this device.",
+      )
+    ) {
       return;
     }
 
@@ -124,12 +127,11 @@ export function PasskeyManager() {
     setMessage({ type: "", text: "" });
 
     try {
-      const res = await fetch(`/api/auth/webauthn/credentials?id=${id}`, {
+      const { ok, data } = await fetchJson(`/api/auth/webauthn/credentials?id=${id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (ok && data.success) {
         setMessage({
           type: "success",
           text: "Passkey removed successfully.",
@@ -161,7 +163,8 @@ export function PasskeyManager() {
             <span>Passkeys & Biometrics (फिंगरप्रिंट व फेस आयडी)</span>
           </h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            लॉगिनसाठी सुरक्षित फिंगरप्रिंट, Touch ID, Face ID किंवा Windows Hello जोडा किंवा व्यवस्थापित करा.
+            लॉगिनसाठी सुरक्षित फिंगरप्रिंट, Touch ID, Face ID किंवा Windows Hello जोडा किंवा
+            व्यवस्थापित करा.
           </p>
         </div>
 
@@ -241,7 +244,14 @@ export function PasskeyManager() {
                       </span>
                     </div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
-                      <span>Registered on {new Date(cred.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</span>
+                      <span>
+                        Registered on{" "}
+                        {new Date(cred.createdAt).toLocaleDateString("en-IN", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
                       <span>·</span>
                       <span className="font-mono text-[10px] text-slate-400">
                         {cred.credentialId.slice(0, 16)}...

@@ -3,8 +3,9 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { withApiLogger } from "@/lib/logger";
 
-export async function GET() {
+export const GET = withApiLogger(async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE)?.value;
   const session = await verifySessionToken(token);
@@ -38,13 +39,32 @@ export async function GET() {
   });
 
   if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ error: "User profile not found" }, { status: 404 });
+  }
+
+  // Auto-upsert student profile record if missing
+  if (!user.studentProfile) {
+    const newProfile = await prisma.studentProfile.create({
+      data: {
+        userId: user.id,
+        coachingStatus: "INDIVIDUAL",
+      },
+      select: {
+        id: true,
+        targetExam: true,
+        education: true,
+        district: true,
+        taluka: true,
+        coachingStatus: true,
+      },
+    });
+    user.studentProfile = newProfile;
   }
 
   return NextResponse.json({ success: true, profile: user });
-}
+}, "/api/student/profile");
 
-export async function PATCH(request) {
+export const PATCH = withApiLogger(async function PATCH(request) {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE)?.value;
   const session = await verifySessionToken(token);
@@ -54,7 +74,7 @@ export async function PATCH(request) {
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { name, phone, targetExam, education, district, taluka, preferredLanguage, newPassword } =
       body;
 
@@ -69,7 +89,10 @@ export async function PATCH(request) {
           where: { phone: cleanPhone, id: { not: session.sub } },
         });
         if (existingPhone) {
-          return NextResponse.json({ error: "Phone number already registered with another account." }, { status: 400 });
+          return NextResponse.json(
+            { error: "Phone number already registered with another account." },
+            { status: 400 },
+          );
         }
         updateUserData.phone = cleanPhone;
       } else {
@@ -104,7 +127,7 @@ export async function PATCH(request) {
       updateProfileData.taluka = taluka.trim();
     }
 
-    const studentProfile = await prisma.studentProfile.upsert({
+    await prisma.studentProfile.upsert({
       where: { userId: session.sub },
       create: {
         userId: session.sub,
@@ -138,4 +161,4 @@ export async function PATCH(request) {
       { status: 400 },
     );
   }
-}
+}, "/api/student/profile");

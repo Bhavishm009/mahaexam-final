@@ -17,6 +17,7 @@ import {
 import { getInitials } from "@/lib/avatar";
 import { PasskeyManager } from "@/components/passkey-manager";
 import { ChangePasswordCard } from "@/components/change-password-card";
+import { fetchJson } from "@/lib/api-client";
 
 const maharashtraDistricts = [
   "Pune",
@@ -100,9 +101,8 @@ export default function StudentProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const res = await fetch("/api/student/profile");
-        const data = await res.json();
-        if (res.ok && data.profile) {
+        const { ok, data } = await fetchJson("/api/student/profile");
+        if (ok && data.profile) {
           const u = data.profile;
           const sp = u.studentProfile || {};
           setForm({
@@ -124,11 +124,11 @@ export default function StudentProfilePage() {
         } else {
           setMessage({
             type: "error",
-            text: data.error || "Failed to load profile.",
+            text: data.error || "Failed to load profile details.",
           });
         }
       } catch (err) {
-        setMessage({ type: "error", text: err.message || "Failed to connect." });
+        setMessage({ type: "error", text: err.message || "Failed to connect to server." });
       } finally {
         setLoading(false);
       }
@@ -142,7 +142,7 @@ export default function StudentProfilePage() {
 
     setSaving(true);
     try {
-      const res = await fetch("/api/student/profile", {
+      const { ok, data } = await fetchJson("/api/student/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -155,9 +155,8 @@ export default function StudentProfilePage() {
           taluka: form.taluka,
         }),
       });
-      const data = await res.json();
 
-      if (res.ok) {
+      if (ok && data.success) {
         setMessage({
           type: "success",
           text: "✅ Profile updated successfully! All changes have been saved.",

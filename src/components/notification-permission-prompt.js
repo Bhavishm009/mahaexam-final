@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Bell, X, CheckCircle, Sparkles } from "lucide-react";
+import { triggerSoundAndVibration } from "@/lib/notification-audio";
 
 export function NotificationPermissionPrompt() {
   const [show, setShow] = useState(false);
@@ -27,6 +28,9 @@ export function NotificationPermissionPrompt() {
   async function handleEnable() {
     try {
       setLoading(true);
+
+      // Trigger sound and vibration test
+      triggerSoundAndVibration([300, 100, 300, 100, 300]);
 
       // Register service worker explicitly first
       let reg = null;
@@ -83,10 +87,17 @@ export function NotificationPermissionPrompt() {
 
         // Show test welcome notification
         if (reg && reg.showNotification) {
-          reg.showNotification("MahaExam Alerts Active 🎯", {
-            body: "महाराष्ट्र पोलीस भरती, तलाठी व MPSC परीक्षेच्या सूचना सुरू झाल्या आहेत!",
-            icon: "/icons/icon-192.png",
-          }).catch(() => {});
+          reg
+            .showNotification("MahaExam Alerts Active 🎯", {
+              body: "महाराष्ट्र पोलीस भरती, तलाठी व MPSC परीक्षेच्या सूचना सुरू झाल्या आहेत!",
+              icon: "/icon-192.svg",
+              badge: "/icon-192.svg",
+              vibrate: [300, 100, 300, 100, 300],
+              renotify: true,
+              silent: false,
+              requireInteraction: true,
+            })
+            .catch(() => {});
         }
 
         setSuccess(true);

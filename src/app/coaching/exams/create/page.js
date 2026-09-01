@@ -262,8 +262,9 @@ export default function CreateExam() {
             </div>
 
             <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-2.5 text-[11px] text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300">
-              🔔 <strong>Automatic Alerts:</strong> Target students receive 4 automated notifications:
-              Upon scheduling, <strong>1 hour before</strong>, <strong>10 minutes before</strong>, and at <strong>Go-Live</strong>.
+              🔔 <strong>Automatic Alerts:</strong> Target students receive 4 automated
+              notifications: Upon scheduling, <strong>1 hour before</strong>,{" "}
+              <strong>10 minutes before</strong>, and at <strong>Go-Live</strong>.
             </div>
 
             {/* Explicit Negative Marking Toggle */}

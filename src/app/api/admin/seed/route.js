@@ -39,7 +39,9 @@ export async function POST(request) {
 
     if (!authorized) {
       return NextResponse.json(
-        { error: "Access Denied: Only Super Admin can perform database seeding and configuration." },
+        {
+          error: "Access Denied: Only Super Admin can perform database seeding and configuration.",
+        },
         { status: 403 },
       );
     }

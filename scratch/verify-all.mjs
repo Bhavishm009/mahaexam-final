@@ -9,9 +9,9 @@ async function verifyDetailed() {
   const subjects = await prisma.subject.findMany({
     include: {
       _count: {
-        select: { questions: true }
-      }
-    }
+        select: { questions: true },
+      },
+    },
   });
 
   console.log("\n📚 1. TOPIC QUESTION BANK COUNTS (>= 200 required per topic):");
@@ -20,13 +20,17 @@ async function verifyDetailed() {
     const count = s._count.questions;
     const passed = count >= 200;
     if (!passed) allTopicsPassed = false;
-    console.log(`  ${passed ? "✅" : "❌"} [${s.slug}] ${s.nameMr} (${s.name}): ${count} Questions`);
+    console.log(
+      `  ${passed ? "✅" : "❌"} [${s.slug}] ${s.nameMr} (${s.name}): ${count} Questions`,
+    );
   }
-  console.log(`\nTopic Count Threshold Check: ${allTopicsPassed ? "PASSED (All topics >= 200)" : "FAILED"}`);
+  console.log(
+    `\nTopic Count Threshold Check: ${allTopicsPassed ? "PASSED (All topics >= 200)" : "FAILED"}`,
+  );
 
   // 2. Question Quality & Correctness
   const allQuestions = await prisma.question.findMany({
-    include: { options: true }
+    include: { options: true },
   });
   console.log(`\n📝 2. TOTAL QUESTIONS IN DATABASE: ${allQuestions.length}`);
 
@@ -38,13 +42,13 @@ async function verifyDetailed() {
 
   for (const q of allQuestions) {
     if (q.options.length !== 4) invalidOptionsCount++;
-    const correctOptions = q.options.filter(o => o.isCorrect);
+    const correctOptions = q.options.filter((o) => o.isCorrect);
     if (correctOptions.length !== 1) missingCorrectCount++;
     if (!q.questionText || !q.questionTextMr) missingTextCount++;
     if (!q.explanation || !q.explanationMr) missingExpCount++;
 
     const sortedOptions = [...q.options].sort((a, b) => a.optionOrder - b.optionOrder);
-    const correctIdx = sortedOptions.findIndex(o => o.isCorrect);
+    const correctIdx = sortedOptions.findIndex((o) => o.isCorrect);
     if (correctIdx !== -1) {
       positionDistribution[correctIdx + 1] = (positionDistribution[correctIdx + 1] || 0) + 1;
     }
@@ -68,25 +72,27 @@ async function verifyDetailed() {
     include: {
       questions: true,
       questionSnapshots: true,
-    }
+    },
   });
 
   console.log(`\n📋 4. EXAM DUPLICATION & LIVE STATUS CHECK (${exams.length} Exams Total):`);
   let anyDuplicateFound = false;
 
   for (const exam of exams) {
-    const qIds = exam.questions.map(eq => eq.questionId);
+    const qIds = exam.questions.map((eq) => eq.questionId);
     const uniqueQIds = new Set(qIds);
     const hasDuplicates = qIds.length !== uniqueQIds.size;
     if (hasDuplicates) anyDuplicateFound = true;
 
     const snapCount = exam.questionSnapshots.length;
     console.log(
-      `  ${hasDuplicates ? "❌ DUPLICATE DETECTED!" : "✅"} [${exam.status}] ${exam.slug}: ${qIds.length} Qs, ${uniqueQIds.size} Unique, ${snapCount} Snapshots`
+      `  ${hasDuplicates ? "❌ DUPLICATE DETECTED!" : "✅"} [${exam.status}] ${exam.slug}: ${qIds.length} Qs, ${uniqueQIds.size} Unique, ${snapCount} Snapshots`,
     );
   }
 
-  console.log(`\nExam Duplicate Check: ${!anyDuplicateFound ? "PASSED (0 duplicates across all exams!)" : "FAILED"}`);
+  console.log(
+    `\nExam Duplicate Check: ${!anyDuplicateFound ? "PASSED (0 duplicates across all exams!)" : "FAILED"}`,
+  );
 
   console.log("\n==================================================");
   console.log("🎉 VERIFICATION COMPLETE");

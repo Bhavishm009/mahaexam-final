@@ -32,7 +32,10 @@ function formatExamDateTime(date) {
  * @param {boolean} [options.isReschedule=false] - True if changing start date/time
  * @param {string[]} [options.batchIds] - Specific batch IDs if private coaching exam
  */
-export async function scheduleExamNotifications(exam, { isReschedule = false, batchIds = [] } = {}) {
+export async function scheduleExamNotifications(
+  exam,
+  { isReschedule = false, batchIds = [] } = {},
+) {
   try {
     const isGlobal =
       exam.visibilityMode === "FREE_GLOBAL" ||
@@ -83,25 +86,29 @@ export async function scheduleExamNotifications(exam, { isReschedule = false, ba
 
     // In-app notifications
     if (targetUserIds.length > 0) {
-      await prisma.studentNotification.createMany({
-        data: targetUserIds.map((uid) => ({
-          userId: uid,
-          type: isReschedule ? "EXAM_RESCHEDULED" : "EXAM_SCHEDULED",
-          title: immediateTitle,
-          message: immediateMessage,
-        })),
-      }).catch((e) => console.warn("In-app notification error:", e.message));
+      await prisma.studentNotification
+        .createMany({
+          data: targetUserIds.map((uid) => ({
+            userId: uid,
+            type: isReschedule ? "EXAM_RESCHEDULED" : "EXAM_SCHEDULED",
+            title: immediateTitle,
+            message: immediateMessage,
+          })),
+        })
+        .catch((e) => console.warn("In-app notification error:", e.message));
     }
 
     // Global Exam notification record
     if (isGlobal) {
-      await prisma.globalExamNotification.create({
-        data: {
-          examId: exam.id,
-          title: immediateTitle,
-          message: immediateMessage,
-        },
-      }).catch(() => {});
+      await prisma.globalExamNotification
+        .create({
+          data: {
+            examId: exam.id,
+            title: immediateTitle,
+            message: immediateMessage,
+          },
+        })
+        .catch(() => {});
     }
 
     // Web Push Notification to active browsers
@@ -121,12 +128,14 @@ export async function scheduleExamNotifications(exam, { isReschedule = false, ba
 
     // If rescheduling, cancel previous pending jobs for this exam
     if (isReschedule) {
-      await prisma.job.deleteMany({
-        where: {
-          status: "PENDING",
-          type: { in: ["EXAM_REMINDER_1HR", "EXAM_REMINDER_10MIN", "EXAM_GO_LIVE"] },
-        },
-      }).catch(() => {});
+      await prisma.job
+        .deleteMany({
+          where: {
+            status: "PENDING",
+            type: { in: ["EXAM_REMINDER_1HR", "EXAM_REMINDER_10MIN", "EXAM_GO_LIVE"] },
+          },
+        })
+        .catch(() => {});
     }
 
     let jobsCount = 0;
@@ -193,7 +202,8 @@ export async function scheduleExamNotifications(exam, { isReschedule = false, ba
  * Execute a specific scheduled exam job (called by the worker / cron processor)
  */
 export async function executeExamJob(job) {
-  const { examId, title, slug, visibilityMode, organizationId, reminderType, batchIds } = job.payload;
+  const { examId, title, slug, visibilityMode, organizationId, reminderType, batchIds } =
+    job.payload;
   const examUrl = `/exam/${slug || examId}`;
 
   // Find target users
@@ -226,14 +236,16 @@ export async function executeExamJob(job) {
     const notifBody = `${title} ची परीक्षा बरोबर १ तासात सुरू होईल. आताच लॉगिन करून तयारी ठेवा!`;
 
     if (targetUserIds.length > 0) {
-      await prisma.studentNotification.createMany({
-        data: targetUserIds.map((uid) => ({
-          userId: uid,
-          type: "EXAM_REMINDER",
-          title: notifTitle,
-          message: notifBody,
-        })),
-      }).catch(() => {});
+      await prisma.studentNotification
+        .createMany({
+          data: targetUserIds.map((uid) => ({
+            userId: uid,
+            type: "EXAM_REMINDER",
+            title: notifTitle,
+            message: notifBody,
+          })),
+        })
+        .catch(() => {});
     }
 
     await sendWebPushNotification({
@@ -246,14 +258,16 @@ export async function executeExamJob(job) {
     const notifBody = `${title} सुरू होण्यास अवघे १० मिनिटे बाकी आहेत. त्वरित परीक्षा हॉलमध्ये प्रवेश करा!`;
 
     if (targetUserIds.length > 0) {
-      await prisma.studentNotification.createMany({
-        data: targetUserIds.map((uid) => ({
-          userId: uid,
-          type: "EXAM_REMINDER",
-          title: notifTitle,
-          message: notifBody,
-        })),
-      }).catch(() => {});
+      await prisma.studentNotification
+        .createMany({
+          data: targetUserIds.map((uid) => ({
+            userId: uid,
+            type: "EXAM_REMINDER",
+            title: notifTitle,
+            message: notifBody,
+          })),
+        })
+        .catch(() => {});
     }
 
     await sendWebPushNotification({
@@ -263,24 +277,28 @@ export async function executeExamJob(job) {
     });
   } else if (reminderType === "GO_LIVE") {
     // 1. Promote exam status to LIVE
-    await prisma.exam.update({
-      where: { id: examId },
-      data: { status: "LIVE" },
-    }).catch(() => {});
+    await prisma.exam
+      .update({
+        where: { id: examId },
+        data: { status: "LIVE" },
+      })
+      .catch(() => {});
 
     // 2. Broadcast Go Live notification
     const notifTitle = `🚀 परीक्षा आता लाइव्ह झाली आहे: ${title}`;
     const notifBody = `${title} आता सुरू झाली आहे. आताच परीक्षा द्या आणि तुमचा महाराष्ट्र रँक पहा!`;
 
     if (targetUserIds.length > 0) {
-      await prisma.studentNotification.createMany({
-        data: targetUserIds.map((uid) => ({
-          userId: uid,
-          type: "EXAM_LIVE",
-          title: notifTitle,
-          message: notifBody,
-        })),
-      }).catch(() => {});
+      await prisma.studentNotification
+        .createMany({
+          data: targetUserIds.map((uid) => ({
+            userId: uid,
+            type: "EXAM_LIVE",
+            title: notifTitle,
+            message: notifBody,
+          })),
+        })
+        .catch(() => {});
     }
 
     await sendWebPushNotification({

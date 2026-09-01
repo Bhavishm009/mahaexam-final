@@ -17,14 +17,20 @@ export async function POST(request) {
   try {
     const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
     if (!s || s.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Forbidden: Super Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden: Super Admin access required" },
+        { status: 403 },
+      );
     }
 
     const body = await request.json();
     const { name, email, password, phone, role, organizationId, academyName } = body;
 
     if (!name || !email || !password) {
-      return NextResponse.json({ error: "Name, email, and password are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name, email, and password are required" },
+        { status: 400 },
+      );
     }
 
     const existing = await prisma.user.findUnique({
@@ -94,7 +100,10 @@ export async function DELETE(request) {
   try {
     const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
     if (!s || s.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Forbidden: Super Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden: Super Admin access required" },
+        { status: 403 },
+      );
     }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

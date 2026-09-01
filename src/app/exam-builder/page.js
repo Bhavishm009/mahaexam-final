@@ -68,9 +68,7 @@ export default function ExamBuilder() {
   }, [loadQuestions]);
 
   function toggleQuestion(id) {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((y) => y !== id) : [...prev, id],
-    );
+    setSelected((prev) => (prev.includes(id) ? prev.filter((y) => y !== id) : [...prev, id]));
   }
 
   function selectAll() {
@@ -135,7 +133,8 @@ export default function ExamBuilder() {
             Exam Builder 2.0
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            Assemble exams, set dates/schedules, configure negative marking, and review before student launch.
+            Assemble exams, set dates/schedules, configure negative marking, and review before
+            student launch.
           </p>
         </div>
 
@@ -383,7 +382,8 @@ export default function ExamBuilder() {
                 Question Bank Selector
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                <strong>{selected.length}</strong> of <strong>{questions.length}</strong> questions selected
+                <strong>{selected.length}</strong> of <strong>{questions.length}</strong> questions
+                selected
               </p>
             </div>
 

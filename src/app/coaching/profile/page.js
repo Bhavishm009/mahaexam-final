@@ -121,12 +121,14 @@ export default function CoachingProfilePage() {
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-600 via-orange-600 to-indigo-700 p-6 text-white shadow-xl sm:p-8">
         <div className="relative z-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/15 text-2xl font-black backdrop-blur-md shadow-inner">
+            <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/15 text-2xl font-black shadow-inner backdrop-blur-md">
               {initials}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-black sm:text-3xl">{form.name || "Coaching Profile"}</h1>
+                <h1 className="text-2xl font-black sm:text-3xl">
+                  {form.name || "Coaching Profile"}
+                </h1>
                 <span className="rounded-full border border-white/20 bg-white/15 px-2.5 py-0.5 text-xs font-bold backdrop-blur-sm">
                   Coaching Admin
                 </span>

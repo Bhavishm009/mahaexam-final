@@ -10,13 +10,19 @@ export async function GET() {
   try {
     const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
     if (!s || !["SUPER_ADMIN", "ADMIN"].includes(s.role)) {
-      return NextResponse.json({ error: "Forbidden: Super Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden: Super Admin access required" },
+        { status: 403 },
+      );
     }
     const organizations = await listOrganizations();
     return NextResponse.json({ organizations });
   } catch (error) {
     console.error("GET /api/admin/organizations error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch organizations", organizations: [] }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch organizations", organizations: [] },
+      { status: 500 },
+    );
   }
 }
 
@@ -177,7 +183,8 @@ export async function DELETE(request) {
 
     return NextResponse.json({
       success: true,
-      message: "Academy deleted safely. All created questions and question bank items are preserved globally!",
+      message:
+        "Academy deleted safely. All created questions and question bank items are preserved globally!",
     });
   } catch (error) {
     return NextResponse.json(
@@ -186,4 +193,3 @@ export async function DELETE(request) {
     );
   }
 }
-

@@ -195,7 +195,9 @@ export default function StudentExams() {
                       >
                         {e.source === "FREE_GLOBAL" || e.isFree ? "100% FREE" : "COACHING"}
                       </span>
-                      {(e.slug?.includes("pyq") || e.title?.includes("PYQ") || e.title?.includes("मूळ")) && (
+                      {(e.slug?.includes("pyq") ||
+                        e.title?.includes("PYQ") ||
+                        e.title?.includes("मूळ")) && (
                         <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-800 dark:bg-amber-950/90 dark:text-amber-300">
                           📜 मूळ PYQ पेपर
                         </span>
@@ -282,7 +284,8 @@ export default function StudentExams() {
           <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <span className="text-xs text-slate-500 dark:text-slate-400">
               Showing page <strong>{currentPage}</strong> of{" "}
-              <strong>{Math.ceil(filteredExams.length / pageSize)}</strong> ({filteredExams.length} tests)
+              <strong>{Math.ceil(filteredExams.length / pageSize)}</strong> ({filteredExams.length}{" "}
+              tests)
             </span>
             <div className="flex gap-2">
               <button

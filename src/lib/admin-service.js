@@ -171,4 +171,3 @@ export async function deleteOrganizationSafely(orgId) {
   // Delete organization record
   return prisma.organization.delete({ where: { id: orgId } });
 }
-

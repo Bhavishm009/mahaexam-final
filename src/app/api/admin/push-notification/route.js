@@ -11,7 +11,10 @@ export async function GET() {
     const session = await verifySessionToken(token);
 
     if (!session || session.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Unauthorized: Super Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Unauthorized: Super Admin access required" },
+        { status: 403 },
+      );
     }
 
     const [activeSubscriptions, totalSubscriptions, studentSubscriptions] = await Promise.all([
@@ -41,7 +44,10 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Admin push stats error:", error);
-    return NextResponse.json({ error: error.message || "Failed to load push stats" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to load push stats" },
+      { status: 500 },
+    );
   }
 }
 
@@ -52,7 +58,10 @@ export async function POST(request) {
     const session = await verifySessionToken(token);
 
     if (!session || session.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Unauthorized: Super Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Unauthorized: Super Admin access required" },
+        { status: 403 },
+      );
     }
 
     const body = await request.json();
@@ -65,7 +74,10 @@ export async function POST(request) {
     } = body;
 
     if (!title?.trim() || !messageBody?.trim()) {
-      return NextResponse.json({ error: "Notification title and body are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Notification title and body are required" },
+        { status: 400 },
+      );
     }
 
     let targetUserId = null;
@@ -133,7 +145,7 @@ export async function POST(request) {
     console.error("Admin send push notification error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to broadcast push notification" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

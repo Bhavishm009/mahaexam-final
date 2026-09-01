@@ -31,7 +31,10 @@ export async function GET() {
       credentials,
     });
   } catch (err) {
-    return NextResponse.json({ error: err.message || "Failed to fetch credentials" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to fetch credentials" },
+      { status: 500 },
+    );
   }
 }
 
@@ -65,7 +68,7 @@ export async function DELETE(request) {
     if (!id && !credentialId) {
       return NextResponse.json(
         { error: "Credential ID or record ID is required to delete" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -82,7 +85,7 @@ export async function DELETE(request) {
     if (deleted.count === 0) {
       return NextResponse.json(
         { error: "Passkey not found or you do not have permission to delete it" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 

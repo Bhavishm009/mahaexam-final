@@ -222,7 +222,8 @@ export default async function ExamPublicPage({ params }) {
                     : "👨‍🏫 Faculty / Coaching Admin Preview Mode"}
                 </div>
                 <p className="text-xs text-blue-800 dark:text-blue-200">
-                  You are previewing this examination as an Administrator / Faculty. You can inspect all questions, correct answers, and manage schedules.
+                  You are previewing this examination as an Administrator / Faculty. You can inspect
+                  all questions, correct answers, and manage schedules.
                 </p>
               </div>
             </div>

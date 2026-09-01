@@ -236,8 +236,8 @@ export function Shell({ children, role = "student", user }) {
     role === "admin"
       ? "/admin/profile"
       : role === "coaching"
-      ? "/coaching/profile"
-      : "/student/profile";
+        ? "/coaching/profile"
+        : "/student/profile";
 
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
