@@ -54,7 +54,7 @@ export default async function sitemap() {
   let examRoutes = [];
   try {
     const exams = await prisma.exam.findMany({
-      where: { isPublished: true },
+      where: { status: "LIVE" },
       select: { id: true, slug: true, updatedAt: true },
       take: 200,
     });

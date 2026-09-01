@@ -150,23 +150,23 @@ function Overview({ d, setTab }) {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card title="Live Mock Tests (सराव परीक्षा)">
+        <Card title={`Live Mock Tests & Official PYQs (एकूण ${d.live?.length || 0} परीक्षा)`}>
           {d.live?.length ? (
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {d.live.slice(0, 6).map((e) => (
+              {d.live.slice(0, 15).map((e) => (
                 <ExamRow key={e.id} e={e} live />
               ))}
             </div>
           ) : (
             <Empty text="No live exams right now." />
           )}
-          {d.live?.length > 6 && (
-            <button
-              onClick={() => setTab("exams")}
-              className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+          {d.live?.length > 15 && (
+            <Link
+              href="/student/exams"
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
             >
-              View all {d.live.length} exams →
-            </button>
+              <span>पहा सर्व {d.live.length} परीक्षा आणि मूळ प्रश्नपत्रिका (View All {d.live.length} Live Exams) →</span>
+            </Link>
           )}
         </Card>
 
