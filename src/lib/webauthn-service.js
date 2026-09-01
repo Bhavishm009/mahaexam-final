@@ -38,11 +38,16 @@ export async function savePasskeyCredential(userId, credentialData) {
   const { id, rawId, response } = credentialData;
 
   const credentialId = id || rawId;
+  if (!credentialId) {
+    throw new Error("Invalid passkey payload: missing credential ID");
+  }
+
   const publicKey = response?.publicKey || Buffer.from(rawId || id).toString("base64");
 
   const credential = await prisma.passkeyCredential.upsert({
     where: { credentialId },
     update: {
+      userId,
       publicKey,
       transports: JSON.stringify(response?.transports || ["internal"]),
     },
@@ -64,12 +69,12 @@ export async function createPasskeyLoginOptions(origin, email) {
   const hostname = new URL(origin || "http://localhost:3000").hostname;
 
   let allowCredentials = [];
-  if (email) {
+  if (email && typeof email === "string" && email.trim()) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },
       include: { passkeys: true },
     });
-    if (user && user.passkeys.length > 0) {
+    if (user && user.passkeys && user.passkeys.length > 0) {
       allowCredentials = user.passkeys.map((p) => ({
         id: p.credentialId,
         type: "public-key",

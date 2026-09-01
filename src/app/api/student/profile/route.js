@@ -63,13 +63,31 @@ export async function PATCH(request) {
       updateUserData.name = name.trim();
     }
     if (typeof phone === "string") {
-      updateUserData.phone = phone.trim() || null;
+      const cleanPhone = phone.trim();
+      if (cleanPhone) {
+        const existingPhone = await prisma.user.findFirst({
+          where: { phone: cleanPhone, id: { not: session.sub } },
+        });
+        if (existingPhone) {
+          return NextResponse.json({ error: "Phone number already registered with another account." }, { status: 400 });
+        }
+        updateUserData.phone = cleanPhone;
+      } else {
+        updateUserData.phone = null;
+      }
     }
     if (typeof preferredLanguage === "string") {
       updateUserData.preferredLanguage = preferredLanguage;
     }
     if (newPassword && typeof newPassword === "string" && newPassword.length >= 6) {
       updateUserData.passwordHash = await bcrypt.hash(newPassword, 12);
+    }
+
+    if (Object.keys(updateUserData).length > 0) {
+      await prisma.user.update({
+        where: { id: session.sub },
+        data: updateUserData,
+      });
     }
 
     const updateProfileData = {};
@@ -86,17 +104,17 @@ export async function PATCH(request) {
       updateProfileData.taluka = taluka.trim();
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: session.sub },
-      data: {
-        ...updateUserData,
-        studentProfile: {
-          upsert: {
-            create: updateProfileData,
-            update: updateProfileData,
-          },
-        },
+    const studentProfile = await prisma.studentProfile.upsert({
+      where: { userId: session.sub },
+      create: {
+        userId: session.sub,
+        ...updateProfileData,
       },
+      update: updateProfileData,
+    });
+
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: session.sub },
       select: {
         id: true,
         name: true,
