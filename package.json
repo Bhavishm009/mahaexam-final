@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
+    "db:seed-pyqs": "node prisma/seed-pyqs.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",

@@ -57,6 +57,12 @@ export default function StudentExams() {
           e.title?.includes("TCS") ||
           e.title?.includes("IBPS") ||
           e.title?.includes("अंकगणित");
+      } else if (category === "PYQ") {
+        matchCat =
+          e.slug?.includes("pyq") ||
+          e.title?.toLowerCase().includes("pyq") ||
+          e.title?.includes("मूळ") ||
+          e.title?.includes("PYQ");
       }
 
       // Query match
@@ -75,6 +81,10 @@ export default function StudentExams() {
 
   const categories = [
     { id: "ALL", label: `सर्व परीक्षा (All ${exams.length})` },
+    {
+      id: "PYQ",
+      label: `📜 मागील वर्षांच्या मूळ प्रश्नपत्रिका (PYQ ${exams.filter((e) => e.slug?.includes("pyq") || e.title?.includes("PYQ") || e.title?.includes("मूळ")).length})`,
+    },
     {
       id: "POLICE",
       label: `पोलीस भरती (Police ${exams.filter((e) => e.slug?.includes("police") || e.title?.includes("पोलीस")).length})`,
@@ -175,15 +185,22 @@ export default function StudentExams() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`rounded-full px-3 py-0.5 text-xs font-bold ${
-                        e.source === "FREE_GLOBAL" || e.isFree
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
-                          : "bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300"
-                      }`}
-                    >
-                      {e.source === "FREE_GLOBAL" || e.isFree ? "100% FREE" : "COACHING"}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`rounded-full px-3 py-0.5 text-xs font-bold ${
+                          e.source === "FREE_GLOBAL" || e.isFree
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
+                            : "bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300"
+                        }`}
+                      >
+                        {e.source === "FREE_GLOBAL" || e.isFree ? "100% FREE" : "COACHING"}
+                      </span>
+                      {(e.slug?.includes("pyq") || e.title?.includes("PYQ") || e.title?.includes("मूळ")) && (
+                        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-800 dark:bg-amber-950/90 dark:text-amber-300">
+                          📜 मूळ PYQ पेपर
+                        </span>
+                      )}
+                    </div>
                     <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                       {e.examType || "CBT"}
                     </span>
