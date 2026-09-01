@@ -6,11 +6,10 @@ import { prisma } from "@/lib/db";
 export async function GET() {
   try {
     const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
-    if (!session || session.role !== "STUDENT") {
+    const userId = session?.sub || session?.id || session?.userId;
+    if (!session || !userId || session.role !== "STUDENT") {
       return NextResponse.json({ error: "Student login required" }, { status: 401 });
     }
-
-    const userId = session.sub;
 
     // Fetch batch memberships
     const memberships = await prisma.batchMembership.findMany({

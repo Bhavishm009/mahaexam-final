@@ -6,26 +6,51 @@ import { prisma } from "@/lib/db";
 import { withApiLogger } from "@/lib/logger";
 
 export const GET = withApiLogger(async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE)?.value;
-  const session = await verifySessionToken(token);
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE)?.value;
+    const session = await verifySessionToken(token);
 
-  if (!session || session.role !== "STUDENT") {
-    return NextResponse.json({ error: "Student login required" }, { status: 401 });
-  }
+    const userId = session?.sub || session?.id || session?.userId;
+    if (!session || !userId || session.role !== "STUDENT") {
+      return NextResponse.json({ error: "Student login required" }, { status: 401 });
+    }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.sub },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      role: true,
-      status: true,
-      preferredLanguage: true,
-      createdAt: true,
-      studentProfile: {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        status: true,
+        preferredLanguage: true,
+        createdAt: true,
+        studentProfile: {
+          select: {
+            id: true,
+            targetExam: true,
+            education: true,
+            district: true,
+            taluka: true,
+            coachingStatus: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User profile not found" }, { status: 404 });
+    }
+
+    // Auto-upsert student profile record if missing
+    if (!user.studentProfile) {
+      const newProfile = await prisma.studentProfile.create({
+        data: {
+          userId: user.id,
+          coachingStatus: "INDIVIDUAL",
+        },
         select: {
           id: true,
           targetExam: true,
@@ -34,34 +59,17 @@ export const GET = withApiLogger(async function GET() {
           taluka: true,
           coachingStatus: true,
         },
-      },
-    },
-  });
+      });
+      user.studentProfile = newProfile;
+    }
 
-  if (!user) {
-    return NextResponse.json({ error: "User profile not found" }, { status: 404 });
+    return NextResponse.json({ success: true, profile: user });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err.message || "Failed to load student profile" },
+      { status: 500 },
+    );
   }
-
-  // Auto-upsert student profile record if missing
-  if (!user.studentProfile) {
-    const newProfile = await prisma.studentProfile.create({
-      data: {
-        userId: user.id,
-        coachingStatus: "INDIVIDUAL",
-      },
-      select: {
-        id: true,
-        targetExam: true,
-        education: true,
-        district: true,
-        taluka: true,
-        coachingStatus: true,
-      },
-    });
-    user.studentProfile = newProfile;
-  }
-
-  return NextResponse.json({ success: true, profile: user });
 }, "/api/student/profile");
 
 export const PATCH = withApiLogger(async function PATCH(request) {
@@ -69,7 +77,8 @@ export const PATCH = withApiLogger(async function PATCH(request) {
   const token = cookieStore.get(COOKIE)?.value;
   const session = await verifySessionToken(token);
 
-  if (!session || session.role !== "STUDENT") {
+  const userId = session?.sub || session?.id || session?.userId;
+  if (!session || !userId || session.role !== "STUDENT") {
     return NextResponse.json({ error: "Student login required" }, { status: 401 });
   }
 
@@ -86,7 +95,7 @@ export const PATCH = withApiLogger(async function PATCH(request) {
       const cleanPhone = phone.trim();
       if (cleanPhone) {
         const existingPhone = await prisma.user.findFirst({
-          where: { phone: cleanPhone, id: { not: session.sub } },
+          where: { phone: cleanPhone, id: { not: userId } },
         });
         if (existingPhone) {
           return NextResponse.json(
@@ -108,7 +117,7 @@ export const PATCH = withApiLogger(async function PATCH(request) {
 
     if (Object.keys(updateUserData).length > 0) {
       await prisma.user.update({
-        where: { id: session.sub },
+        where: { id: userId },
         data: updateUserData,
       });
     }
@@ -128,16 +137,16 @@ export const PATCH = withApiLogger(async function PATCH(request) {
     }
 
     await prisma.studentProfile.upsert({
-      where: { userId: session.sub },
+      where: { userId: userId },
       create: {
-        userId: session.sub,
+        userId: userId,
         ...updateProfileData,
       },
       update: updateProfileData,
     });
 
     const updatedUser = await prisma.user.findUnique({
-      where: { id: session.sub },
+      where: { id: userId },
       select: {
         id: true,
         name: true,
