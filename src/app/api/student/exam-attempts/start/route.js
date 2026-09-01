@@ -4,11 +4,13 @@ import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { getStudentExamAccess } from "@/lib/exam-access-service";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export async function POST(request) {
+  let s = null;
   try {
-    const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
-    if (!s) {
+    s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+    if (!s || !s.sub) {
       return NextResponse.json({ error: "Student login required" }, { status: 401 });
     }
 
@@ -107,16 +109,31 @@ export async function POST(request) {
       }
     }
 
-    // Format questions list
-    const questions = (examData.questions || []).map((eq, idx) => {
+    // Format and deduplicate questions list (guarantee 0 duplicates)
+    const seenQuestionIds = new Set();
+    const seenQuestionTexts = new Set();
+    const rawQuestions = examData.questions || [];
+    const questions = [];
+
+    for (let idx = 0; idx < rawQuestions.length; idx++) {
+      const eq = rawQuestions[idx];
       const q = eq.question || {};
-      return {
-        id: q.id || eq.id || `q-${idx + 1}`,
-        order: eq.questionOrder || idx + 1,
-        text: q.questionText || "",
-        textMr: q.questionTextMr || q.questionText || "",
-        questionText: q.questionText || "",
-        questionTextMr: q.questionTextMr || q.questionText || "",
+      const qId = q.id || eq.id || `q-${idx + 1}`;
+      const qText = q.questionText || "";
+
+      if (qId && seenQuestionIds.has(qId)) continue;
+      if (qText && seenQuestionTexts.has(qText)) continue;
+
+      if (qId) seenQuestionIds.add(qId);
+      if (qText) seenQuestionTexts.add(qText);
+
+      questions.push({
+        id: qId,
+        order: questions.length + 1,
+        text: qText,
+        textMr: q.questionTextMr || qText,
+        questionText: qText,
+        questionTextMr: q.questionTextMr || qText,
         explanation: q.explanation || "",
         explanationMr: q.explanationMr || "",
         marks: eq.marks || q.marks || 1,
@@ -129,8 +146,8 @@ export async function POST(request) {
           optionTextMr: o.optionTextMr || o.optionText || "",
           order: o.optionOrder || optIdx + 1,
         })),
-      };
-    });
+      });
+    }
 
     // Check for existing IN_PROGRESS attempt
     const existing = await prisma.examAttempt.findFirst({
@@ -205,6 +222,15 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("Error starting exam attempt:", error);
+    await logError({
+      message: error.message,
+      stack: error.stack,
+      source: "SERVER",
+      route: "/api/student/exam-attempts/start",
+      userId: s?.sub || null,
+      request,
+    }).catch(() => {});
+
     return NextResponse.json(
       { error: error.message || "Failed to initialize exam session." },
       { status: 500 },

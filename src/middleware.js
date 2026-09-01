@@ -3,6 +3,20 @@ import { verifySessionToken, COOKIE } from "@/lib/auth";
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
+  const token = request.cookies.get(COOKIE)?.value;
+  const session = await verifySessionToken(token);
+
+  // If user is already logged in and attempts to access login or register pages
+  if (session && (pathname === "/login" || pathname === "/register")) {
+    const target =
+      session.role === "SUPER_ADMIN"
+        ? "/admin/analytics"
+        : session.role === "COACHING_ADMIN" || session.role === "TEACHER"
+          ? "/coaching/dashboard"
+          : "/student/dashboard";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
+
   const protectedPath =
     pathname.startsWith("/student") ||
     pathname.startsWith("/coaching") ||
@@ -11,9 +25,6 @@ export async function middleware(request) {
   if (!protectedPath) {
     return NextResponse.next();
   }
-
-  const token = request.cookies.get(COOKIE)?.value;
-  const session = await verifySessionToken(token);
 
   if (!session) {
     const url = new URL("/login", request.url);
@@ -40,5 +51,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/student/:path*", "/coaching/:path*", "/admin/:path*", "/exam/:path*"],
+  matcher: ["/login", "/register", "/student/:path*", "/coaching/:path*", "/admin/:path*", "/exam/:path*"],
 };

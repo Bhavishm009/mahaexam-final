@@ -130,7 +130,7 @@ export async function runCompleteDatabaseSeed(prismaClient) {
           options: {
             create: q.options.map((opt, optIdx) => ({
               optionText: opt.text,
-              optionTextMr: opt.text,
+              optionTextMr: opt.textMr || opt.text,
               isCorrect: opt.isCorrect,
               optionOrder: optIdx + 1,
             })),

@@ -14,8 +14,19 @@ async function resolveQuestions(exam) {
     where: { examId: exam.id },
     orderBy: { position: "asc" },
   });
+
+  const filterUnique = (items) => {
+    const seen = new Set();
+    return items.filter((q) => {
+      const key = q.sourceQuestionId || q.id;
+      if (key && seen.has(key)) return false;
+      if (key) seen.add(key);
+      return true;
+    });
+  };
+
   if (!exam.questionPools.length) {
-    return fixed;
+    return filterUnique(fixed);
   }
   const result = [];
   for (const pool of exam.questionPools) {
@@ -27,7 +38,8 @@ async function resolveQuestions(exam) {
     selected = shuffle(selected).slice(0, pool.questionCount);
     result.push(...selected);
   }
-  return result.length ? result : fixed;
+  const rawList = result.length ? result : fixed;
+  return filterUnique(rawList);
 }
 
 export async function startAttempt(userId, examId) {

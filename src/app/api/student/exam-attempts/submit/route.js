@@ -4,10 +4,12 @@ import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { submitSecureAttempt } from "@/lib/secure-exam-service";
 import { evaluateAttempt, rankResult } from "@/lib/evaluation-service";
+import { logError } from "@/lib/logger";
 
 export async function POST(request) {
+  let s = null;
   try {
-    const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+    s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
     if (!s) {
       return NextResponse.json({ error: "Student login required" }, { status: 401 });
     }
@@ -82,6 +84,15 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("Error submitting exam attempt:", error);
+    await logError({
+      message: error.message,
+      stack: error.stack,
+      source: "SERVER",
+      route: "/api/student/exam-attempts/submit",
+      userId: s?.sub || null,
+      request,
+    }).catch(() => {});
+
     return NextResponse.json(
       { error: error.message || "Failed to submit exam attempt." },
       { status: 400 },

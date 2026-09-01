@@ -23,6 +23,10 @@ async function getExamWithQuestions(examId) {
 }
 
 export async function startPersistentAttempt({ examId, studentId }) {
+  if (!studentId) {
+    throw new Error("STUDENT_ID_REQUIRED");
+  }
+
   const exam = await getExamWithQuestions(examId);
   if (!exam) {
     throw new Error("EXAM_NOT_FOUND");
@@ -55,6 +59,14 @@ export async function startPersistentAttempt({ examId, studentId }) {
   const startedAt = new Date();
   const expiresAt = new Date(startedAt.getTime() + exam.durationMinutes * 60_000);
 
+  // Deduplicate questions
+  const seenQ = new Set();
+  const uniqueQuestions = (exam.questions || []).filter((item) => {
+    if (seenQ.has(item.questionId)) return false;
+    seenQ.add(item.questionId);
+    return true;
+  });
+
   return prisma.examAttempt.create({
     data: {
       examId,
@@ -63,7 +75,7 @@ export async function startPersistentAttempt({ examId, studentId }) {
       startedAt,
       expiresAt,
       questions: {
-        create: exam.questions.map((item, index) => ({
+        create: uniqueQuestions.map((item, index) => ({
           questionId: item.questionId,
           questionOrder: index + 1,
           marks: item.marks,

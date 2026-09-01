@@ -4,20 +4,26 @@ import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { startPersistentAttempt } from "@/lib/exam-db-service";
 import { hasExamAccess } from "@/lib/access-control";
 import { rateLimit } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export async function POST(request) {
-  const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
-  if (!session || session.role !== "STUDENT") {
-    return NextResponse.json({ error: "Student login required" }, { status: 401 });
-  }
-
-  const rl = rateLimit(`exam-start:${session.sub}`, 10, 60_000);
-  if (!rl.allowed) {
-    return NextResponse.json({ error: "Too many requests. Try again shortly." }, { status: 429 });
-  }
-
+  let session = null;
   try {
+    session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+    if (!session || !session.sub || session.role !== "STUDENT") {
+      return NextResponse.json({ error: "Student login required" }, { status: 401 });
+    }
+
+    const rl = rateLimit(`exam-start:${session.sub}`, 10, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests. Try again shortly." }, { status: 429 });
+    }
+
     const { examId } = await request.json();
+    if (!examId) {
+      return NextResponse.json({ error: "Exam ID is required" }, { status: 400 });
+    }
+
     const access = await hasExamAccess({ userId: session.sub, examId });
     if (!access.allowed) {
       return NextResponse.json(
@@ -33,6 +39,15 @@ export async function POST(request) {
     const attempt = await startPersistentAttempt({ examId, studentId: session.sub });
     return NextResponse.json(attempt);
   } catch (error) {
+    await logError({
+      message: error.message,
+      stack: error.stack,
+      source: "SERVER",
+      route: "/api/exam/db/start",
+      userId: session?.sub || null,
+      request,
+    }).catch(() => {});
+
     const messages = {
       EXAM_NOT_FOUND: "Exam not found.",
       EXAM_NOT_STARTED: "Exam has not started yet.",

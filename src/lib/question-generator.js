@@ -2,6 +2,17 @@
 // Generates >= 200 unique questions per topic (Total 2000+ unique questions)
 // With verified correct answers, randomized option positions, and rich explanations.
 
+function getMarathiOptionText(opt) {
+  if (opt.textMr) return opt.textMr;
+  if (typeof opt.text === "string") {
+    const match = opt.text.match(/\(([\u0900-\u097F\s\d.,\-/]+)\)/);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return opt.text;
+}
+
 export function shuffleOptions(correctOpt, wrongOpts) {
   const all = [
     { ...correctOpt, isCorrect: true },
@@ -11,7 +22,11 @@ export function shuffleOptions(correctOpt, wrongOpts) {
     const j = Math.floor(Math.random() * (i + 1));
     [all[i], all[j]] = [all[j], all[i]];
   }
-  return all;
+  return all.map((o) => ({
+    text: o.text,
+    textMr: getMarathiOptionText(o),
+    isCorrect: o.isCorrect,
+  }));
 }
 
 // 1. HISTORY (इतिहास) - 200 Unique Questions

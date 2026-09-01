@@ -1,14 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, BookOpen, Sparkles, ChevronRight, ShieldCheck, Globe } from "lucide-react";
+import { Menu, X, BookOpen, Sparkles, ChevronRight, ShieldCheck, Globe, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/components/language-provider";
 
 export function PublicNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const { language, toggleLanguage, t } = useLanguage();
+
+  useEffect(() => {
+    fetch("/api/auth/profile")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.profile) {
+          setUser(data.profile);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const dashboardHref =
+    user?.role === "SUPER_ADMIN"
+      ? "/admin/analytics"
+      : user?.role === "COACHING_ADMIN" || user?.role === "TEACHER"
+        ? "/coaching/dashboard"
+        : "/student/dashboard";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-colors dark:border-slate-800/80 dark:bg-slate-950/95">
@@ -80,19 +99,31 @@ export function PublicNavbar() {
 
           <ThemeToggle />
 
-          <Link
-            href="/login"
-            className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-          >
-            {t.signIn}
-          </Link>
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
-          >
-            <span>{t.startFree}</span>
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          {user ? (
+            <Link
+              href={dashboardHref}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+            >
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+              >
+                {t.signIn}
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+              >
+                <span>{t.startFree}</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile controls */}
