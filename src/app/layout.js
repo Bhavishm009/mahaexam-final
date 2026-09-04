@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { Plus_Jakarta_Sans, Noto_Sans_Devanagari, Mukta } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { AuthProvider } from "@/components/auth-provider";
 import { PWARegister } from "@/components/pwa-register";
 import { NotificationPermissionPrompt } from "@/components/notification-permission-prompt";
+import { NavigationProgress } from "@/components/navigation-progress";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -62,6 +64,9 @@ export default function RootLayout({ children }) {
               <PWARegister />
               <NotificationPermissionPrompt />
               <Analytics />
+              <Suspense fallback={null}>
+                <NavigationProgress />
+              </Suspense>
               {children}
             </AuthProvider>
           </LanguageProvider>

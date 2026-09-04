@@ -1,7 +1,10 @@
+import { getServerUser } from "@/lib/server-user";
 import { AppShell } from "@/components/shell";
-export default function AdminLayout({ children }) {
+
+export default async function AdminLayout({ children }) {
+  const user = await getServerUser();
   return (
-    <AppShell role="admin" title="Super Admin" subtitle="Manage the MahaExam platform">
+    <AppShell role="admin" title="Super Admin" subtitle="Manage the MahaExam platform" user={user}>
       {children}
     </AppShell>
   );
