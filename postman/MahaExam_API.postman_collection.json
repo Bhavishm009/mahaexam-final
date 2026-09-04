@@ -1,0 +1,1355 @@
+{
+  "info": {
+    "_postman_id": "b1a2c3d4-maha-exam-collection-v2-1",
+    "name": "MahaExam Platform API",
+    "description": "Comprehensive Postman collection for MahaExam Platform APIs (Authentication, Student, Coaching, Admin, Payments, Question Bank, Exams, and Analytics). Configured with automatic environment variable extraction (authToken, attemptId, batchId).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "01 - Health & System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Check basic application health status."
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ready",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ready"]
+            },
+            "description": "Check if database and essential dependencies are reachable."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Authentication",
+      "item": [
+        {
+          "name": "Login - Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.environment.set(\"authToken\", res.token);",
+                  "}",
+                  "if (res.user) {",
+                  "    pm.environment.set(\"userId\", res.user.id);",
+                  "    pm.environment.set(\"userRole\", res.user.role);",
+                  "}",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticate as a Student. Automatically captures authToken and user details into Postman environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Coaching Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.environment.set(\"authToken\", res.token);",
+                  "}",
+                  "if (res.user) {",
+                  "    pm.environment.set(\"userId\", res.user.id);",
+                  "    pm.environment.set(\"userRole\", res.user.role);",
+                  "}",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{coachingEmail}}\",\n  \"password\": \"{{coachingPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticate as Coaching Academy Admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Platform Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.environment.set(\"authToken\", res.token);",
+                  "}",
+                  "if (res.user) {",
+                  "    pm.environment.set(\"userId\", res.user.id);",
+                  "    pm.environment.set(\"userRole\", res.user.role);",
+                  "}",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticate as Platform Super Admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Session (Me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Returns current authenticated session user and profile information."
+          },
+          "response": []
+        },
+        {
+          "name": "Register Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.environment.set(\"authToken\", res.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ramesh Patil\",\n  \"email\": \"ramesh.test@example.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"demo123\",\n  \"targetExam\": \"POLICE_BHARTI\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new student account."
+          },
+          "response": []
+        },
+        {
+          "name": "Register Coaching Academy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.environment.set(\"authToken\", res.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationName\": \"Sahyadri Career Academy\",\n  \"adminName\": \"Kailash Deshmukh\",\n  \"email\": \"sahyadri.academy@example.com\",\n  \"phone\": \"9876543299\",\n  \"district\": \"Kolhapur\",\n  \"password\": \"demo123\",\n  \"role\": \"COACHING_ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new coaching academy organization and coaching admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Get logged in user profile details."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"preferredLanguage\": \"MR\",\n  \"targetExam\": \"MPSC_RAJYASEVA\",\n  \"district\": \"Pune\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Update profile name, target exam, and preferences."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"demo123\",\n  \"newPassword\": \"demo123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "change-password"]
+            },
+            "description": "Update user password."
+          },
+          "response": []
+        },
+        {
+          "name": "Send Mobile OTP",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "otp", "send"]
+            },
+            "description": "Dispatch SMS OTP for phone verification or login."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Mobile OTP",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9876543210\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "otp", "verify"]
+            },
+            "description": "Verify submitted phone OTP code."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.environment.set(\"authToken\", \"\");"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Clear session cookies and log out."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Student Portal",
+      "item": [
+        {
+          "name": "Student Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "dashboard"]
+            },
+            "description": "Student dashboard statistics, active batches, and recent exam activity."
+          },
+          "response": []
+        },
+        {
+          "name": "Exams List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/exams?category=police",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "exams"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "police"
+                }
+              ]
+            },
+            "description": "List exams available for students with optional category filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Check Exam Access Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/exams/{{examId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "exams", "{{examId}}", "status"]
+            },
+            "description": "Check if current student has access/enrollment for the given exam."
+          },
+          "response": []
+        },
+        {
+          "name": "Start Exam Attempt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.attemptId || (res.attempt && res.attempt.id)) {",
+                  "    pm.environment.set(\"attemptId\", res.attemptId || res.attempt.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examId\": \"{{examId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/student/exam-attempts/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "exam-attempts", "start"]
+            },
+            "description": "Start a live exam attempt. Automatically saves the new attemptId into environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Attempt Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/exam-attempts/{{attemptId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "exam-attempts", "{{attemptId}}"]
+            },
+            "description": "Retrieve current attempt state, questions, timer, and saved responses."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Question Answer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"q1\",\n  \"selectedOption\": \"A\",\n  \"timeSpentSeconds\": 20\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/student/exam-attempts/{{attemptId}}/answer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "exam-attempts", "{{attemptId}}", "answer"]
+            },
+            "description": "Save or update student answer for a specific question."
+          },
+          "response": []
+        },
+        {
+          "name": "Record Security Event / Violation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"TAB_SWITCH\",\n  \"details\": \"Student left the active exam tab window\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/student/exam-attempts/{{attemptId}}/event",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "exam-attempts", "{{attemptId}}", "event"]
+            },
+            "description": "Log an anti-cheat proctoring event (tab switch, window blur, fullscreen exit)."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Exam Final Attempt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timeSpentSeconds\": 1200\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/student/exam-attempts/{{attemptId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "exam-attempts", "{{attemptId}}", "submit"]
+            },
+            "description": "Complete and finalize the exam attempt for automatic evaluation."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/results",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "results"]
+            },
+            "description": "Fetch historical test results, scores, and percentile data for student."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Attempt Result",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/results/{{attemptId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "results", "{{attemptId}}"]
+            },
+            "description": "Detailed question-by-question breakdown, accuracy, subject performance, and explanations."
+          },
+          "response": []
+        },
+        {
+          "name": "Student Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "analytics"]
+            },
+            "description": "Student subject-wise strengths, weaknesses, speed analysis, and progress timeline."
+          },
+          "response": []
+        },
+        {
+          "name": "Student Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/student/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "notifications"]
+            },
+            "description": "List notifications and exam alerts for student."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notifications Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"all\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/student/notifications/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "student", "notifications", "read"]
+            },
+            "description": "Mark unread notifications as acknowledged."
+          },
+          "response": []
+        },
+        {
+          "name": "Exam Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/leaderboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "leaderboard"]
+            },
+            "description": "State-wide and batch-level top rankers for given exam."
+          },
+          "response": []
+        },
+        {
+          "name": "Exam Solutions Review",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/exams/{{examId}}/review",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exams", "{{examId}}", "review"]
+            },
+            "description": "Full question key, detailed Marathi explanations, and step-by-step solutions."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Coaching Academy Portal",
+      "item": [
+        {
+          "name": "Coaching Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "dashboard"]
+            },
+            "description": "Overview metrics: active batches, enrolled students, revenue, and active test series."
+          },
+          "response": []
+        },
+        {
+          "name": "Batches List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/batches",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "batches"]
+            },
+            "description": "List all batches created by this coaching institute."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Batch",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id || (res.batch && res.batch.id)) {",
+                  "    pm.environment.set(\"batchId\", res.id || res.batch.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Talathi Exam 2026 Morning Batch\",\n  \"examType\": \"TALATHI\",\n  \"startDate\": \"2026-04-01\",\n  \"endDate\": \"2026-08-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/batches",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "batches"]
+            },
+            "description": "Create a new classroom or online student batch."
+          },
+          "response": []
+        },
+        {
+          "name": "Batch Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/batches/{{batchId}}/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "batches", "{{batchId}}", "students"]
+            },
+            "description": "Fetch all students enrolled inside this batch."
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Students to Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentIds\": [\"{{userId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/batches/{{batchId}}/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "batches", "{{batchId}}", "students"]
+            },
+            "description": "Assign one or more students to a batch."
+          },
+          "response": []
+        },
+        {
+          "name": "Batch Exams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/batches/{{batchId}}/exams",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "batches", "{{batchId}}", "exams"]
+            },
+            "description": "Fetch all exams assigned to this batch."
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Exam to Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"examId\": \"{{examId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/batches/{{batchId}}/exams",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "batches", "{{batchId}}", "exams"]
+            },
+            "description": "Assign an exam to be accessible by students of this batch."
+          },
+          "response": []
+        },
+        {
+          "name": "Coaching Students Directory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "students"]
+            },
+            "description": "Directory of all registered students associated with this coaching academy."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Student Directly",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vaibhav Shinde\",\n  \"email\": \"vaibhav.shinde@example.com\",\n  \"phone\": \"9822334455\",\n  \"batchId\": \"{{batchId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/students/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "students", "add"]
+            },
+            "description": "Enroll student into institute and assign to batch."
+          },
+          "response": []
+        },
+        {
+          "name": "Coaching Exams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/exams",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "exams"]
+            },
+            "description": "Exams authored by coaching institute."
+          },
+          "response": []
+        },
+        {
+          "name": "Paper Builder Generator",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Police Bharti Special Full Mock 01\",\n  \"category\": \"POLICE_BHARTI\",\n  \"durationMinutes\": 90,\n  \"totalQuestions\": 100,\n  \"difficulty\": \"BALANCED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/paper-builder",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "paper-builder"]
+            },
+            "description": "Generate an automated or custom question paper draft."
+          },
+          "response": []
+        },
+        {
+          "name": "Coaching Questions Bank",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/questions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "questions"]
+            },
+            "description": "Custom questions created by this institute."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Custom Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"POLICE_BHARTI\",\n  \"subject\": \"मराठी व्याकरण\",\n  \"textMr\": \"'शिपाई शूर आहे.' या वाक्यातील विशेषण ओळखा.\",\n  \"textEn\": \"Identify the adjective in: The soldier is brave.\",\n  \"optionA\": \"शिपाई\",\n  \"optionB\": \"शूर\",\n  \"optionC\": \"आहे\",\n  \"optionD\": \"या\",\n  \"correctOption\": \"B\",\n  \"explanation\": \"येथे 'शूर' हा शब्द शिपायाबद्दल अधिक माहिती सांगतो, म्हणून ते गुणविशेषण आहे.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/questions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "questions"]
+            },
+            "description": "Add bilingual custom question with Marathi explanation."
+          },
+          "response": []
+        },
+        {
+          "name": "Coaching Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "analytics"]
+            },
+            "description": "Academy performance metrics, batch comparison, and attendance analytics."
+          },
+          "response": []
+        },
+        {
+          "name": "Payout Account Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/coaching/payout-account",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "coaching", "payout-account"]
+            },
+            "description": "Get linked bank account and UPI details for coaching revenue payouts."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Admin Portal",
+      "item": [
+        {
+          "name": "Platform Overview Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "stats"]
+            },
+            "description": "Platform-wide summary: total students, active coachings, revenue, exams conducted."
+          },
+          "response": []
+        },
+        {
+          "name": "Platform Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "analytics"]
+            },
+            "description": "Growth trends, exam attempt volumes, regional distribution."
+          },
+          "response": []
+        },
+        {
+          "name": "Users List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users?role=STUDENT",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "STUDENT"
+                }
+              ]
+            },
+            "description": "List users across the platform with optional role filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Payments & Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "payments"]
+            },
+            "description": "List all financial transactions, successful payments, and refunds."
+          },
+          "response": []
+        },
+        {
+          "name": "Subscription Plans List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "plans"]
+            },
+            "description": "List existing subscription tiers and pricing."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Subscription Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Maha Combo Yearly\",\n  \"slug\": \"maha-combo-yearly\",\n  \"price\": 1499,\n  \"durationDays\": 365,\n  \"features\": [\"All MPSC Exams\", \"Police Mock Tests\", \"PYQs With Solutions\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "plans"]
+            },
+            "description": "Add a new subscription plan tier."
+          },
+          "response": []
+        },
+        {
+          "name": "Organizations Directory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/organizations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "organizations"]
+            },
+            "description": "List all registered coaching academies and institutions."
+          },
+          "response": []
+        },
+        {
+          "name": "Coaching Payouts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/coaching-payouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "coaching-payouts"]
+            },
+            "description": "List pending and processed coaching revenue payouts."
+          },
+          "response": []
+        },
+        {
+          "name": "Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/audit-logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "audit-logs"]
+            },
+            "description": "Audit trail for sensitive admin and coaching actions."
+          },
+          "response": []
+        },
+        {
+          "name": "Error Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "logs"]
+            },
+            "description": "Application error logs and exceptions."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Payments & Subscriptions",
+      "item": [
+        {
+          "name": "Public Subscription Plans",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscription-plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscription-plans"]
+            },
+            "description": "Public listing of subscription plans displayed on pricing page."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Payment Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"plan_monthly\",\n  \"amount\": 49900,\n  \"currency\": \"INR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/create-order",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "create-order"]
+            },
+            "description": "Initiate Razorpay order for subscription or single exam purchase."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Payment Signature",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razorpay_order_id\": \"order_mock123\",\n  \"razorpay_payment_id\": \"pay_mock123\",\n  \"razorpay_signature\": \"sig_mock123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "verify"]
+            },
+            "description": "Verify cryptographic Razorpay HMAC signature and activate user access."
+          },
+          "response": []
+        },
+        {
+          "name": "Razorpay Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-razorpay-signature",
+                "value": "mock_test_signature"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment.captured\",\n  \"payload\": {\n    \"payment\": {\n      \"entity\": {\n        \"id\": \"pay_mock123\",\n        \"order_id\": \"order_mock123\",\n        \"amount\": 49900,\n        \"status\": \"captured\"\n      }\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/razorpay/webhook",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "razorpay", "webhook"]
+            },
+            "description": "Incoming webhook handler for Razorpay server-to-server events."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - Question Bank",
+      "item": [
+        {
+          "name": "Search Questions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/question-bank?category=police&q=history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "question-bank"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "police"
+                },
+                {
+                  "key": "q",
+                  "value": "history"
+                }
+              ]
+            },
+            "description": "Search questions by category, subject, topic, or keyword."
+          },
+          "response": []
+        },
+        {
+          "name": "List Chapters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/question-bank/chapters",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "question-bank", "chapters"]
+            },
+            "description": "List chapters across syllabus subjects."
+          },
+          "response": []
+        },
+        {
+          "name": "List Topics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/question-bank/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "question-bank", "topics"]
+            },
+            "description": "List specific sub-topics."
+          },
+          "response": []
+        },
+        {
+          "name": "Questions Import Preview",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"csvData\": \"category,subject,textMr,optionA,optionB,optionC,optionD,correctOption\\nPOLICE_BHARTI,भूगोल,महाराष्ट्राची राजधानी कोणती?,मुंबई,पुणे,नागपूर,नाशिक,A\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/import/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "import", "preview"]
+            },
+            "description": "Validate and preview questions before final bulk import."
+          },
+          "response": []
+        },
+        {
+          "name": "Questions Bulk Import",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questions\": [\n    {\n      \"category\": \"POLICE_BHARTI\",\n      \"subject\": \"भूगोल\",\n      \"textMr\": \"महाराष्ट्राची राजधानी कोणती?\",\n      \"optionA\": \"मुंबई\",\n      \"optionB\": \"पुणे\",\n      \"optionC\": \"नागपूर\",\n      \"optionD\": \"नाशिक\",\n      \"correctOption\": \"A\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/questions/import",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "questions", "import"]
+            },
+            "description": "Bulk import validated questions into question database."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+

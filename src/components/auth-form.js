@@ -21,7 +21,7 @@ export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const { setUser, refreshUser } = useAuth();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -33,10 +33,11 @@ export function LoginForm() {
     setLoading(true);
     setError("");
     try {
+      const trimmed = identifier.trim();
       const r = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ identifier: trimmed, email: trimmed, password }),
       });
       const data = await r.json();
       if (!r.ok) {
@@ -83,7 +84,7 @@ export function LoginForm() {
       const optRes = await fetch("/api/auth/webauthn/login/options", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() || undefined }),
+        body: JSON.stringify({ email: identifier.trim() || undefined }),
       });
       const options = await optRes.json();
       if (!optRes.ok) {
@@ -188,16 +189,18 @@ export function LoginForm() {
 
         <div>
           <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-            ईमेल आयडी (Email Address)
+            ईमेल किंवा १० अंकी मोबाईल नंबर (Email or Mobile)
           </label>
           <div className="relative">
             <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
             <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              type="text"
+              autoCapitalize="none"
+              autoCorrect="off"
               required
-              placeholder="bhavishm009@gmail.com"
+              placeholder="bhavishm009@gmail.com किंवा 7721841331"
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
             />
           </div>
@@ -382,7 +385,11 @@ export function SignupForm() {
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
           >
             {MAHARASHTRA_EXAM_TYPES.map((ex) => (
-              <option key={ex.id || ex.value} value={ex.value || ex.name} className="bg-white dark:bg-slate-900">
+              <option
+                key={ex.id || ex.value}
+                value={ex.value || ex.name}
+                className="bg-white dark:bg-slate-900"
+              >
                 {ex.label || `${ex.nameMr} (${ex.name})`}
               </option>
             ))}

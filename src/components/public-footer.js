@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck, Award, Globe, Heart } from "lucide-react";
+import { ShieldCheck, Award, Globe, Heart, LogOut } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
+import { useAuth } from "@/components/auth-provider";
 
 export function PublicFooter() {
   const { language } = useLanguage();
+  const { user, logout } = useAuth();
 
   return (
     <footer className="border-t border-slate-200 bg-white text-slate-600 transition-colors dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
@@ -105,7 +107,7 @@ export function PublicFooter() {
             <ul className="mt-3 space-y-2 text-xs">
               <li>
                 <Link
-                  href="/login"
+                  href={user ? "/student/exams" : "/#exams"}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "महाराष्ट्र पोलीस भरती" : "Police Bharti 2026"}
@@ -113,7 +115,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href={user ? "/student/exams" : "/#exams"}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "MPSC राज्यसेवा / संयुक्त" : "MPSC Rajyaseva / Combined"}
@@ -121,7 +123,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href={user ? "/student/exams" : "/#exams"}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "तलाठी भरती सराव" : "Talathi Bharti Mock Tests"}
@@ -129,7 +131,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href={user ? "/student/exams" : "/#exams"}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "जिल्हा परिषद भरती" : "Zilla Parishad Recruitment"}
@@ -144,30 +146,61 @@ export function PublicFooter() {
               {language === "mr" ? "अकॅडेमी पोर्टल" : "Coaching Portal"}
             </h3>
             <ul className="mt-3 space-y-2 text-xs">
-              <li>
-                <Link
-                  href="/coaching/register"
-                  className="transition hover:text-blue-600 dark:hover:text-white"
-                >
-                  {language === "mr" ? "नवीन अकॅडेमी नोंदणी" : "Register Academy"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/coaching/login"
-                  className="transition hover:text-blue-600 dark:hover:text-white"
-                >
-                  {language === "mr" ? "अकॅडेमी संचालक लॉगिन" : "Academy Admin Login"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/coaching/dashboard"
-                  className="transition hover:text-blue-600 dark:hover:text-white"
-                >
-                  {language === "mr" ? "प्रश्नपत्रिका निर्मिती" : "Paper Builder"}
-                </Link>
-              </li>
+              {user?.role === "COACHING_ADMIN" || user?.role === "TEACHER" ? (
+                <>
+                  <li>
+                    <Link
+                      href="/coaching/dashboard"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "अकॅडेमी डॅशबोर्ड" : "Coaching Dashboard"}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/coaching/exams"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "परीक्षा व्यवस्थापन" : "Manage Exams"}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/coaching/students"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "विद्यार्थी यादी" : "Enrolled Students"}
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link
+                      href="/coaching/register"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "नवीन अकॅडेमी नोंदणी" : "Register Academy"}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/coaching/login"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "अकॅडेमी संचालक लॉगिन" : "Academy Admin Login"}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#coaching"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "संस्था वैशिष्ट्ये" : "Institute Features"}
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -177,22 +210,67 @@ export function PublicFooter() {
               {language === "mr" ? "खाते व मदत" : "Account & Help"}
             </h3>
             <ul className="mt-3 space-y-2 text-xs">
-              <li>
-                <Link
-                  href="/login"
-                  className="transition hover:text-blue-600 dark:hover:text-white"
-                >
-                  {language === "mr" ? "विद्यार्थी लॉगिन" : "Student Login"}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/register"
-                  className="transition hover:text-blue-600 dark:hover:text-white"
-                >
-                  {language === "mr" ? "मोफत नोंदणी" : "Free Registration"}
-                </Link>
-              </li>
+              {user ? (
+                <>
+                  <li>
+                    <Link
+                      href={
+                        user.role === "SUPER_ADMIN"
+                          ? "/admin"
+                          : user.role === "COACHING_ADMIN"
+                            ? "/coaching/dashboard"
+                            : "/student/dashboard"
+                      }
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href={
+                        user.role === "SUPER_ADMIN"
+                          ? "/admin/profile"
+                          : user.role === "COACHING_ADMIN"
+                            ? "/coaching/profile"
+                            : "/student/profile"
+                      }
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "माझे प्रोफाइल" : "My Profile"}
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={logout}
+                      className="inline-flex items-center gap-1 text-rose-600 transition hover:underline dark:text-rose-400"
+                    >
+                      <LogOut className="h-3 w-3" />
+                      <span>{language === "mr" ? "लॉगआउट" : "Sign Out"}</span>
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link
+                      href="/login"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "विद्यार्थी लॉगिन" : "Student Login"}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/register"
+                      className="transition hover:text-blue-600 dark:hover:text-white"
+                    >
+                      {language === "mr" ? "मोफत नोंदणी" : "Free Registration"}
+                    </Link>
+                  </li>
+                </>
+              )}
               <li>
                 <Link href="/#faq" className="transition hover:text-blue-600 dark:hover:text-white">
                   {language === "mr" ? "वारंवार विचारले जाणारे प्रश्न" : "FAQs"}

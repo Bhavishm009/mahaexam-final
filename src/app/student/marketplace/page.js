@@ -12,31 +12,43 @@ export default function Marketplace() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-50 p-6">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-black">Practice Marketplace</h1>
-        <p className="mt-1 text-slate-500">
-          Free practice papers and paid papers from participating coaching institutes.
+    <main className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+          Practice Marketplace
+        </h1>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+          Free practice papers and premium papers from participating coaching institutes.
         </p>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {items.map((x) => (
-            <div key={x.id} className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="font-black">{x.exam?.title}</h2>
-              <div className="mt-3 text-2xl font-black">₹{x.price}</div>
-              <a
-                href={`/student/checkout/${x.exam?.id}`}
-                className="mt-4 block rounded-xl bg-blue-600 px-4 py-3 text-center font-bold text-white"
-              >
-                Buy Paper
-              </a>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((x) => (
+          <div
+            key={x.id}
+            className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <div>
+              <h2 className="text-base font-black text-slate-900 dark:text-white sm:text-lg">
+                {x.exam?.title}
+              </h2>
+              <div className="mt-4 text-3xl font-black text-blue-600 dark:text-blue-400">
+                ₹{x.price}
+              </div>
             </div>
-          ))}
-          {!items.length && (
-            <div className="col-span-full rounded-2xl bg-white p-8 text-center text-slate-500">
-              No marketplace papers available at this time.
-            </div>
-          )}
-        </div>
+            <a
+              href={`/student/checkout/${x.exam?.id}`}
+              className="mt-6 block rounded-2xl bg-blue-600 py-3 text-center text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+            >
+              Unlock Paper
+            </a>
+          </div>
+        ))}
+        {!items.length && (
+          <div className="col-span-full rounded-3xl border border-slate-200 bg-white p-12 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 sm:text-sm">
+            No marketplace papers available at this time.
+          </div>
+        )}
       </div>
     </main>
   );

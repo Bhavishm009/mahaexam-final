@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -11,22 +12,37 @@ import {
   ShieldCheck,
   Globe,
   LayoutDashboard,
+  LogOut,
+  User as UserIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";
+import { getInitials } from "@/lib/avatar";
 
 export function PublicNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, loading } = useAuth();
+  const pathname = usePathname();
+  const { user, loading, logout } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
 
+  const isLoginPage = pathname === "/login" || pathname === "/coaching/login";
+  const isRegisterPage = pathname === "/register" || pathname === "/coaching/register";
+
+  const userInitials = getInitials(user?.name);
   const dashboardHref =
     user?.role === "SUPER_ADMIN"
-      ? "/admin/analytics"
+      ? "/admin"
       : user?.role === "COACHING_ADMIN" || user?.role === "TEACHER"
         ? "/coaching/dashboard"
         : "/student/dashboard";
+
+  const profileHref =
+    user?.role === "SUPER_ADMIN"
+      ? "/admin/profile"
+      : user?.role === "COACHING_ADMIN" || user?.role === "TEACHER"
+        ? "/coaching/profile"
+        : "/student/profile";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-colors dark:border-slate-800/80 dark:bg-slate-950/95">
@@ -84,7 +100,7 @@ export function PublicNavbar() {
         </nav>
 
         {/* Action Buttons, Language Toggle & Theme Toggle */}
-        <div className="hidden items-center gap-2.5 sm:flex">
+        <div className="hidden items-center gap-2.5 md:flex">
           {/* Language Switcher */}
           <button
             type="button"
@@ -101,29 +117,56 @@ export function PublicNavbar() {
           {loading && !user ? (
             <div className="h-8 w-28 animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
           ) : user ? (
-            <Link
-              href={dashboardHref}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
-            >
-              <LayoutDashboard className="h-3.5 w-3.5" />
-              <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href={profileHref}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+                title="माझे प्रोफाइल / Profile"
+              >
+                <div className="grid h-6 w-6 place-items-center rounded-lg bg-blue-600 text-[11px] font-black text-white">
+                  {userInitials}
+                </div>
+                <span className="max-w-[100px] truncate text-xs font-bold text-slate-800 dark:text-slate-200">
+                  {user?.name?.split(" ")[0] || "User"}
+                </span>
+              </Link>
+              <Link
+                href={dashboardHref}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" />
+                <span>{language === "mr" ? "डॅशबोर्ड" : "Dashboard"}</span>
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50/70 px-2.5 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100 active:scale-95 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-950/70"
+                title="लॉगआउट करा / Sign Out"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden xl:inline">{language === "mr" ? "लॉगआउट" : "Logout"}</span>
+              </button>
+            </div>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-              >
-                {t.signIn}
-              </Link>
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
-              >
-                <span>{t.startFree}</span>
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-            </>
+            <div className="flex items-center gap-2">
+              {!isLoginPage && (
+                <Link
+                  href="/login"
+                  className="rounded-xl px-3.5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                >
+                  {t.signIn}
+                </Link>
+              )}
+              {!isRegisterPage && (
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+                >
+                  <span>{t.startFree}</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
+            </div>
           )}
         </div>
 
@@ -139,6 +182,17 @@ export function PublicNavbar() {
           </button>
 
           <ThemeToggle />
+
+          {user && (
+            <Link
+              href={dashboardHref}
+              className="grid h-9 w-9 place-items-center rounded-xl bg-blue-600 text-xs font-black text-white shadow-sm"
+              title="Dashboard"
+            >
+              {userInitials}
+            </Link>
+          )}
+
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -186,34 +240,76 @@ export function PublicNavbar() {
               <BookOpen className="h-4 w-4 text-purple-600" />
               <span>{t.navPricing}</span>
             </Link>
+
             <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
               {loading && !user ? (
                 <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
               ) : user ? (
-                <Link
-                  href={dashboardHref}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
-                </Link>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 rounded-2xl bg-slate-100 p-3 dark:bg-slate-800/80">
+                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-600 font-black text-white">
+                      {userInitials}
+                    </div>
+                    <div className="min-w-0 flex-1 truncate">
+                      <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                        {user.name || "User"}
+                      </div>
+                      <div className="truncate text-[10px] text-slate-500 dark:text-slate-400">
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={dashboardHref}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
+                  </Link>
+
+                  <Link
+                    href={profileHref}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                  >
+                    <UserIcon className="h-4 w-4 text-blue-600" />
+                    <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-center text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
+                  </button>
+                </div>
               ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    {t.studentSignIn}
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
-                  >
-                    {t.studentRegister}
-                  </Link>
+                <div className="flex flex-col gap-2">
+                  {!isLoginPage && (
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      {t.studentSignIn}
+                    </Link>
+                  )}
+                  {!isRegisterPage && (
+                    <Link
+                      href="/register"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                    >
+                      {t.studentRegister}
+                    </Link>
+                  )}
                   <Link
                     href="/coaching/register"
                     onClick={() => setMobileMenuOpen(false)}
@@ -221,7 +317,7 @@ export function PublicNavbar() {
                   >
                     {t.coachingRegister}
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </nav>

@@ -1,10 +1,27 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { LoginForm } from "@/components/auth-form";
 import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
 import { ShieldCheck, Award, Sparkles, CheckCircle2 } from "lucide-react";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE)?.value;
+  const session = await verifySessionToken(token);
+
+  if (session) {
+    if (session.role === "SUPER_ADMIN" || session.role === "ADMIN") {
+      redirect("/admin");
+    } else if (session.role === "COACHING_ADMIN" || session.role === "TEACHER") {
+      redirect("/coaching/dashboard");
+    } else {
+      redirect("/student/dashboard");
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <PublicNavbar />

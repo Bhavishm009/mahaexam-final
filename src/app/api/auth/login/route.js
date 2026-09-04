@@ -5,15 +5,23 @@ import { createSessionToken, sessionCookieOptions, COOKIE } from "@/lib/auth";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const user = await loginUser({ email: body.email, password: body.password });
+    const identifier = body.identifier || body.email || body.phone;
+    const user = await loginUser({
+      identifier,
+      email: body.email || identifier,
+      phone: body.phone || identifier,
+      password: body.password,
+    });
     const token = await createSessionToken(user);
 
     const response = NextResponse.json({
       success: true,
+      token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
         organizationId: user.organizationId,
       },

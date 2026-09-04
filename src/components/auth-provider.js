@@ -12,58 +12,60 @@ const AuthContext = createContext({
 
 const CACHE_KEY = "mahaexam_user_cache";
 
-export function AuthProvider({ children }) {
-  const [user, setUserState] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        if (cached) {
-          return JSON.parse(cached);
-        }
-      } catch {}
-    }
+function getStoredUser() {
+  if (typeof window === "undefined") {
     return null;
-  });
+  }
+  try {
+    const item = localStorage.getItem(CACHE_KEY) || sessionStorage.getItem(CACHE_KEY);
+    return item ? JSON.parse(item) : null;
+  } catch {
+    return null;
+  }
+}
 
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        if (cached) {
-          return false;
-        }
-      } catch {}
+function persistUser(user) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    if (user) {
+      const serialized = JSON.stringify(user);
+      localStorage.setItem(CACHE_KEY, serialized);
+      sessionStorage.setItem(CACHE_KEY, serialized);
+    } else {
+      localStorage.removeItem(CACHE_KEY);
+      sessionStorage.removeItem(CACHE_KEY);
     }
-    return true;
-  });
+  } catch {}
+}
+
+export function AuthProvider({ children }) {
+  const [user, setUserState] = useState(getStoredUser);
+  const [loading, setLoading] = useState(() => !getStoredUser());
 
   const setUser = useCallback((newUser) => {
     setUserState(newUser);
-    if (typeof window !== "undefined") {
-      try {
-        if (newUser) {
-          sessionStorage.setItem(CACHE_KEY, JSON.stringify(newUser));
-        } else {
-          sessionStorage.removeItem(CACHE_KEY);
-        }
-      } catch {}
-    }
+    persistUser(newUser);
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/profile");
+      const res = await fetch("/api/auth/me");
       if (res.ok) {
         const data = await res.json();
-        if (data?.profile) {
-          setUser(data.profile);
+        if (data?.authenticated && data?.user) {
+          setUser(data.user);
           setLoading(false);
-          return data.profile;
+          return data.user;
         }
       }
-      setUser(null);
+      // If unauthorized or not authenticated, clear session
+      if (res.status === 401 || res.status === 403) {
+        setUser(null);
+      }
     } catch {
-      // Keep cached state if offline/network glitch
+      // Keep cached user if offline or brief network error
     } finally {
       setLoading(false);
     }

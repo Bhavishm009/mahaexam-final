@@ -2,18 +2,33 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { auth } from "@/auth";
 
-export async function GET() {
+export async function GET(request) {
   const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE)?.value;
+  let token = cookieStore.get(COOKIE)?.value;
+  if (!token && request) {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      token = authHeader.substring(7);
+    }
+  }
   const session = await verifySessionToken(token);
 
-  if (!session?.sub) {
+  let userId = session?.sub;
+  if (!userId) {
+    try {
+      const nextAuthSession = await auth();
+      userId = nextAuthSession?.user?.id;
+    } catch {}
+  }
+
+  if (!userId) {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: session.sub },
+    where: { id: userId },
     select: {
       id: true,
       name: true,

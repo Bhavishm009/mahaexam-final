@@ -196,3 +196,23 @@ canvas {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Automatic Dark Mode form controls safeguard */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+.dark select,
+.dark textarea {
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+.dark select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+

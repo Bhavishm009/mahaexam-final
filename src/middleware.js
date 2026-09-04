@@ -6,15 +6,23 @@ export async function middleware(request) {
   const token = request.cookies.get(COOKIE)?.value;
   const session = await verifySessionToken(token);
 
-  // If user is already logged in and attempts to access login or register pages
-  if (session && (pathname === "/login" || pathname === "/register")) {
+  const authPages = ["/login", "/register", "/coaching/login", "/coaching/register"];
+  const isAuthPage = authPages.includes(pathname);
+
+  // If user is already logged in and attempts to access any login or register page
+  if (session && isAuthPage) {
     const target =
-      session.role === "SUPER_ADMIN"
-        ? "/admin/analytics"
+      session.role === "SUPER_ADMIN" || session.role === "ADMIN"
+        ? "/admin"
         : session.role === "COACHING_ADMIN" || session.role === "TEACHER"
           ? "/coaching/dashboard"
           : "/student/dashboard";
     return NextResponse.redirect(new URL(target, request.url));
+  }
+
+  // Public coaching auth pages must not be treated as protected routes
+  if (pathname === "/coaching/login" || pathname === "/coaching/register") {
+    return NextResponse.next();
   }
 
   const protectedPath =
@@ -43,7 +51,7 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if (pathname.startsWith("/admin") && session.role !== "SUPER_ADMIN") {
+  if (pathname.startsWith("/admin") && !["SUPER_ADMIN", "ADMIN"].includes(session.role)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

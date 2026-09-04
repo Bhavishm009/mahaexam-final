@@ -17,24 +17,28 @@ export default function Plans() {
     setPlans((x) => x.map((q) => (q.id === p.id ? d.plan : q)));
   }
   return (
-    <main className="min-h-screen bg-slate-50 p-6">
+    <main className="min-h-screen bg-slate-50 p-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <div className="mx-auto max-w-6xl">
-        <a href="/admin" className="text-sm font-semibold text-blue-600">
+        <a href="/admin" className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
           ← Admin
         </a>
-        <h1 className="mt-3 text-3xl font-black">Subscription Plans</h1>
+        <h1 className="mt-3 text-3xl font-black text-slate-900 dark:text-white">Subscription Plans</h1>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {plans.map((p) => (
-            <div key={p.id} className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-bold">{p.name}</h2>
-              <div className="mt-2 text-3xl font-black">₹{p.price}</div>
-              <p className="mt-3 text-sm text-slate-500">
+            <div key={p.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{p.name}</h2>
+              <div className="mt-2 text-3xl font-black text-slate-900 dark:text-white">₹{p.price}</div>
+              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
                 {p.maxStudents || "∞"} students · {p.maxBatches || "∞"} batches ·{" "}
                 {p.maxExams || "∞"} exams
               </p>
               <button
                 onClick={() => toggle(p)}
-                className={`mt-5 rounded-xl px-4 py-2 font-semibold ${p.active ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}
+                className={`mt-5 rounded-xl px-4 py-2 font-semibold transition-colors ${
+                  p.active
+                    ? "bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50"
+                    : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+                }`}
               >
                 {p.active ? "Deactivate" : "Activate"}
               </button>

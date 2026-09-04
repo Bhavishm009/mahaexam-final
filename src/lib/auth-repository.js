@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { prisma } from "./db";
+import { prisma } from "./db.js";
 
 export async function registerUser({ name, email, phone, password, targetExam = "Police Bharti" }) {
   if (!email && !phone) {
@@ -120,8 +120,49 @@ export async function registerCoachingOrganization({
   return result.user;
 }
 
-export async function loginUser({ email, password }) {
-  const user = await prisma.user.findUnique({ where: { email } });
+export async function loginUser({ email, identifier, phone, password }) {
+  const loginIdentifier = (identifier || email || phone || "").trim();
+  if (!loginIdentifier || !password) {
+    throw new Error("INVALID_CREDENTIALS");
+  }
+
+  // Check if identifier is a phone number (e.g. 7721841331, +917721841331, 917721841331)
+  const numericOnly = loginIdentifier.replace(/\D/g, "");
+  const cleanPhone =
+    numericOnly.length === 10
+      ? numericOnly
+      : numericOnly.length === 12 && numericOnly.startsWith("91")
+        ? numericOnly.slice(2)
+        : null;
+
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: { equals: loginIdentifier, mode: "insensitive" } },
+        ...(cleanPhone
+          ? [{ phone: cleanPhone }, { phone: loginIdentifier }, { phone: `+91${cleanPhone}` }]
+          : [{ phone: loginIdentifier }]),
+      ],
+    },
+    include: {
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          status: true,
+        },
+      },
+      studentProfile: {
+        select: {
+          id: true,
+          targetExam: true,
+          district: true,
+        },
+      },
+    },
+  });
+
   if (!user || !user.passwordHash) {
     throw new Error("INVALID_CREDENTIALS");
   }

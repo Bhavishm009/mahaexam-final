@@ -74,15 +74,19 @@ export default function Checkout({ params }) {
   }
 
   if (!data) {
-    return <main className="grid min-h-screen place-items-center bg-slate-50">Loading...</main>;
+    return (
+      <main className="grid min-h-screen place-items-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-400">
+        Loading...
+      </main>
+    );
   }
 
   if (data.allowed) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-50">
+      <main className="grid min-h-screen place-items-center bg-slate-50 dark:bg-slate-950">
         <a
           href={`/exam/${examId}/attempt`}
-          className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white"
+          className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-blue-500"
         >
           Start Exam
         </a>
@@ -91,19 +95,29 @@ export default function Checkout({ params }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 p-6">
-      <div className="mx-auto max-w-lg rounded-3xl bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-black">{data.exam?.title}</h1>
-        <p className="mt-2 text-slate-500">Purchase access to attempt this examination.</p>
-        <div className="mt-8 text-4xl font-black">₹{data.exam?.price}</div>
+    <main className="min-h-screen bg-slate-50 p-6 transition-colors dark:bg-slate-950">
+      <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+          {data.exam?.title}
+        </h1>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+          Purchase access to attempt this examination.
+        </p>
+        <div className="mt-8 text-4xl font-black text-slate-900 dark:text-white">
+          ₹{data.exam?.price}
+        </div>
         <button
           disabled={loading}
           onClick={buy}
-          className="mt-8 w-full rounded-xl bg-blue-600 py-3 font-bold text-white disabled:opacity-50"
+          className="mt-8 w-full rounded-xl bg-blue-600 py-3 font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95 disabled:opacity-50"
         >
           {loading ? "Opening payment..." : "Pay & Unlock Exam"}
         </button>
-        {msg && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{msg}</p>}
+        {msg && (
+          <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-rose-950/50 dark:text-rose-300">
+            {msg}
+          </p>
+        )}
       </div>
     </main>
   );
