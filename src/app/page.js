@@ -63,13 +63,9 @@ export default async function Home() {
       negativeMarksEn: e.negativeMarks ? `${e.negativeMarks}` : "0.25",
       isFree: e.isFree,
       badgeMr:
-        e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq")
-          ? "अधिकृत PYQ"
-          : "१००% लाइव्ह",
+        e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq") ? "अधिकृत PYQ" : "१००% लाइव्ह",
       badgeEn:
-        e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq")
-          ? "Official PYQ"
-          : "100% Live",
+        e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq") ? "Official PYQ" : "100% Live",
       badgeColor:
         e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq")
           ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700"
@@ -95,8 +91,8 @@ export default async function Home() {
 
       <main className="flex-1">
         {/* HERO SECTION */}
-        <section className="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24">
-          <div className="pointer-events-none absolute inset-0 -z-10 bg-radial-gradient opacity-60" />
+        <section className="relative overflow-hidden pb-16 pt-12 sm:pb-24 sm:pt-20">
+          <div className="bg-radial-gradient pointer-events-none absolute inset-0 -z-10 opacity-60" />
           <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
             <HeroTitle />
             <HeroCta initialSession={initialSession} />

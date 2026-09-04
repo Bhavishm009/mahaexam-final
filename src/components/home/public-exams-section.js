@@ -113,26 +113,68 @@ export function PublicExamsSection({ initialExams = [] }) {
     const slug = (e.slug || e.id || "").toLowerCase();
     const title = (e.title || e.titleMr || e.titleEn || "").toLowerCase();
 
-    if (type.includes("POLICE") || slug.includes("police") || title.includes("police") || title.includes("पोलीस")) {
+    if (
+      type.includes("POLICE") ||
+      slug.includes("police") ||
+      title.includes("police") ||
+      title.includes("पोलीस")
+    ) {
       return { id: "police", labelMr: "पोलीस भरती", labelEn: "Police Bharti" };
     }
-    if (type.includes("MPSC") || slug.includes("mpsc") || title.includes("mpsc") || title.includes("राज्यसेवा") || title.includes("संयुक्त")) {
+    if (
+      type.includes("MPSC") ||
+      slug.includes("mpsc") ||
+      title.includes("mpsc") ||
+      title.includes("राज्यसेवा") ||
+      title.includes("संयुक्त")
+    ) {
       return { id: "mpsc", labelMr: "एमपीएससी", labelEn: "MPSC Exams" };
     }
-    if (type.includes("TALATHI") || slug.includes("talathi") || title.includes("talathi") || title.includes("तलाठी")) {
+    if (
+      type.includes("TALATHI") ||
+      slug.includes("talathi") ||
+      title.includes("talathi") ||
+      title.includes("तलाठी")
+    ) {
       return { id: "talathi", labelMr: "तलाठी भरती", labelEn: "Talathi Bharti" };
     }
-    if (type.includes("ZILLA") || type.includes("ZP") || slug.includes("zp") || slug.includes("gramsevak") || title.includes("जिल्हा परिषद") || title.includes("ग्रामसेवक") || title.includes("आरोग्य")) {
+    if (
+      type.includes("ZILLA") ||
+      type.includes("ZP") ||
+      slug.includes("zp") ||
+      slug.includes("gramsevak") ||
+      title.includes("जिल्हा परिषद") ||
+      title.includes("ग्रामसेवक") ||
+      title.includes("आरोग्य")
+    ) {
       return { id: "zp", labelMr: "जिल्हा परिषद (ZP)", labelEn: "Zilla Parishad" };
     }
-    if (type.includes("SARALSEVA") || type.includes("VANRAKSHAK") || slug.includes("vanrakshak") || slug.includes("saralseva") || title.includes("वनरक्षक") || title.includes("सरळसेवा")) {
+    if (
+      type.includes("SARALSEVA") ||
+      type.includes("VANRAKSHAK") ||
+      slug.includes("vanrakshak") ||
+      slug.includes("saralseva") ||
+      title.includes("वनरक्षक") ||
+      title.includes("सरळसेवा")
+    ) {
       return { id: "saralseva", labelMr: "सरळसेवा / वनरक्षक", labelEn: "Saralseva & Forest" };
     }
-    if (type.includes("PYQ") || slug.includes("official") || slug.includes("pyq") || e.isPyq === true || title.includes("मूळ प्रश्नपत्रिका") || title.includes("official paper")) {
+    if (
+      type.includes("PYQ") ||
+      slug.includes("official") ||
+      slug.includes("pyq") ||
+      e.isPyq === true ||
+      title.includes("मूळ प्रश्नपत्रिका") ||
+      title.includes("official paper")
+    ) {
       return { id: "pyq", labelMr: "मूळ PYQ प्रश्नपत्रिका", labelEn: "Official PYQs" };
     }
     const fallbackId = type ? type.toLowerCase().replace(/[^a-z0-9]/g, "-") : "other";
-    return { id: fallbackId, labelMr: e.examType || "इतर परीक्षा", labelEn: e.examType || "Other Exams" };
+    return {
+      id: fallbackId,
+      labelMr: e.examType || "इतर परीक्षा",
+      labelEn: e.examType || "Other Exams",
+    };
   };
 
   const categories = useMemo(() => {
@@ -261,7 +303,7 @@ export function PublicExamsSection({ initialExams = [] }) {
                     </span>
                   </div>
 
-                  <h3 className="mt-4 text-base font-black leading-snug text-slate-900 dark:text-white line-clamp-2">
+                  <h3 className="mt-4 line-clamp-2 text-base font-black leading-snug text-slate-900 dark:text-white">
                     {title}
                   </h3>
 
@@ -310,4 +352,3 @@ export function PublicExamsSection({ initialExams = [] }) {
     </section>
   );
 }
-
