@@ -99,22 +99,24 @@ async function fetchSeoForRouteInternal(routePath) {
   const cleanPath = routePath?.toLowerCase() || "/";
 
   try {
-    const dbSeo = await prisma.seoSetting.findUnique({
-      where: { route: cleanPath },
-    });
+    if (prisma?.seoSetting) {
+      const dbSeo = await prisma.seoSetting.findUnique({
+        where: { route: cleanPath },
+      });
 
-    if (dbSeo) {
-      return {
-        route: dbSeo.route,
-        title: dbSeo.title,
-        titleMr: dbSeo.titleMr || dbSeo.title,
-        description: dbSeo.description,
-        descriptionMr: dbSeo.descriptionMr || dbSeo.description,
-        keywords: dbSeo.keywords || "",
-        canonicalUrl: dbSeo.canonicalUrl || `https://mahaexam.in${cleanPath}`,
-        ogImage: dbSeo.ogImage || "/og-image.png",
-        structuredJson: dbSeo.structuredJson || null,
-      };
+      if (dbSeo) {
+        return {
+          route: dbSeo.route,
+          title: dbSeo.title,
+          titleMr: dbSeo.titleMr || dbSeo.title,
+          description: dbSeo.description,
+          descriptionMr: dbSeo.descriptionMr || dbSeo.description,
+          keywords: dbSeo.keywords || "",
+          canonicalUrl: dbSeo.canonicalUrl || `https://mahaexam.in${cleanPath}`,
+          ogImage: dbSeo.ogImage || "/og-image.png",
+          structuredJson: dbSeo.structuredJson || null,
+        };
+      }
     }
   } catch (err) {
     console.error("getSeoForRoute DB Fetch Error:", err?.message);
@@ -188,9 +190,11 @@ export async function updateSeoForRoute(routePath, data) {
  * Fetch all SEO settings in DB
  */
 export async function getAllSeoSettings() {
-  const dbRecords = await prisma.seoSetting.findMany({
-    orderBy: { route: "asc" },
-  });
+  const dbRecords = prisma?.seoSetting
+    ? await prisma.seoSetting.findMany({
+        orderBy: { route: "asc" },
+      })
+    : [];
 
   const dbMap = new Map(dbRecords.map((r) => [r.route, r]));
 

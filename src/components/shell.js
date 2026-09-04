@@ -320,32 +320,34 @@ export function Shell({ children, role = "student", user }) {
         {/* Top App Header */}
         <header
           data-shell-header="true"
-          className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-md transition-colors dark:border-slate-800 dark:bg-slate-950/95 sm:px-6"
+          className="sticky top-0 z-30 flex h-16 items-center justify-between gap-1.5 border-b border-slate-200 bg-white/95 px-2.5 backdrop-blur-md transition-colors dark:border-slate-800 dark:bg-slate-950/95 sm:px-6"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="rounded-xl border border-slate-200 p-2 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800 md:hidden"
+              className="shrink-0 rounded-xl border border-slate-200 p-1.5 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800 md:hidden"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="text-sm font-black text-slate-900 dark:text-white">
+            <div className="whitespace-nowrap text-xs font-black tracking-tight text-slate-900 dark:text-white sm:text-sm">
               {role === "student" && (language === "mr" ? "विद्यार्थी डॅशबोर्ड" : "Student Portal")}
               {role === "coaching" && (language === "mr" ? "अकॅडेमी कन्सोल" : "Coaching Portal")}
               {role === "admin" && (language === "mr" ? "सुपर ॲडमिन पॅनेल" : "Admin Panel")}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {/* Language Switcher */}
             <button
               type="button"
               onClick={toggleLanguage}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1.5 text-xs font-bold text-slate-800 transition hover:bg-slate-200 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1.5 text-xs font-bold text-slate-800 transition hover:bg-slate-200 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:px-2.5 sm:py-1.5"
+              title="Switch Language / भाषा बदला"
             >
               <Globe className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-              <span>{language === "mr" ? "English" : "मराठी"}</span>
+              <span className="hidden sm:inline">{language === "mr" ? "English" : "मराठी"}</span>
+              <span className="sm:hidden">{language === "mr" ? "EN" : "म"}</span>
             </button>
 
             <ThemeToggle />

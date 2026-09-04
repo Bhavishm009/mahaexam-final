@@ -60,12 +60,12 @@ export default function NotificationCenter() {
       <button
         type="button"
         onClick={() => setOpen((x) => !x)}
-        className="relative flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        className="relative flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:px-3 sm:py-2"
       >
         <Bell className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-        <span>सूचना</span>
+        <span className="hidden sm:inline">सूचना</span>
         {unread > 0 && (
-          <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-black text-white">
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-black text-white">
             {unread}
           </span>
         )}
