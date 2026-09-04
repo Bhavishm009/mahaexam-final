@@ -22,14 +22,14 @@ export async function getCoachingDashboard(session) {
     prisma.exam.count({
       where: {
         organizationId,
-        status: { in: ["SCHEDULED", "PUBLISHED"] },
+        status: { in: ["SCHEDULED", "LIVE"] },
         startAt: { gt: new Date() },
       },
     }),
     prisma.exam.count({
       where: {
         organizationId,
-        status: "PUBLISHED",
+        status: "LIVE",
         startAt: { lte: new Date() },
         OR: [{ endAt: null }, { endAt: { gte: new Date() } }],
       },

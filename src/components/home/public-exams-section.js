@@ -225,7 +225,7 @@ export function PublicExamsSection({ initialExams = [] }) {
                 ? exam.titleMr || exam.title
                 : exam.titleEn || exam.title || exam.titleMr;
             const qCount = exam.questions || exam._count?.questions || 100;
-            const duration = exam.duration || 90;
+            const duration = exam.duration || exam.durationMinutes || 90;
             const totalMarks = exam.marks || exam.totalMarks || 100;
             const isPyq = exam.examType === "PREVIOUS_YEAR";
 
