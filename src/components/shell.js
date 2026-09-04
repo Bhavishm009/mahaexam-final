@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/components/language-provider";
+import NotificationCenter from "@/components/notification-center";
 import { getInitials } from "@/lib/avatar";
 
 const navDefinitions = {
@@ -349,6 +350,8 @@ export function Shell({ children, role = "student", user }) {
 
             <ThemeToggle />
 
+            <NotificationCenter />
+
             {/* Profile Dropdown */}
             <div className="relative">
               <button
@@ -366,34 +369,37 @@ export function Shell({ children, role = "student", user }) {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
-                  <div className="border-b border-slate-100 px-3 py-2 text-xs dark:border-slate-800">
-                    <div className="font-bold text-slate-900 dark:text-white">
-                      {currentUser?.name || user?.name || "User"}
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                  <div className="absolute right-0 z-50 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                    <div className="border-b border-slate-100 px-3 py-2 text-xs dark:border-slate-800">
+                      <div className="font-bold text-slate-900 dark:text-white">
+                        {currentUser?.name || user?.name || "User"}
+                      </div>
+                      <div className="truncate text-[10px] text-slate-400">
+                        {currentUser?.email || user?.email || "Account"}
+                      </div>
                     </div>
-                    <div className="truncate text-[10px] text-slate-400">
-                      {currentUser?.email || user?.email || "Account"}
-                    </div>
+
+                    <Link
+                      href={profileUrl}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <UserCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
+                    </button>
                   </div>
-
-                  <Link
-                    href={profileUrl}
-                    onClick={() => setUserMenuOpen(false)}
-                    className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <UserCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
-                  </button>
-                </div>
+                </>
               )}
             </div>
           </div>
