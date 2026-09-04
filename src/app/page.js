@@ -14,11 +14,15 @@ import { CoachingSection } from "@/components/home/coaching-section";
 import { PricingSection } from "@/components/home/pricing-section";
 import { FaqAccordion } from "@/components/home/faq-accordion";
 
-export const metadata = {
-  title: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल | Police Bharti, MPSC, Talathi Mock Tests",
-  description:
-    "पोलीस भरती, MPSC, तलाठी, जिल्हा परिषद आणि सर्व सरकारी स्पर्धा परीक्षांसाठी अस्सल TCS/IBPS पॅटर्न ऑनलाइन मॉक टेस्ट पोर्टल. १००% मराठी व इंग्रजी सराव.",
-};
+import { getSeoForRoute } from "@/lib/seo-service";
+
+export async function generateMetadata() {
+  return await getSeoForRoute("/", {
+    title: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल | Police Bharti, MPSC, Talathi Mock Tests",
+    description:
+      "पोलीस भरती, MPSC, तलाठी, जिल्हा परिषद आणि सर्व सरकारी स्पर्धा परीक्षांसाठी अस्सल TCS/IBPS पॅटर्न ऑनलाइन मॉक टेस्ट पोर्टल. १००% मराठी व इंग्रजी सराव.",
+  });
+}
 
 export default async function Home() {
   const cookieStore = await cookies();

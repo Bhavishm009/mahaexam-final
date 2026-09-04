@@ -15,11 +15,15 @@ import {
   BookOpen,
 } from "lucide-react";
 
-export const metadata = {
-  title: "अकॅडेमी व शिक्षकांसाठी (For Coaching Institutes) — MahaExam",
-  description:
-    "तुमच्या अकॅडेमीसाठी स्वतःचे ऑनलाइन टेस्ट पोर्टल सुरू करा. ५०,०००+ प्रश्न बँक, ऑटो-पेपर जनरेटर, बॅच मॅनेजमेंट आणि थेट फी संकलन.",
-};
+import { getSeoForRoute } from "@/lib/seo-service";
+
+export async function generateMetadata() {
+  return await getSeoForRoute("/for-coaching", {
+    title: "अकॅडेमी व शिक्षकांसाठी (For Coaching Institutes) — MahaExam",
+    description:
+      "तुमच्या अकॅडेमीसाठी स्वतःचे ऑनलाइन टेस्ट पोर्टल सुरू करा. ५०,०००+ प्रश्न बँक, ऑटो-पेपर जनरेटर, बॅच मॅनेजमेंट आणि थेट फी संकलन.",
+  });
+}
 
 export default function ForCoachingPage() {
   const benefits = [

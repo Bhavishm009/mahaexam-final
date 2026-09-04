@@ -3,11 +3,15 @@ import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
 import { Check, Sparkles, Zap, Building2, User, ArrowRight } from "lucide-react";
 
-export const metadata = {
-  title: "किंमत व प्लॅन्स (Pricing & Plans) — MahaExam",
-  description:
-    "विद्यार्थी आणि अकॅडेमीसाठी पारदर्शक व परवडणारे प्लॅन्स. १००% मोफत सराव पेपर्स आणि प्रगत टेस्ट सिरीज पॅकेजेस.",
-};
+import { getSeoForRoute } from "@/lib/seo-service";
+
+export async function generateMetadata() {
+  return await getSeoForRoute("/pricing", {
+    title: "किंमत व प्लॅन्स (Pricing & Plans) — MahaExam",
+    description:
+      "विद्यार्थी आणि अकॅडेमीसाठी पारदर्शक व परवडणारे प्लॅन्स. १००% मोफत सराव पेपर्स आणि प्रगत टेस्ट सिरीज पॅकेजेस.",
+  });
+}
 
 export default function PricingPage() {
   const studentPlans = [

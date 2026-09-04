@@ -3,11 +3,15 @@ import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
 import { HelpCircle, Sparkles, ChevronDown, ArrowRight, Zap } from "lucide-react";
 
-export const metadata = {
-  title: "वारंवार विचारले जाणारे प्रश्न (FAQ) — MahaExam",
-  description:
-    "महाराष्ट्र पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद परीक्षांचे नियम, TCS/IBPS पॅटर्न, निगेटिव्ह मार्किंग आणि निकाल संबंधित सर्व प्रश्नांची उत्तरे.",
-};
+import { getSeoForRoute } from "@/lib/seo-service";
+
+export async function generateMetadata() {
+  return await getSeoForRoute("/faq", {
+    title: "वारंवार विचारले जाणारे प्रश्न (FAQ) — MahaExam",
+    description:
+      "महाराष्ट्र पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद परीक्षांचे नियम, TCS/IBPS पॅटर्न, निगेटिव्ह मार्किंग आणि निकाल संबंधित सर्व प्रश्नांची उत्तरे.",
+  });
+}
 
 export default function FaqPage() {
   const faqs = [

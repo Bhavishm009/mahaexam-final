@@ -1638,3 +1638,43 @@ model PasskeyCredential {
   @@index([userId])
 }
 
+model SeoSetting {
+  id             String   @id @default(cuid())
+  route          String   @unique
+  title          String
+  titleMr        String?
+  description    String
+  descriptionMr String?
+  keywords       String?
+  ogImage        String?
+  canonicalUrl   String?
+  structuredJson Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model JobAlert {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  department       String
+  departmentMr     String?
+  title            String
+  titleMr          String?
+  vacancies        String
+  qualification    String
+  qualificationMr String?
+  lastDate         String
+  status           String   @default("ACTIVE")
+  statusColor      String?  @default("bg-emerald-100 text-emerald-800")
+  officialUrl      String?
+  notificationPdf  String?
+  description      String
+  descriptionMr   String?
+  examSlug         String?
+  salaryRange      String?
+  ageLimit         String?
+  selectionProcess String?
+  publishedAt      DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+

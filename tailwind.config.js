@@ -5,11 +5,17 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["'Sakal Marathi'", "var(--font-sans)", "system-ui", "sans-serif"],
-        marathi: [
-          "'Sakal Marathi'",
+        sans: [
+          "var(--font-sans)",
           "var(--font-marathi)",
           "var(--font-mukta)",
+          "system-ui",
+          "sans-serif",
+        ],
+        marathi: [
+          "var(--font-marathi)",
+          "var(--font-mukta)",
+          "'Sakal Marathi'",
           "Noto Sans Devanagari",
           "sans-serif",
         ],

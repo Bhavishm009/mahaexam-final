@@ -68,13 +68,15 @@ export function PublicNavbar() {
           </div>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden items-center gap-1 md:flex lg:gap-1.5">
+        {/* Desktop Navigation Links - Exams & Jobs Only */}
+        <nav className="hidden items-center gap-1.5 md:flex lg:gap-2">
           <Link
             href="/exams"
             prefetch={true}
-            className={`rounded-xl px-3 py-2 text-xs font-bold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
-              pathname === "/exams" ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"
+            className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
+              pathname?.startsWith("/exams") || pathname?.startsWith("/exam")
+                ? "bg-blue-50 font-bold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                : "text-slate-700 dark:text-slate-200"
             }`}
           >
             {t.navMockTests}
@@ -82,50 +84,16 @@ export function PublicNavbar() {
           <Link
             href="/jobs"
             prefetch={true}
-            className={`rounded-xl px-3 py-2 text-xs font-bold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
-              pathname === "/jobs" ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"
+            className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
+              pathname === "/jobs"
+                ? "bg-blue-50 font-bold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                : "text-slate-700 dark:text-slate-200"
             }`}
           >
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1.5">
               <span>{t.navJobs}</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-ping" />
+              <span className="h-1.5 w-1.5 animate-ping rounded-full bg-rose-500" />
             </span>
-          </Link>
-          <Link
-            href="/features"
-            prefetch={true}
-            className={`rounded-xl px-3 py-2 text-xs font-bold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
-              pathname === "/features" ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"
-            }`}
-          >
-            {t.navFeatures}
-          </Link>
-          <Link
-            href="/for-coaching"
-            prefetch={true}
-            className={`rounded-xl px-3 py-2 text-xs font-bold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
-              pathname === "/for-coaching" ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"
-            }`}
-          >
-            {t.navCoaching}
-          </Link>
-          <Link
-            href="/pricing"
-            prefetch={true}
-            className={`rounded-xl px-3 py-2 text-xs font-bold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
-              pathname === "/pricing" ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"
-            }`}
-          >
-            {t.navPricing}
-          </Link>
-          <Link
-            href="/faq"
-            prefetch={true}
-            className={`rounded-xl px-3 py-2 text-xs font-bold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
-              pathname === "/faq" ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"
-            }`}
-          >
-            {t.navFaq}
           </Link>
         </nav>
 
@@ -269,58 +237,7 @@ export function PublicNavbar() {
                 New
               </span>
             </Link>
-            <Link
-              href="/features"
-              prefetch={true}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
-                pathname === "/features"
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-              }`}
-            >
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              <span>{t.navFeatures}</span>
-            </Link>
-            <Link
-              href="/for-coaching"
-              prefetch={true}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
-                pathname === "/for-coaching"
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-              }`}
-            >
-              <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              <span>{t.navCoaching}</span>
-            </Link>
-            <Link
-              href="/pricing"
-              prefetch={true}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
-                pathname === "/pricing"
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-              }`}
-            >
-              <CreditCard className="h-4 w-4 text-purple-600" />
-              <span>{t.navPricing}</span>
-            </Link>
-            <Link
-              href="/faq"
-              prefetch={true}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
-                pathname === "/faq"
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-              }`}
-            >
-              <HelpCircle className="h-4 w-4 text-slate-500" />
-              <span>{t.navFaq}</span>
-            </Link>
+
 
             <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
               {loading && !user ? (

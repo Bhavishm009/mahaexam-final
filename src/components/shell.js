@@ -112,6 +112,18 @@ const navDefinitions = {
       icon: LayoutDashboard,
     },
     {
+      labelMr: "SEO मॅनेजमेंट 🚀",
+      labelEn: "SEO Management",
+      href: "/admin/seo",
+      icon: Globe,
+    },
+    {
+      labelMr: "नोकरी भरती जाहिराती 🔔",
+      labelEn: "Job Alerts & Push",
+      href: "/admin/jobs",
+      icon: Bell,
+    },
+    {
       labelMr: "सिस्टम व एरर लॉग्स 🚨",
       labelEn: "System & Error Logs",
       href: "/admin/logs",

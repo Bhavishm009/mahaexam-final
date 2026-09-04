@@ -29,9 +29,8 @@
 @font-face {
   font-family: "Sakal Marathi";
   src:
-    url("/fonts/SakalMarathi-Normal.eot?#iefix") format("embedded-opentype"),
     url("/fonts/SakalMarathi-Normal.ttf") format("truetype"),
-    url("/fonts/SakalMarathi-Normal.svg#SakalMarathi-Normal") format("svg");
+    url("/fonts/SakalMarathi-Normal.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -76,9 +75,10 @@ body {
   min-width: 320px;
   overflow-x: hidden;
   font-family:
+    var(--font-sans),
+    var(--font-marathi),
+    var(--font-mukta),
     "Sakal Marathi",
-    "Mukta",
-    "Noto Sans Devanagari",
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
@@ -89,9 +89,18 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Devanagari typography weight normalization - prevents overly thick/heavy text */
+.font-black {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 700;
+}
+
 /* Marathi & Devanagari specific font class */
 .font-marathi {
-  font-family: "Sakal Marathi", "Mukta", "Noto Sans Devanagari", "Plus Jakarta Sans", sans-serif;
+  font-family: var(--font-marathi), var(--font-mukta), "Sakal Marathi", var(--font-sans), sans-serif;
   line-height: 1.5;
   letter-spacing: 0.01em;
 }

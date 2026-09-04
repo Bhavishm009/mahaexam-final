@@ -116,7 +116,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/exams?category=police"
+                  href="/exams/police-bharti"
                   prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
@@ -125,7 +125,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/exams?category=mpsc"
+                  href="/exams/mpsc"
                   prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
@@ -134,7 +134,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/exams?category=talathi"
+                  href="/exams/talathi"
                   prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
@@ -143,7 +143,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/exams?category=zp"
+                  href="/exams/zp-bharti"
                   prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
@@ -190,9 +190,9 @@ export function PublicFooter() {
                 <Link
                   href="/pricing"
                   prefetch={true}
-                  className="transition hover:text-blue-600 dark:hover:text-white"
+                  className="font-bold text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  {language === "mr" ? "किंमत व प्लॅन्स" : "Pricing & Plans"}
+                  {language === "mr" ? "🏷️ किंमत व प्लॅन्स (Pricing & Plans)" : "🏷️ Pricing & Subscription Plans"}
                 </Link>
               </li>
               {user?.role === "COACHING_ADMIN" || user?.role === "TEACHER" ? (
@@ -316,9 +316,11 @@ export function PublicFooter() {
                 <Link
                   href="/faq"
                   prefetch={true}
-                  className="transition hover:text-blue-600 dark:hover:text-white"
+                  className="font-bold text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  {language === "mr" ? "वारंवार विचारले जाणारे प्रश्न (FAQ)" : "Frequently Asked Questions"}
+                  {language === "mr"
+                    ? "❓ वारंवार विचारले जाणारे प्रश्न (FAQ)"
+                    : "❓ Frequently Asked Questions (FAQ)"}
                 </Link>
               </li>
             </ul>

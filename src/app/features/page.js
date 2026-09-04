@@ -16,11 +16,15 @@ import {
   Layers,
 } from "lucide-react";
 
-export const metadata = {
-  title: "वैशिष्ट्ये (Features) — MahaExam ऑनलाइन टेस्ट प्लॅटफॉर्म",
-  description:
-    "MahaExam पोर्टलची प्रमुख वैशिष्ट्ये: अस्सल TCS/IBPS पॅटर्न, मराठी व इंग्रजी द्विभाषिक पेपर, AI निकाल विश्लेषण, स्टेट रँकिंग आणि अँटी-चीटिंग सिस्टीम.",
-};
+import { getSeoForRoute } from "@/lib/seo-service";
+
+export async function generateMetadata() {
+  return await getSeoForRoute("/features", {
+    title: "वैशिष्ट्ये (Features) — MahaExam ऑनलाइन टेस्ट प्लॅटफॉर्म",
+    description:
+      "MahaExam पोर्टलची प्रमुख वैशिष्ट्ये: अस्सल TCS/IBPS पॅटर्न, मराठी व इंग्रजी द्विभाषिक पेपर, AI निकाल विश्लेषण, स्टेट रँकिंग आणि अँटी-चीटिंग सिस्टीम.",
+  });
+}
 
 export default function FeaturesPage() {
   const featuresList = [

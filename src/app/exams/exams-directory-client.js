@@ -2,97 +2,45 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, Clock, Award, HelpCircle, ArrowRight, BookOpen, Sparkles, Zap, Filter } from "lucide-react";
+import { Search, Clock, Award, HelpCircle, ArrowRight, BookOpen, Zap, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
+import { EXAM_CATEGORIES, getCategorySlugFromExam } from "@/lib/exam-category-helper";
 
-export function ExamsDirectoryClient({ exams = [] }) {
+export function ExamsDirectoryClient({
+  exams = [],
+  hideCategoriesHub = false,
+  hideCategoryPills = false,
+}) {
   const [activeCategory, setActiveCategory] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const { language } = useLanguage();
 
-  const getCategoryFromExam = (e) => {
-    const slug = (e.slug || e.id || "").toLowerCase();
-    const title = (e.title || "").toLowerCase();
-    const type = (e.examType || "").toUpperCase();
-
-    if (slug.includes("police") || title.includes("police") || title.includes("पोलीस") || type === "POLICE_BHARTI") {
-      return "POLICE";
-    }
-    if (slug.includes("talathi") || title.includes("talathi") || title.includes("तलाठी") || type === "TALATHI") {
-      return "TALATHI";
-    }
-    if (slug.includes("mpsc-rajyaseva") || title.includes("राज्यसेवा") || type === "MPSC_RAJYASEVA") {
-      return "MPSC_RAJYASEVA";
-    }
-    if (slug.includes("combine") || slug.includes("group-b") || slug.includes("group-c") || title.includes("संयुक्त") || type === "MPSC_COMBINE") {
-      return "MPSC_COMBINE";
-    }
-    if (slug.includes("zp") || slug.includes("gramsevak") || title.includes("जिल्हा परिषद") || title.includes("आरोग्य") || type === "ZILLA_PARISHAD") {
-      return "ZP";
-    }
-    if (slug.includes("vanrakshak") || slug.includes("forest") || title.includes("वनरक्षक") || type === "VANRAKSHAK") {
-      return "VANRAKSHAK";
-    }
-    if (slug.includes("group-d") || slug.includes("saralseva") || title.includes("गट-डी") || title.includes("सरळसेवा") || type === "SARALSEVA") {
-      return "SARALSEVA";
-    }
-    if (e.isPyq || slug.includes("pyq") || title.includes("pyq") || title.includes("मूळ")) {
-      return "PYQ";
-    }
-    return "OTHER";
-  };
-
-  const categories = [
-    { id: "ALL", labelMr: `सर्व परीक्षा (${exams.length})`, labelEn: `All Tests (${exams.length})` },
-    {
-      id: "PYQ",
-      labelMr: `📜 अधिकृत PYQ पेपर्स (${exams.filter((e) => e.isPyq || e.slug?.includes("pyq") || e.title?.includes("PYQ") || e.title?.includes("मूळ")).length})`,
-      labelEn: `📜 Official PYQs (${exams.filter((e) => e.isPyq || e.slug?.includes("pyq") || e.title?.includes("PYQ") || e.title?.includes("मूळ")).length})`,
-    },
-    {
-      id: "POLICE",
-      labelMr: `पोलीस भरती (${exams.filter((e) => getCategoryFromExam(e) === "POLICE").length})`,
-      labelEn: `Police Bharti (${exams.filter((e) => getCategoryFromExam(e) === "POLICE").length})`,
-    },
-    {
-      id: "TALATHI",
-      labelMr: `तलाठी भरती TCS (${exams.filter((e) => getCategoryFromExam(e) === "TALATHI").length})`,
-      labelEn: `Talathi TCS (${exams.filter((e) => getCategoryFromExam(e) === "TALATHI").length})`,
-    },
-    {
-      id: "MPSC_RAJYASEVA",
-      labelMr: `MPSC राज्यसेवा (${exams.filter((e) => getCategoryFromExam(e) === "MPSC_RAJYASEVA").length})`,
-      labelEn: `MPSC Rajyaseva (${exams.filter((e) => getCategoryFromExam(e) === "MPSC_RAJYASEVA").length})`,
-    },
-    {
-      id: "MPSC_COMBINE",
-      labelMr: `MPSC संयुक्त गट ब व क (${exams.filter((e) => getCategoryFromExam(e) === "MPSC_COMBINE").length})`,
-      labelEn: `MPSC Combine B & C (${exams.filter((e) => getCategoryFromExam(e) === "MPSC_COMBINE").length})`,
-    },
-    {
-      id: "ZP",
-      labelMr: `जिल्हा परिषद / आरोग्य सेवक (${exams.filter((e) => getCategoryFromExam(e) === "ZP").length})`,
-      labelEn: `Zilla Parishad (${exams.filter((e) => getCategoryFromExam(e) === "ZP").length})`,
-    },
-    {
-      id: "VANRAKSHAK",
-      labelMr: `वनरक्षक भरती (${exams.filter((e) => getCategoryFromExam(e) === "VANRAKSHAK").length})`,
-      labelEn: `Vanrakshak / Forest (${exams.filter((e) => getCategoryFromExam(e) === "VANRAKSHAK").length})`,
-    },
-    {
-      id: "SARALSEVA",
-      labelMr: `सरळसेवा / गट-डी (${exams.filter((e) => getCategoryFromExam(e) === "SARALSEVA").length})`,
-      labelEn: `Saralseva / Group D (${exams.filter((e) => getCategoryFromExam(e) === "SARALSEVA").length})`,
-    },
-  ];
+  const categoriesWithCounts = useMemo(() => {
+    return [
+      { id: "ALL", slug: "all", labelMr: `सर्व परीक्षा (${exams.length})`, labelEn: `All Tests (${exams.length})` },
+      ...EXAM_CATEGORIES.map((c) => {
+        const count = exams.filter((e) => getCategorySlugFromExam(e) === c.slug).length;
+        return {
+          id: c.id,
+          slug: c.slug,
+          labelMr: `${c.badgeMr} (${count})`,
+          labelEn: `${c.badgeEn} (${count})`,
+          count,
+        };
+      }),
+    ];
+  }, [exams]);
 
   const filteredExams = useMemo(() => {
     return exams.filter((e) => {
       let matchCat = true;
-      if (activeCategory === "PYQ") {
-        matchCat = e.isPyq || e.slug?.includes("pyq") || e.title?.includes("PYQ") || e.title?.includes("मूळ");
-      } else if (activeCategory !== "ALL") {
-        matchCat = getCategoryFromExam(e) === activeCategory;
+      const catSlug = getCategorySlugFromExam(e);
+
+      if (!hideCategoryPills && activeCategory !== "ALL") {
+        const selectedObj = categoriesWithCounts.find((c) => c.id === activeCategory);
+        if (selectedObj) {
+          matchCat = catSlug === selectedObj.slug;
+        }
       }
 
       let matchQuery = true;
@@ -106,62 +54,118 @@ export function ExamsDirectoryClient({ exams = [] }) {
 
       return matchCat && matchQuery;
     });
-  }, [exams, activeCategory, searchQuery]);
+  }, [exams, activeCategory, searchQuery, categoriesWithCounts, hideCategoryPills]);
 
   return (
     <div className="space-y-8">
-      {/* Search and Filters Bar */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        {/* Category Pills */}
-        <div className="flex flex-wrap items-center gap-2">
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setActiveCategory(c.id)}
-              className={`rounded-2xl px-4 py-2 text-xs font-bold transition active:scale-95 sm:text-sm ${
-                activeCategory === c.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 dark:bg-blue-600"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-              }`}
-            >
-              {language === "mr" ? c.labelMr : c.labelEn}
-            </button>
-          ))}
+      {/* Category Cards Hub (Only shown on main /exams overview page) */}
+      {!hideCategoriesHub && (
+        <div>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-white sm:text-lg">
+              {language === "mr" ? "परीक्षा प्रवर्ग शोधा (Exam Categories)" : "Explore Exam Categories"}
+            </h2>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {EXAM_CATEGORIES.length} प्रमुख प्रवर्गांचे सराव पेपर्स
+            </span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+            {EXAM_CATEGORIES.map((cat) => {
+              const count = exams.filter((e) => getCategorySlugFromExam(e) === cat.slug).length;
+
+              return (
+                <Link
+                  key={cat.slug}
+                  href={`/exams/${cat.slug}`}
+                  prefetch={true}
+                  className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-500"
+                >
+                  <div>
+                    <span className={`inline-block rounded-lg px-2 py-0.5 text-[10px] font-bold ${cat.badgeColor}`}>
+                      {cat.badgeMr}
+                    </span>
+                    <div className="mt-2 line-clamp-1 text-xs font-bold text-slate-900 transition group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
+                      {cat.badgeMr}
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                    <span>{count} पेपर्स</span>
+                    <ChevronRight className="h-3 w-3 text-slate-400 group-hover:text-blue-600" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Clean, Aligned Search & Filter Control Bar */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          {/* Live Search Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder={
+                language === "mr"
+                  ? "परीक्षेचे नाव, विषय किंवा कीवर्ड शोधा..."
+                  : "Search tests by name, subject, or keywords..."
+              }
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50/80 pl-11 pr-10 text-xs font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:border-blue-500 dark:focus:bg-slate-900 sm:text-sm"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-xs text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Status Counter */}
+          <div className="flex shrink-0 items-center justify-between gap-3">
+            <span className="rounded-xl bg-blue-50 px-3.5 py-2.5 text-xs font-bold text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
+              {language === "mr"
+                ? `${filteredExams.length} सराव परीक्षा उपलब्ध`
+                : `${filteredExams.length} Tests Available`}
+            </span>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="text-xs font-bold text-rose-600 hover:underline dark:text-rose-400"
+              >
+                {language === "mr" ? "रीसेट करा" : "Clear"}
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Live Search Input */}
-        <div className="relative shrink-0 sm:w-80">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder={
-              language === "mr"
-                ? "परीक्षा शोधा (उदा. पोलीस, तलाठी, MPSC)..."
-                : "Search tests (e.g. Police, Talathi, MPSC)..."
-            }
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-900 dark:text-white sm:text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Counter */}
-      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span>
-          {language === "mr"
-            ? `${filteredExams.length} सराव परीक्षा उपलब्ध`
-            : `Showing ${filteredExams.length} tests`}
-        </span>
-        {activeCategory !== "ALL" && (
-          <button
-            type="button"
-            onClick={() => setActiveCategory("ALL")}
-            className="font-bold text-blue-600 hover:underline dark:text-blue-400"
-          >
-            {language === "mr" ? "सर्व परीक्षा पहा" : "Clear filter"}
-          </button>
+        {/* Category Filter Pills (Only shown when not hidden) */}
+        {!hideCategoryPills && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+            {categoriesWithCounts.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setActiveCategory(c.id)}
+                className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition active:scale-95 ${
+                  activeCategory === c.id
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 dark:bg-blue-600"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                }`}
+              >
+                {language === "mr" ? c.labelMr : c.labelEn}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -171,11 +175,16 @@ export function ExamsDirectoryClient({ exams = [] }) {
           const qCount = e.questions || e.totalQuestions || 100;
           const duration = e.duration || e.durationMinutes || 90;
           const marks = e.marks || e.totalMarks || 100;
+          const categorySlug = getCategorySlugFromExam(e);
+          const examSlug = e.slug || e.id;
+
+          const detailHref = `/exams/${categorySlug}/${examSlug}`;
+          const startHref = `/exams/${categorySlug}/${examSlug}/start`;
 
           return (
             <article
               key={e.id}
-              className="group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
+              className="group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
@@ -189,9 +198,11 @@ export function ExamsDirectoryClient({ exams = [] }) {
                   </span>
                 </div>
 
-                <h2 className="mt-4 line-clamp-2 text-base font-black leading-snug text-slate-900 transition group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 sm:text-lg">
-                  {e.title}
-                </h2>
+                <Link href={detailHref} prefetch={true}>
+                  <h3 className="mt-4 line-clamp-2 text-base font-bold leading-snug text-slate-900 transition group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 sm:text-lg">
+                    {e.title}
+                  </h3>
+                </Link>
 
                 <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-3 text-center text-xs dark:bg-slate-800/60">
                   <div>
@@ -199,7 +210,7 @@ export function ExamsDirectoryClient({ exams = [] }) {
                       <HelpCircle className="h-3.5 w-3.5" />
                       <span className="text-[10px]">प्रश्न</span>
                     </div>
-                    <div className="mt-1 font-black text-slate-900 dark:text-slate-100">
+                    <div className="mt-1 font-bold text-slate-900 dark:text-slate-100">
                       {qCount}
                     </div>
                   </div>
@@ -208,7 +219,7 @@ export function ExamsDirectoryClient({ exams = [] }) {
                       <Clock className="h-3.5 w-3.5" />
                       <span className="text-[10px]">वेळ</span>
                     </div>
-                    <div className="mt-1 font-black text-slate-900 dark:text-slate-100">
+                    <div className="mt-1 font-bold text-slate-900 dark:text-slate-100">
                       {duration} मि
                     </div>
                   </div>
@@ -217,7 +228,7 @@ export function ExamsDirectoryClient({ exams = [] }) {
                       <Award className="h-3.5 w-3.5" />
                       <span className="text-[10px]">गुण</span>
                     </div>
-                    <div className="mt-1 font-black text-blue-600 dark:text-blue-400">
+                    <div className="mt-1 font-bold text-blue-600 dark:text-blue-400">
                       {marks}
                     </div>
                   </div>
@@ -226,7 +237,7 @@ export function ExamsDirectoryClient({ exams = [] }) {
 
               <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
                 <Link
-                  href={`/exam/${e.slug || e.id}/attempt`}
+                  href={startHref}
                   prefetch={true}
                   className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-blue-600 py-3 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-[0.98]"
                 >
@@ -236,7 +247,7 @@ export function ExamsDirectoryClient({ exams = [] }) {
                 </Link>
 
                 <Link
-                  href={`/exam/${e.slug || e.id}`}
+                  href={detailHref}
                   prefetch={true}
                   className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                   title="अभ्यासक्रम व सूचना पहा (Syllabus & Info)"
@@ -250,9 +261,9 @@ export function ExamsDirectoryClient({ exams = [] }) {
 
         {!filteredExams.length && (
           <div className="col-span-full rounded-3xl border border-slate-200 bg-white p-12 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-            <p className="text-base font-bold">या वर्गात परीक्षा सापडली नाही.</p>
+            <p className="text-base font-bold">या प्रवर्गात परीक्षा सापडली नाही.</p>
             <p className="mt-1 text-xs text-slate-400">
-              कृपया दुसरा प्रवर्ग निवडा किंवा सर्च शब्द बदलून पहा.
+              कृपया दुसरा सर्च शब्द वापरून पहा.
             </p>
           </div>
         )}
