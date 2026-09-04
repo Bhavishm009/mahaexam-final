@@ -102,12 +102,22 @@ export function PublicFooter() {
           {/* Exams Column */}
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200">
-              {language === "mr" ? "लोकप्रिय परीक्षा" : "Popular Exams"}
+              {language === "mr" ? "मॉक टेस्ट्स व परीक्षा" : "Mock Tests & Exams"}
             </h3>
             <ul className="mt-3 space-y-2 text-xs">
               <li>
                 <Link
-                  href={user ? "/student/exams" : "/#exams"}
+                  href="/exams"
+                  prefetch={true}
+                  className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  {language === "mr" ? "सर्व २९+ मोफत टेस्ट्स →" : "All 29+ Free Tests →"}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/exams?category=police"
+                  prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "महाराष्ट्र पोलीस भरती" : "Police Bharti 2026"}
@@ -115,7 +125,8 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href={user ? "/student/exams" : "/#exams"}
+                  href="/exams?category=mpsc"
+                  prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "MPSC राज्यसेवा / संयुक्त" : "MPSC Rajyaseva / Combined"}
@@ -123,7 +134,8 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href={user ? "/student/exams" : "/#exams"}
+                  href="/exams?category=talathi"
+                  prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "तलाठी भरती सराव" : "Talathi Bharti Mock Tests"}
@@ -131,26 +143,64 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href={user ? "/student/exams" : "/#exams"}
+                  href="/exams?category=zp"
+                  prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "जिल्हा परिषद भरती" : "Zilla Parishad Recruitment"}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/jobs"
+                  prefetch={true}
+                  className="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                >
+                  {language === "mr" ? "भरती जाहिराती २०२६ 🔥" : "Govt Job Alerts 2026 🔥"}
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Coaching Column */}
+          {/* Platform & Coaching Column */}
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200">
-              {language === "mr" ? "अकॅडेमी पोर्टल" : "Coaching Portal"}
+              {language === "mr" ? "प्लॅटफॉर्म व अकॅडेमी" : "Platform & Academy"}
             </h3>
             <ul className="mt-3 space-y-2 text-xs">
+              <li>
+                <Link
+                  href="/features"
+                  prefetch={true}
+                  className="transition hover:text-blue-600 dark:hover:text-white"
+                >
+                  {language === "mr" ? "वैशिष्ट्ये (TCS/IBPS इंजिन)" : "Platform Features"}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/for-coaching"
+                  prefetch={true}
+                  className="transition hover:text-blue-600 dark:hover:text-white"
+                >
+                  {language === "mr" ? "अकॅडेमी सोल्यूशन्स" : "For Coaching Institutes"}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/pricing"
+                  prefetch={true}
+                  className="transition hover:text-blue-600 dark:hover:text-white"
+                >
+                  {language === "mr" ? "किंमत व प्लॅन्स" : "Pricing & Plans"}
+                </Link>
+              </li>
               {user?.role === "COACHING_ADMIN" || user?.role === "TEACHER" ? (
                 <>
                   <li>
                     <Link
                       href="/coaching/dashboard"
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "अकॅडेमी डॅशबोर्ड" : "Coaching Dashboard"}
@@ -159,17 +209,10 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/coaching/exams"
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "परीक्षा व्यवस्थापन" : "Manage Exams"}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/coaching/students"
-                      className="transition hover:text-blue-600 dark:hover:text-white"
-                    >
-                      {language === "mr" ? "विद्यार्थी यादी" : "Enrolled Students"}
                     </Link>
                   </li>
                 </>
@@ -178,6 +221,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/coaching/register"
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "नवीन अकॅडेमी नोंदणी" : "Register Academy"}
@@ -186,17 +230,10 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/coaching/login"
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "अकॅडेमी संचालक लॉगिन" : "Academy Admin Login"}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/#coaching"
-                      className="transition hover:text-blue-600 dark:hover:text-white"
-                    >
-                      {language === "mr" ? "संस्था वैशिष्ट्ये" : "Institute Features"}
                     </Link>
                   </li>
                 </>
@@ -221,6 +258,7 @@ export function PublicFooter() {
                             ? "/coaching/dashboard"
                             : "/student/dashboard"
                       }
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}
@@ -235,6 +273,7 @@ export function PublicFooter() {
                             ? "/coaching/profile"
                             : "/student/profile"
                       }
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "माझे प्रोफाइल" : "My Profile"}
@@ -256,6 +295,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/login"
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "विद्यार्थी लॉगिन" : "Student Login"}
@@ -264,6 +304,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/register"
+                      prefetch={true}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "मोफत नोंदणी" : "Free Registration"}
@@ -272,8 +313,12 @@ export function PublicFooter() {
                 </>
               )}
               <li>
-                <Link href="/#faq" className="transition hover:text-blue-600 dark:hover:text-white">
-                  {language === "mr" ? "वारंवार विचारले जाणारे प्रश्न" : "FAQs"}
+                <Link
+                  href="/faq"
+                  prefetch={true}
+                  className="transition hover:text-blue-600 dark:hover:text-white"
+                >
+                  {language === "mr" ? "वारंवार विचारले जाणारे प्रश्न (FAQ)" : "Frequently Asked Questions"}
                 </Link>
               </li>
             </ul>

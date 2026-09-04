@@ -13,6 +13,42 @@ export default async function sitemap() {
       priority: 1.0,
     },
     {
+      url: `${baseUrl}/exams`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/jobs`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/features`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/for-coaching`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/pricing`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/faq`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/student/exams`,
       lastModified: now,
       changeFrequency: "daily",
@@ -54,7 +90,7 @@ export default async function sitemap() {
   let examRoutes = [];
   try {
     const exams = await prisma.exam.findMany({
-      where: { status: "LIVE" },
+      where: { status: { in: ["SCHEDULED", "LIVE"] } },
       select: { id: true, slug: true, updatedAt: true },
       take: 200,
     });

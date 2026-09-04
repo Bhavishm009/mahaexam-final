@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getCachedPublicExams } from "@/lib/cached-exams";
+import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
 import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
 import { HeroTitle } from "@/components/home/hero-title";
@@ -25,52 +27,7 @@ export default async function Home() {
 
   let dbExams = [];
   try {
-    const examsFromDb = await prisma.exam.findMany({
-      where: {
-        status: { in: ["SCHEDULED", "LIVE"] },
-      },
-      take: 12,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        examType: true,
-        durationMinutes: true,
-        totalQuestions: true,
-        totalMarks: true,
-        negativeMarks: true,
-        isFree: true,
-        visibilityMode: true,
-        _count: {
-          select: { questions: true },
-        },
-      },
-    });
-
-    dbExams = examsFromDb.map((e) => ({
-      id: e.id,
-      slug: e.slug,
-      title: e.title,
-      titleMr: e.title,
-      titleEn: e.title,
-      examType: e.examType,
-      questions: e.totalQuestions || e._count?.questions || 100,
-      duration: e.durationMinutes || 90,
-      marks: e.totalMarks || 100,
-      totalMarks: e.totalMarks || 100,
-      negativeMarks: e.negativeMarks ? `${e.negativeMarks}` : "०.२५",
-      negativeMarksEn: e.negativeMarks ? `${e.negativeMarks}` : "0.25",
-      isFree: e.isFree,
-      badgeMr:
-        e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq") ? "अधिकृत PYQ" : "१००% लाइव्ह",
-      badgeEn:
-        e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq") ? "Official PYQ" : "100% Live",
-      badgeColor:
-        e.examType === "PREVIOUS_YEAR" || e.slug?.includes("pyq")
-          ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700"
-          : "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700",
-    }));
+    dbExams = await getCachedPublicExams();
   } catch {
     dbExams = [];
   }
@@ -101,7 +58,9 @@ export default async function Home() {
         </section>
 
         {/* MOCK TESTS CATALOG */}
-        <PublicExamsSection initialExams={dbExams} />
+        <Suspense fallback={<ExamsSkeleton />}>
+          <PublicExamsSection initialExams={dbExams} />
+        </Suspense>
 
         {/* FEATURES GRID */}
         <FeaturesSection />

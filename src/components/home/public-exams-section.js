@@ -6,106 +6,13 @@ import { Zap } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";
 
-const fallbackExamsData = [
-  {
-    id: "police-01",
-    category: "police",
-    titleMr: "महाराष्ट्र पोलीस भरती संपूर्ण सराव परीक्षा ०१",
-    titleEn: "Maharashtra Police Bharti Full Mock Test 01",
-    questions: 100,
-    duration: 90,
-    marks: 100,
-    negativeMarks: "०.२५",
-    negativeMarksEn: "0.25",
-    badgeMr: "सर्वात लोकप्रिय",
-    badgeEn: "Most Popular",
-    badgeColor:
-      "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700",
-  },
-  {
-    id: "mpsc-01",
-    category: "mpsc",
-    titleMr: "MPSC राज्यसेवा सामान्य अध्ययन पेपर १ सराव परीक्षा",
-    titleEn: "MPSC Rajyaseva GS Paper 1 Comprehensive Test",
-    questions: 100,
-    duration: 120,
-    marks: 200,
-    negativeMarks: "०.२५",
-    negativeMarksEn: "0.25",
-    badgeMr: "TCS/IBPS पॅटर्न",
-    badgeEn: "TCS/IBPS Pattern",
-    badgeColor:
-      "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-700",
-  },
-  {
-    id: "talathi-01",
-    category: "talathi",
-    titleMr: "तलाठी भरती विशेष ऑनलाइन टेस्ट सिरीज २०२६",
-    titleEn: "Talathi Bharti Special Practice Test Series 2026",
-    questions: 100,
-    duration: 120,
-    marks: 200,
-    negativeMarks: "नाही",
-    negativeMarksEn: "None",
-    badgeMr: "नवीन अभ्यासक्रम",
-    badgeEn: "Latest Syllabus",
-    badgeColor:
-      "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700",
-  },
-  {
-    id: "zp-01",
-    category: "zp",
-    titleMr: "जिल्हा परिषद आरोग्य सेवक परिपूर्ण सराव परीक्षा",
-    titleEn: "Zilla Parishad Arogya Sevak Full Length Test",
-    questions: 100,
-    duration: 90,
-    marks: 200,
-    negativeMarks: "०.२५",
-    negativeMarksEn: "0.25",
-    badgeMr: "नवीन २०२६",
-    badgeEn: "Updated 2026",
-    badgeColor:
-      "bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-700",
-  },
-  {
-    id: "vanrakshak-01",
-    category: "saralseva",
-    titleMr: "वनरक्षक सरळसेवा भरती ऑनलाइन CBT परीक्षा",
-    titleEn: "Vanrakshak (Forest Guard) CBT Exam Simulator",
-    questions: 60,
-    duration: 90,
-    marks: 120,
-    negativeMarks: "०.५०",
-    negativeMarksEn: "0.50",
-    badgeMr: "ऑनलाइन CBT",
-    badgeEn: "Online CBT",
-    badgeColor:
-      "bg-indigo-100 text-indigo-900 border-indigo-300 dark:bg-indigo-950/80 dark:text-indigo-300 dark:border-indigo-700",
-  },
-  {
-    id: "police-02",
-    category: "police",
-    titleMr: "पोलीस भरती सामान्य ज्ञान व मराठी व्याकरण सराव",
-    titleEn: "Police Bharti GK & Marathi Grammar Focus",
-    questions: 50,
-    duration: 45,
-    marks: 50,
-    negativeMarks: "०.२५",
-    negativeMarksEn: "0.25",
-    badgeMr: "विषयवार टेस्ट",
-    badgeEn: "Subject Test",
-    badgeColor:
-      "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-700",
-  },
-];
-
 export function PublicExamsSection({ initialExams = [] }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const { language, t } = useLanguage();
   const { user } = useAuth();
 
   const sourceList = useMemo(() => {
-    return initialExams && initialExams.length > 0 ? initialExams : fallbackExamsData;
+    return initialExams || [];
   }, [initialExams]);
 
   const getExamCategory = (e) => {
@@ -347,6 +254,22 @@ export function PublicExamsSection({ initialExams = [] }) {
               </div>
             );
           })}
+        </div>
+
+        {/* View All Exams Banner */}
+        <div className="mt-12 text-center">
+          <Link
+            href="/exams"
+            prefetch={true}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:from-blue-500 hover:to-indigo-500 hover:shadow-xl active:scale-95"
+          >
+            <Zap className="h-4 w-4 text-amber-300" />
+            <span>
+              {language === "mr"
+                ? `सर्व २९+ सराव परीक्षा व PYQ पेपर्स पहा (${sourceList.length} उपलब्ध)`
+                : `Explore All 29+ Mock Tests & PYQs (${sourceList.length} Available)`}
+            </span>
+          </Link>
         </div>
       </div>
     </section>
