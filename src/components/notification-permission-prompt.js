@@ -58,13 +58,13 @@ export function NotificationPermissionPrompt() {
           try {
             let pushSub = await reg.pushManager.getSubscription();
             if (!pushSub) {
-              const vapidKey =
-                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-                "BBXdoA9ueuPsQgjRjbAyEPBGxd47dSZ8cV02rSadvYAuNcjQ2Ev3L_1qZbXJvQ22u5U5fgS0H1mUzE6Ym8LOMiM";
-              pushSub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidKey),
-              });
+              const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+              if (vapidKey) {
+                pushSub = await reg.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: urlBase64ToUint8Array(vapidKey),
+                });
+              }
             }
             if (pushSub) {
               const json = pushSub.toJSON();

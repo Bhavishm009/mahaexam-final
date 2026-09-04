@@ -28,9 +28,7 @@ export async function GET() {
       }),
     ]);
 
-    const vapidPublicKey =
-      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-      "BBXdoA9ueuPsQgjRjbAyEPBGxd47dSZ8cV02rSadvYAuNcjQ2Ev3L_1qZbXJvQ22u5U5fgS0H1mUzE6Ym8LOMiM";
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
     return NextResponse.json({
       success: true,
@@ -38,7 +36,7 @@ export async function GET() {
         activeSubscriptions,
         totalSubscriptions,
         studentSubscriptions,
-        vapidConfigured: Boolean(process.env.VAPID_PRIVATE_KEY || true),
+        vapidConfigured: Boolean(process.env.VAPID_PRIVATE_KEY),
         vapidPublicKey,
       },
     });

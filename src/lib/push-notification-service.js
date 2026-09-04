@@ -1,11 +1,8 @@
 import { prisma } from "./db.js";
 import webpush from "web-push";
 
-const VAPID_PUBLIC_KEY =
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-  "BBXdoA9ueuPsQgjRjbAyEPBGxd47dSZ8cV02rSadvYAuNcjQ2Ev3L_1qZbXJvQ22u5U5fgS0H1mUzE6Ym8LOMiM";
-const VAPID_PRIVATE_KEY =
-  process.env.VAPID_PRIVATE_KEY || "2dlok6PztFXdAYkkc1PNJY1CYqdmqimJHNniW8M0_uQ";
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:support@mahaexam.com";
 
 let vapidConfigured = false;
