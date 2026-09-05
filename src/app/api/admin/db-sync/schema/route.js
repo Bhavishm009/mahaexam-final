@@ -78,6 +78,18 @@ export async function GET() {
     }
   }
 
+  const byTable = {};
+  for (const mc of missingColumns) {
+    const k = mc.table.toLowerCase();
+    if (!byTable[k]) {
+      byTable[k] = {
+        table: mc.table,
+        missingColumns: [],
+      };
+    }
+    byTable[k].missingColumns.push(mc);
+  }
+
   const isSchemaAligned = missingTables.length === 0 && missingColumns.length === 0;
 
   return NextResponse.json({
@@ -88,6 +100,7 @@ export async function GET() {
     totalCheckedColumns: primaryColumns.length,
     missingTables,
     missingColumns,
+    byTable,
     message: isSchemaAligned
       ? "Primary and Secondary database schemas are 100% identical and aligned."
       : `Secondary database is missing ${missingTables.length} tables and ${missingColumns.length} columns. Click 'Align Schema' to synchronize.`,
@@ -96,11 +109,24 @@ export async function GET() {
 
 /**
  * POST /api/admin/db-sync/schema
- * Automatically align missing columns on Secondary Shadow Database
+ * Automatically align missing columns on Secondary Shadow Database.
+ * Supports ?table=<tableName> to align only a specific table.
  */
-export async function POST() {
+export async function POST(req) {
   if (!secondaryPrisma) {
     return NextResponse.json({ success: false, error: "SECONDARY_DATABASE_URL is not configured" }, { status: 400 });
+  }
+
+  let targetTable = null;
+  if (req) {
+    try {
+      const url = new URL(req.url);
+      targetTable = url.searchParams.get("table");
+      if (!targetTable && req.headers.get("content-type")?.includes("application/json")) {
+        const body = await req.json().catch(() => ({}));
+        targetTable = body.table || null;
+      }
+    } catch (_) {}
   }
 
   try {
@@ -122,6 +148,11 @@ export async function POST() {
 
     for (const col of primaryColumns) {
       if (col.table_name.startsWith("_") || col.table_name === "pg_stat_statements") continue;
+
+      if (targetTable && col.table_name.toLowerCase() !== targetTable.toLowerCase()) {
+        continue;
+      }
+
       const key = `${col.table_name}.${col.column_name}`;
 
       if (!sColSet.has(key)) {
@@ -139,8 +170,11 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       message: alignedLog.length > 0
-        ? `Successfully aligned schema: ${alignedLog.length} columns synchronized.`
+        ? targetTable
+          ? `Successfully aligned schema for '${targetTable}': ${alignedLog.length} columns added without data loss.`
+          : `Successfully aligned schema: ${alignedLog.length} columns synchronized.`
         : "Schema is already 100% aligned.",
+      targetTable: targetTable || null,
       alignedLog,
     });
   } catch (err) {

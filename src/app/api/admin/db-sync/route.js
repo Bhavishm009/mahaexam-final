@@ -34,12 +34,24 @@ function sanitizeRecords(records) {
  * POST /api/admin/db-sync
  * Trigger bidirectional 1:1 schema sync & record mirroring for ALL tables between Primary & Secondary DBs
  */
-export async function POST() {
+export async function POST(req) {
   if (!secondaryPrisma) {
     return NextResponse.json(
       { success: false, error: "SECONDARY_DATABASE_URL is not configured" },
       { status: 400 }
     );
+  }
+
+  let targetTable = null;
+  if (req) {
+    try {
+      const url = new URL(req.url);
+      targetTable = url.searchParams.get("table");
+      if (!targetTable && req.headers.get("content-type")?.includes("application/json")) {
+        const body = await req.json().catch(() => ({}));
+        targetTable = body.table || null;
+      }
+    } catch (_) {}
   }
 
   // Verify Primary is reachable before attempting sync
@@ -49,7 +61,7 @@ export async function POST() {
     return NextResponse.json(
       {
         success: false,
-        error: "Primary Database (Aiven) is currently offline. System is running in automatic failover on Secondary DB. Cannot perform bidirectional sync until Primary DB is restored.",
+        error: "Primary Database (Aiven) is currently offline. System is running in automatic failover on Secondary DB. Cannot perform sync until Primary DB is restored.",
       },
       { status: 503 }
     );
@@ -69,17 +81,30 @@ export async function POST() {
     subscriptionPlan: "slug",
   };
 
-  // Replay any pending failover outbox mutations first
-  try {
-    const { replayFailoverQueue } = await import("@/lib/db-sync-queue.js");
-    const replayRes = await replayFailoverQueue();
-    if (replayRes && replayRes.replayed > 0) {
-      syncLog.push(`📦 Replayed ${replayRes.replayed} failover outbox mutations from Secondary to Primary`);
-    }
-  } catch (_) {}
+  const modelsToSync = targetTable
+    ? SYNC_MODELS.filter((m) => m.key.toLowerCase() === targetTable.toLowerCase())
+    : SYNC_MODELS;
+
+  if (targetTable && modelsToSync.length === 0) {
+    return NextResponse.json(
+      { success: false, error: `Table '${targetTable}' is not a valid syncable model.` },
+      { status: 400 }
+    );
+  }
+
+  // If doing a full sync, replay failover outbox mutations first
+  if (!targetTable) {
+    try {
+      const { replayFailoverQueue } = await import("@/lib/db-sync-queue.js");
+      const replayRes = await replayFailoverQueue();
+      if (replayRes && replayRes.replayed > 0) {
+        syncLog.push(`📦 Replayed ${replayRes.replayed} failover outbox mutations from Secondary to Primary`);
+      }
+    } catch (_) {}
+  }
 
   try {
-    for (const { key, label } of SYNC_MODELS) {
+    for (const { key, label } of modelsToSync) {
       if (!primaryPrisma[key] || !secondaryPrisma[key]) continue;
 
       try {
@@ -213,7 +238,10 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      message: "Full Database Synchronization Completed Successfully!",
+      message: targetTable
+        ? `Table '${modelsToSync[0]?.label}' Synchronized Successfully!`
+        : "Full Database Synchronization Completed Successfully!",
+      targetTable: targetTable || null,
       syncLog,
       stats,
       status: freshStatus,

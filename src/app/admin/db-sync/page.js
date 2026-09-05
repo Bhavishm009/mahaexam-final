@@ -81,7 +81,43 @@ export default function DatabaseSyncPage() {
     }
   }
 
-  // 3. Setup Realtime SSE Listener
+  // 3. Single-Table Data Sync Handler
+  const [syncingTable, setSyncingTable] = useState(null);
+  async function handleSyncTable(tableKey, label) {
+    setSyncingTable(tableKey);
+    try {
+      const res = await fetch(`/api/admin/db-sync?table=${tableKey}`, { method: "POST" });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Table sync failed");
+      toast.success(json.message || `Table '${label}' synchronized successfully!`);
+      await queryClient.invalidateQueries({ queryKey: ["db-sync-status"] });
+      await handleForceRecheck();
+    } catch (err) {
+      toast.error(`Sync failed for ${label}: ${err.message}`);
+    } finally {
+      setSyncingTable(null);
+    }
+  }
+
+  // 4. Single-Table Schema Migration Handler
+  const [aligningTable, setAligningTable] = useState(null);
+  async function handleAlignSingleTableSchema(tableName) {
+    setAligningTable(tableName);
+    try {
+      const res = await fetch(`/api/admin/db-sync/schema?table=${tableName}`, { method: "POST" });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "Schema migration failed");
+      toast.success(json.message || `Schema aligned for '${tableName}'!`);
+      await refetchSchema();
+      await handleForceRecheck();
+    } catch (e) {
+      toast.error("Schema migration failed: " + e.message);
+    } finally {
+      setAligningTable(null);
+    }
+  }
+
+  // 5. Setup Realtime SSE Listener
   useEffect(() => {
     let eventSource;
     try {
@@ -623,25 +659,76 @@ export default function DatabaseSyncPage() {
                 <th className="px-6 py-3.5">Table Name</th>
                 <th className="px-6 py-3.5">Primary Aiven DB Count</th>
                 <th className="px-6 py-3.5">Secondary Supabase Count</th>
-                <th className="px-6 py-3.5 text-right">Sync Status</th>
+                <th className="px-6 py-3.5">Sync Status</th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {tableRows.map((row) => {
                 const hasP = typeof row.p === "number";
                 const hasS = typeof row.s === "number";
-                const match = hasP && hasS && row.p === row.s;
+                const countMatch = hasP && hasS && row.p === row.s;
+                const countDiff = hasP && hasS ? row.p - row.s : 0;
+
+                // Check for per-table schema divergence
+                const tableKeyLower = row.key.toLowerCase();
+                const schemaIssue =
+                  schemaData?.byTable?.[tableKeyLower] ||
+                  schemaData?.byTable?.[row.label.toLowerCase()] ||
+                  null;
+                const hasSchemaMismatch = !!schemaIssue && schemaIssue.missingColumns?.length > 0;
+                const isRowOutdated = !countMatch || hasSchemaMismatch;
 
                 return (
-                  <tr key={row.key} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                  <tr
+                    key={row.key}
+                    className={
+                      isRowOutdated
+                        ? "bg-amber-50/70 dark:bg-amber-950/25 border-l-4 border-l-amber-500 hover:bg-amber-100/60 dark:hover:bg-amber-950/40 transition-colors"
+                        : "hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
+                    }
+                  >
                     <td className="px-6 py-4 font-extrabold text-slate-900 dark:text-white">
-                      {row.label}
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span>{row.label}</span>
+                          <span className="font-mono text-[10px] font-normal text-slate-400">
+                            ({row.key})
+                          </span>
+                        </div>
+                        {hasSchemaMismatch && (
+                          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                            <span className="inline-flex items-center gap-1 rounded bg-amber-200/80 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-900/60 dark:text-amber-200">
+                              <AlertTriangle className="h-2.5 w-2.5" />
+                              Missing {schemaIssue.missingColumns.length} column(s):{" "}
+                              {schemaIssue.missingColumns.map((c) => c.column).join(", ")}
+                            </span>
+                            <button
+                              onClick={() => handleAlignSingleTableSchema(schemaIssue.table)}
+                              disabled={aligningTable === schemaIssue.table}
+                              className="inline-flex items-center gap-1 rounded bg-amber-600 px-2 py-0.5 text-[10px] font-extrabold text-white hover:bg-amber-700 disabled:opacity-50"
+                            >
+                              <RefreshCw
+                                className={`h-2.5 w-2.5 ${aligningTable === schemaIssue.table ? "animate-spin" : ""}`}
+                              />
+                              {aligningTable === schemaIssue.table ? "Migrating..." : "Migrate Schema"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">
                       {isBusy ? (
                         <span className="animate-pulse text-slate-400 font-medium">Checking...</span>
                       ) : hasP ? (
-                        row.p.toLocaleString()
+                        <div className="flex items-center gap-2">
+                          <span>{row.p.toLocaleString()}</span>
+                          {!countMatch && countDiff > 0 && (
+                            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-800 dark:bg-blue-950/80 dark:text-blue-300">
+                              +{countDiff.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         "—"
                       )}
@@ -650,18 +737,25 @@ export default function DatabaseSyncPage() {
                       {isBusy ? (
                         <span className="animate-pulse text-slate-400 font-medium">Checking...</span>
                       ) : hasS ? (
-                        row.s.toLocaleString()
+                        <div className="flex items-center gap-2">
+                          <span>{row.s.toLocaleString()}</span>
+                          {!countMatch && countDiff < 0 && (
+                            <span className="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-800 dark:bg-purple-950/80 dark:text-purple-300">
+                              +{Math.abs(countDiff).toLocaleString()}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         "—"
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4">
                       {isBusy ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-extrabold text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
                           <RefreshCw className="h-3 w-3 animate-spin text-blue-500" />
                           Checking...
                         </span>
-                      ) : match ? (
+                      ) : countMatch && !hasSchemaMismatch ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-extrabold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           In Sync
@@ -669,9 +763,30 @@ export default function DatabaseSyncPage() {
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-extrabold text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
                           <AlertTriangle className="h-3.5 w-3.5" />
-                          Sync Needed
+                          {!countMatch ? "Records Out of Sync" : "Schema Out of Sync"}
                         </span>
                       )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleSyncTable(row.key, row.label)}
+                        disabled={isBusy || syncingTable === row.key}
+                        className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition shadow-xs ${
+                          isRowOutdated
+                            ? "bg-amber-600 text-white hover:bg-amber-700 shadow-sm"
+                            : "border border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        } disabled:opacity-50`}
+                        title={`Sync records for ${row.label}`}
+                      >
+                        <RefreshCw
+                          className={`h-3.5 w-3.5 ${syncingTable === row.key ? "animate-spin" : ""}`}
+                        />
+                        {syncingTable === row.key
+                          ? "Syncing..."
+                          : isRowOutdated
+                          ? "Retry Sync"
+                          : "Sync Table"}
+                      </button>
                     </td>
                   </tr>
                 );
