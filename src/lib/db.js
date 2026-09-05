@@ -5,9 +5,16 @@ const globalForPrisma = globalThis;
 
 function createClient(url) {
   if (!url) return null;
+  let tunedUrl = url;
+  // Ensure connection pool timeout allows sufficient buffer (20s) during deployment container restarts
+  if (tunedUrl.includes("pool_timeout=10")) {
+    tunedUrl = tunedUrl.replace("pool_timeout=10", "pool_timeout=20");
+  } else if (!tunedUrl.includes("pool_timeout=")) {
+    tunedUrl += (tunedUrl.includes("?") ? "&" : "?") + "pool_timeout=20";
+  }
   return new PrismaClient({
     datasources: {
-      db: { url },
+      db: { url: tunedUrl },
     },
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
@@ -133,7 +140,9 @@ export async function activateFailover(err) {
   if (
     process.env.NEXT_PHASE === "phase-production-build" ||
     process.env.IS_BUILD ||
-    process.env.NEXT_PUBLIC_IS_BUILD
+    process.env.NEXT_PUBLIC_IS_BUILD ||
+    process.env.CI === "true" ||
+    process.env.CI === "1"
   ) {
     return;
   }
@@ -153,6 +162,20 @@ export async function activateFailover(err) {
     // Asynchronously dispatch notification without blocking current database query
     (async () => {
       try {
+        // Distributed database throttle: Check if any serverless lambda already alerted in the last 15 mins
+        const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+        const recentAlert = await secondaryPrisma.notification.findFirst({
+          where: {
+            title: { contains: "CRITICAL: Primary Database Down" },
+            createdAt: { gte: fifteenMinsAgo },
+          },
+          select: { id: true },
+        });
+
+        if (recentAlert) {
+          return;
+        }
+
         const superAdmin = await secondaryPrisma.user.findFirst({
           where: { role: "SUPER_ADMIN" },
           select: { id: true, email: true, name: true },
@@ -240,6 +263,20 @@ export async function handlePrimaryRecovery() {
   // Instant notification to Super Admin that Primary Database has recovered
   (async () => {
     try {
+      // Distributed database throttle: Check if any instance already dispatched a recovery alert in the last 15 mins
+      const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const recentRecovery = await primaryPrisma.notification.findFirst({
+        where: {
+          title: { contains: "RESTORED: Primary Database Online" },
+          createdAt: { gte: fifteenMinsAgo },
+        },
+        select: { id: true },
+      }).catch(() => null);
+
+      if (recentRecovery) {
+        return;
+      }
+
       const superAdmin = await primaryPrisma.user.findFirst({
         where: { role: "SUPER_ADMIN" },
         select: { id: true, email: true, name: true },

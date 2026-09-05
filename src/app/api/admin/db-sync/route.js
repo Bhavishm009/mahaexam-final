@@ -70,48 +70,100 @@ export async function POST() {
         try { sCount = await secondaryPrisma[key].count(); } catch {}
 
         if (pCount === null || sCount === null) {
-          syncLog.push(`⚠️ ${label}: Skipped (Model or Table missing on target DB)`);
+          syncLog.push(`⚠️ ${label}: Skipped (Table missing or inaccessible)`);
           continue;
         }
 
-        if (pCount === sCount) {
+        // For massive static tables (questions, questionOptions), count equality is a safe fast-path
+        if (pCount === sCount && pCount > 5000) {
           stats[key] = pCount;
           syncLog.push(`In Sync (${pCount} ${label})`);
           continue;
         }
 
-        // Copy missing Primary records to Secondary
-        if (pCount > sCount) {
-          const records = await primaryPrisma[key].findMany();
-          if (records.length > 0) {
-            const CHUNK_SIZE = key === "questionOption" ? 500 : 200;
-            for (let i = 0; i < records.length; i += CHUNK_SIZE) {
-              const chunk = sanitizeRecords(records.slice(i, i + CHUNK_SIZE));
-              await secondaryPrisma[key].createMany({
-                data: chunk,
-                skipDuplicates: true,
-              }).catch(() => {});
-            }
-            stats[key] = records.length;
-            syncLog.push(`Synced ${records.length} ${label} (Primary -> Secondary)`);
-          }
+        // Fetch IDs to find exact missing records in both directions
+        const pRows = await primaryPrisma[key].findMany({ select: { id: true } });
+        const sRows = await secondaryPrisma[key].findMany({ select: { id: true } });
+
+        const pIds = pRows.map((r) => r.id);
+        const sIds = sRows.map((r) => r.id);
+
+        const pIdSet = new Set(pIds);
+        const sIdSet = new Set(sIds);
+
+        const missingInSecondary = pIds.filter((id) => !sIdSet.has(id));
+        const missingInPrimary = sIds.filter((id) => !pIdSet.has(id));
+
+        if (missingInSecondary.length === 0 && missingInPrimary.length === 0) {
+          stats[key] = pCount;
+          syncLog.push(`In Sync (${pCount} ${label})`);
+          continue;
         }
 
-        // Copy missing Secondary records to Primary
-        if (sCount > pCount) {
-          const records = await secondaryPrisma[key].findMany();
-          if (records.length > 0) {
-            const CHUNK_SIZE = key === "questionOption" ? 500 : 200;
-            for (let i = 0; i < records.length; i += CHUNK_SIZE) {
-              const chunk = sanitizeRecords(records.slice(i, i + CHUNK_SIZE));
-              await primaryPrisma[key].createMany({
-                data: chunk,
+        const CHUNK_SIZE = 150;
+
+        // 1. Copy records missing in Secondary (Primary -> Secondary)
+        if (missingInSecondary.length > 0) {
+          let syncedToSecondary = 0;
+          for (let i = 0; i < missingInSecondary.length; i += CHUNK_SIZE) {
+            const chunkIds = missingInSecondary.slice(i, i + CHUNK_SIZE);
+            const records = await primaryPrisma[key].findMany({
+              where: { id: { in: chunkIds } },
+            });
+            const cleanChunk = sanitizeRecords(records);
+
+            try {
+              const res = await secondaryPrisma[key].createMany({
+                data: cleanChunk,
                 skipDuplicates: true,
-              }).catch(() => {});
+              });
+              syncedToSecondary += res.count || cleanChunk.length;
+            } catch (chunkErr) {
+              // Fallback to per-item insertion if a unique constraint or relation fails
+              for (const item of cleanChunk) {
+                try {
+                  await secondaryPrisma[key].create({ data: item });
+                  syncedToSecondary++;
+                } catch (_) {}
+              }
             }
-            stats[key] = records.length;
-            syncLog.push(`Synced ${records.length} ${label} (Secondary -> Primary)`);
           }
+          syncLog.push(`Synced ${syncedToSecondary} ${label} (Primary -> Secondary)`);
+        }
+
+        // 2. Copy records missing in Primary (Secondary -> Primary)
+        if (missingInPrimary.length > 0) {
+          let syncedToPrimary = 0;
+          for (let i = 0; i < missingInPrimary.length; i += CHUNK_SIZE) {
+            const chunkIds = missingInPrimary.slice(i, i + CHUNK_SIZE);
+            const records = await secondaryPrisma[key].findMany({
+              where: { id: { in: chunkIds } },
+            });
+            const cleanChunk = sanitizeRecords(records);
+
+            try {
+              const res = await primaryPrisma[key].createMany({
+                data: cleanChunk,
+                skipDuplicates: true,
+              });
+              syncedToPrimary += res.count || cleanChunk.length;
+            } catch (chunkErr) {
+              // Fallback to per-item insertion
+              for (const item of cleanChunk) {
+                try {
+                  await primaryPrisma[key].create({ data: item });
+                  syncedToPrimary++;
+                } catch (_) {}
+              }
+            }
+          }
+          syncLog.push(`Synced ${syncedToPrimary} ${label} (Secondary -> Primary)`);
+        }
+
+        try {
+          stats[key] = await primaryPrisma[key].count();
+        } catch {
+          stats[key] = pCount;
         }
       } catch (err) {
         console.error(`Error syncing model ${key}:`, err);

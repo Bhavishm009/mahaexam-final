@@ -1,38 +1,72 @@
 import { primaryPrisma, secondaryPrisma } from "./db.js";
 
-// List of all database models to track and sync
+// List of all database models to track and sync in topological foreign-key dependency order
 export const SYNC_MODELS = [
+  // Level 0: Root independent models
   { key: "organization", label: "Organizations" },
+  { key: "subscriptionPlan", label: "Subscription Plans" },
+  { key: "subject", label: "Subjects" },
+  { key: "jobAlert", label: "Job Notifications & Alerts" },
+  { key: "seoSetting", label: "SEO Settings" },
+  { key: "job", label: "Background Queue Jobs" },
+
+  // Level 1: Depends on Level 0
   { key: "user", label: "Users" },
+  { key: "chapter", label: "Chapters" },
+  { key: "coachingSubscription", label: "Coaching Subscriptions" },
+
+  // Level 2: Depends on User / Org / Subject
   { key: "studentProfile", label: "Student Profiles" },
   { key: "teacherProfile", label: "Teacher Profiles" },
-  { key: "subscriptionPlan", label: "Subscription Plans" },
-  { key: "coachingSubscription", label: "Coaching Subscriptions" },
+  { key: "passkeyCredential", label: "Passkey Credentials" },
+  { key: "pushSubscription", label: "Push Subscriptions" },
+  { key: "topic", label: "Topics" },
   { key: "batch", label: "Batches" },
   { key: "coachingBatch", label: "Coaching Batches" },
+  { key: "coachingInvite", label: "Coaching Invites" },
+  { key: "blogPost", label: "Blog Posts" },
+  { key: "auditLog", label: "Audit Logs" },
+  { key: "notification", label: "Notifications" },
+
+  // Level 3: Depends on Batch / User / Topics
   { key: "batchMembership", label: "Batch Memberships" },
-  { key: "subject", label: "Subjects" },
-  { key: "chapter", label: "Chapters" },
-  { key: "topic", label: "Topics" },
+  { key: "batchStudent", label: "Batch Students" },
   { key: "question", label: "Questions" },
+
+  // Level 4: Depends on Question
   { key: "questionOption", label: "Question Options" },
   { key: "questionTag", label: "Question Tags" },
   { key: "exam", label: "Exams" },
+
+  // Level 5: Depends on Exam / Question
   { key: "examQuestion", label: "Exam Questions" },
+  { key: "examQuestionSnapshot", label: "Exam Question Snapshots" },
   { key: "examBatch", label: "Exam Batches" },
+  { key: "examStudent", label: "Exam Students" },
+  { key: "globalExamNotification", label: "Global Exam Notifications" },
+
+  // Level 6: Depends on Exam / User
   { key: "examAttempt", label: "Exam Attempts" },
-  { key: "attemptQuestion", label: "Attempt Questions" },
-  { key: "attemptAnswer", label: "Attempt Answers" },
-  { key: "examResult", label: "Exam Results" },
-  { key: "jobAlert", label: "Job Notifications & Alerts" },
-  { key: "blogPost", label: "Blog Posts" },
-  { key: "seoSetting", label: "SEO Settings" },
-  { key: "auditLog", label: "Audit Logs" },
-  { key: "notification", label: "Notifications" },
-  { key: "payment", label: "Payments" },
   { key: "paymentOrder", label: "Payment Orders" },
-  { key: "job", label: "Background Queue Jobs" },
-  { key: "passkeyCredential", label: "Passkey Credentials" },
+
+  // Level 7: Depends on ExamAttempt / PaymentOrder
+  { key: "payment", label: "Payments" },
+  { key: "examAttemptEvent", label: "Exam Attempt Events" },
+  { key: "examAttemptAnswer", label: "Exam Attempt Answers" },
+  { key: "attemptQuestion", label: "Attempt Questions" },
+  { key: "examViolation", label: "Exam Violations" },
+  { key: "examResult", label: "Exam Results" },
+
+  // Level 8: Depends on AttemptQuestion / ExamResult
+  { key: "attemptAnswer", label: "Attempt Answers" },
+  { key: "examResultSummary", label: "Exam Result Summaries" },
+  { key: "result", label: "Results" },
+
+  // Level 9: Depends on Result
+  { key: "resultSubject", label: "Result Subjects" },
+  { key: "subjectResult", label: "Subject Results" },
+  { key: "examLeaderboard", label: "Exam Leaderboards" },
+  { key: "studentPerformanceSnapshot", label: "Student Performance Snapshots" },
 ];
 
 const globalForCache = globalThis;
