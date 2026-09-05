@@ -64,14 +64,30 @@ export async function savePasskeyCredential(userId, credentialData) {
   return credential;
 }
 
-export async function createPasskeyLoginOptions(origin, email) {
+export async function createPasskeyLoginOptions(origin, identifier) {
   const challenge = crypto.randomBytes(32).toString("base64url");
   const hostname = new URL(origin || "http://localhost:3000").hostname;
 
   let allowCredentials = [];
-  if (email && typeof email === "string" && email.trim()) {
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+  const loginIdentifier = (identifier || "").trim();
+  if (loginIdentifier) {
+    const numericOnly = loginIdentifier.replace(/\D/g, "");
+    const cleanPhone =
+      numericOnly.length === 10
+        ? numericOnly
+        : numericOnly.length === 12 && numericOnly.startsWith("91")
+          ? numericOnly.slice(2)
+          : null;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: { equals: loginIdentifier, mode: "insensitive" } },
+          ...(cleanPhone
+            ? [{ phone: cleanPhone }, { phone: loginIdentifier }, { phone: `+91${cleanPhone}` }]
+            : [{ phone: loginIdentifier }]),
+        ],
+      },
       include: { passkeys: true },
     });
     if (user && user.passkeys && user.passkeys.length > 0) {

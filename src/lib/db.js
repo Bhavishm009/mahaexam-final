@@ -129,8 +129,24 @@ export async function activateFailover(err) {
     invalidateDbSyncCache();
   } catch (_) {}
 
-  // Send instant notification to Super Admin (throttled to once every 15 mins per incident)
-  if (secondaryPrisma && (!state.lastNotifiedAt || now - state.lastNotifiedAt > 15 * 60 * 1000)) {
+  // Skip notifications during Next.js production build or deployment static generation
+  if (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.IS_BUILD ||
+    process.env.NEXT_PUBLIC_IS_BUILD
+  ) {
+    return;
+  }
+
+  // Track failure count to avoid transient 2-second container deployment restart blips
+  state.failureCount = (state.failureCount || 0) + 1;
+
+  // Send instant notification to Super Admin only on sustained failure (throttled to once every 15 mins)
+  if (
+    state.failureCount >= 3 &&
+    secondaryPrisma &&
+    (!state.lastNotifiedAt || now - state.lastNotifiedAt > 15 * 60 * 1000)
+  ) {
     state.lastNotifiedAt = now;
     state.adminNotified = true;
 
@@ -196,10 +212,13 @@ export async function handlePrimaryRecovery() {
 
   const outageStartedAt = state.failoverStartedAt;
   const restoredAt = new Date().toISOString();
+  const wasAdminNotified = state.adminNotified;
 
   state.isFailoverActive = false;
+  state.failureCount = 0;
   state.failoverStartedAt = null;
   state.failoverReason = null;
+  state.adminNotified = false;
   state.activeDb = "PRIMARY (Aiven)";
   state.lastNotifiedAt = 0; // Reset failover throttle so any future failover triggers immediate notification
   state.lastRecoveredAt = restoredAt;
@@ -212,6 +231,11 @@ export async function handlePrimaryRecovery() {
   try {
     invalidateDbSyncCache();
   } catch (_) {}
+
+  // Only dispatch recovery notification if an actual outage alert was sent earlier
+  if (!wasAdminNotified) {
+    return;
+  }
 
   // Instant notification to Super Admin that Primary Database has recovered
   (async () => {

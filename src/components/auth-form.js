@@ -260,31 +260,31 @@ export function LoginForm() {
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
                 {useBackupCode
                   ? "एक-वेळ वापरणारा बॅकअप रिकव्हरी कोड (Backup Recovery Code)"
-                  : "ऑथेंटिकेटर अ‍ॅपमधील ६-अंकी कोड (6-Digit Authenticator Code)"}
+                  : "६-अंकी कोड किंवा बॅकअप कोड (6-Digit Authenticator or Backup Code)"}
               </label>
               <div className="relative">
                 <Key className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                 <input
                   value={mfaCode}
-                  onChange={(e) =>
-                    setMfaCode(
-                      useBackupCode
-                        ? e.target.value.toUpperCase()
-                        : e.target.value.replace(/\D/g, "")
-                    )
-                  }
+                  onChange={(e) => {
+                    const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+                    if (/[A-Z-]/.test(raw) || raw.length > 6) {
+                      setUseBackupCode(true);
+                    }
+                    setMfaCode(raw);
+                  }}
                   type="text"
                   autoFocus
-                  maxLength={useBackupCode ? 10 : 6}
+                  maxLength={12}
                   required
-                  placeholder={useBackupCode ? "XXXX-XXXX" : "123456"}
+                  placeholder={useBackupCode ? "CDFB-9A99" : "123456 किंवा CDFB-9A99"}
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-center font-mono text-xl font-black tracking-widest text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                 />
               </div>
               <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
                 {useBackupCode
-                  ? "उदा. 4A82-9B10. हा कोड वापरल्यानंतर आपोआप निष्क्रीय होईल."
-                  : "Google Authenticator किंवा Microsoft Authenticator मधील सध्याचा ६-अंकी कोड टाका."}
+                  ? "उदा. CDFB-9A99 (8-अक्षरी बॅकअप कोड). हा कोड वापरल्यानंतर आपोआप निष्क्रीय होईल."
+                  : "Authenticator अ‍ॅपमधील ६-अंकी कोड टाका, किंवा सेव्ह केलेला बॅकअप कोड (उदा. CDFB-9A99) टाका."}
               </p>
             </div>
 

@@ -4,10 +4,10 @@ import { createPasskeyLoginOptions } from "@/lib/webauthn-service";
 export async function POST(request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { email } = body;
+    const identifier = body.identifier || body.email || body.phone;
     const origin = request.nextUrl.origin;
 
-    const options = await createPasskeyLoginOptions(origin, email);
+    const options = await createPasskeyLoginOptions(origin, identifier);
     return NextResponse.json(options);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
