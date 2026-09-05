@@ -8,6 +8,7 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "db:push": "prisma db push",
     "db:push:all": "node scripts/db-push-all.mjs",
     "db:seed": "node prisma/seed.js",
@@ -21,7 +22,8 @@
     "format:check": "prettier --check .",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run prisma:validate",
     "prisma:format": "prisma format",
-    "test:apis": "node scripts/test-all-apis.mjs"
+    "test:apis": "node scripts/test-all-apis.mjs",
+    "prepare": "husky"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
@@ -55,6 +57,8 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.34.0",
     "eslint-config-next": "^16.3.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.1",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
