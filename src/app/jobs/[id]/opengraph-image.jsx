@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getJobAlertById } from "@/lib/job-service";
+import { getDevanagariOgFont } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam Job Recruitment Alert";
@@ -15,6 +16,18 @@ export default async function Image({ params }) {
   try {
     job = await getJobAlertById(id);
   } catch {}
+
+  const fontData = await getDevanagariOgFont();
+  const fonts = fontData
+    ? [
+        {
+          name: "Noto Sans Devanagari",
+          data: fontData,
+          style: "normal",
+          weight: 700,
+        },
+      ]
+    : [];
 
   const title = job?.titleMr || job?.title || "महाराष्ट्र सरकारी नोकरी जाहिरात";
   const dept = job?.department || "Maharashtra Government";
@@ -34,7 +47,7 @@ export default async function Image({ params }) {
         backgroundImage:
           "radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.5), transparent 45%), radial-gradient(circle at 85% 80%, rgba(225, 29, 72, 0.4), transparent 45%)",
         padding: "60px 70px",
-        fontFamily: "sans-serif",
+        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -148,6 +161,7 @@ export default async function Image({ params }) {
     </div>,
     {
       ...size,
+      fonts,
     }
   );
 }

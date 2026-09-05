@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { getDevanagariOgFont } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam — महाराष्ट्र स्पर्धा परीक्षा मॉक टेस्ट पोर्टल";
@@ -9,6 +10,18 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
+  const fontData = await getDevanagariOgFont();
+  const fonts = fontData
+    ? [
+        {
+          name: "Noto Sans Devanagari",
+          data: fontData,
+          style: "normal",
+          weight: 700,
+        },
+      ]
+    : [];
+
   return new ImageResponse(
     <div
       style={{
@@ -22,7 +35,7 @@ export default async function Image() {
         backgroundImage:
           "radial-gradient(circle at 15% 25%, rgba(37, 99, 235, 0.4), transparent 45%), radial-gradient(circle at 85% 75%, rgba(124, 58, 237, 0.35), transparent 45%)",
         padding: "50px 60px",
-        fontFamily: "sans-serif",
+        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -119,6 +132,7 @@ export default async function Image() {
     </div>,
     {
       ...size,
+      fonts,
     },
   );
 }

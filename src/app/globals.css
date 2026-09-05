@@ -75,10 +75,9 @@ body {
   min-width: 320px;
   overflow-x: hidden;
   font-family:
-    var(--font-sans),
     var(--font-marathi),
     var(--font-mukta),
-    "Sakal Marathi",
+    var(--font-sans),
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
@@ -87,6 +86,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "liga" 1, "rlig" 1, "dlig" 1;
+  font-variant-ligatures: normal;
 }
 
 /* Devanagari typography weight normalization - prevents overly thick/heavy text */
@@ -100,9 +101,11 @@ body {
 
 /* Marathi & Devanagari specific font class */
 .font-marathi {
-  font-family: var(--font-marathi), var(--font-mukta), "Sakal Marathi", var(--font-sans), sans-serif;
+  font-family: var(--font-marathi), var(--font-mukta), var(--font-sans), sans-serif;
   line-height: 1.5;
   letter-spacing: 0.01em;
+  font-feature-settings: "liga" 1, "rlig" 1, "dlig" 1;
+  font-variant-ligatures: normal;
 }
 
 a {

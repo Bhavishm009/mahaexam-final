@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getBlogPostBySlug } from "@/lib/blog-service";
+import { getDevanagariOgFont } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam Blog Article";
@@ -15,6 +16,18 @@ export default async function Image({ params }) {
   try {
     blog = await getBlogPostBySlug(slug);
   } catch {}
+
+  const fontData = await getDevanagariOgFont();
+  const fonts = fontData
+    ? [
+        {
+          name: "Noto Sans Devanagari",
+          data: fontData,
+          style: "normal",
+          weight: 700,
+        },
+      ]
+    : [];
 
   const title = blog?.title || "MahaExam स्पर्धा परीक्षा मार्गदर्शक व बातम्या";
   const category = blog?.category || "MahaExam Blog";
@@ -40,7 +53,7 @@ export default async function Image({ params }) {
         backgroundImage:
           "radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.45), transparent 45%), radial-gradient(circle at 85% 80%, rgba(147, 51, 234, 0.4), transparent 45%)",
         padding: "60px 70px",
-        fontFamily: "sans-serif",
+        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -157,6 +170,7 @@ export default async function Image({ params }) {
     </div>,
     {
       ...size,
+      fonts,
     }
   );
 }

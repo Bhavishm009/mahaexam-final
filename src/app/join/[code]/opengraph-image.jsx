@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/db";
+import { getDevanagariOgFont } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam कोचिंग बॅच आमंत्रण";
@@ -11,6 +12,18 @@ export const contentType = "image/png";
 
 export default async function Image({ params }) {
   const { code } = await params;
+
+  const fontData = await getDevanagariOgFont();
+  const fonts = fontData
+    ? [
+        {
+          name: "Noto Sans Devanagari",
+          data: fontData,
+          style: "normal",
+          weight: 700,
+        },
+      ]
+    : [];
 
   let batchTitle = "स्पर्धा परीक्षा कोचिंग बॅच";
   let academyName = "MahaExam Partner Academy";
@@ -48,7 +61,7 @@ export default async function Image({ params }) {
         backgroundImage:
           "radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.45), transparent 45%), radial-gradient(circle at 10% 80%, rgba(37, 99, 235, 0.35), transparent 45%)",
         padding: "60px 70px",
-        fontFamily: "sans-serif",
+        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
       }}
     >
@@ -150,6 +163,7 @@ export default async function Image({ params }) {
     </div>,
     {
       ...size,
+      fonts,
     },
   );
 }

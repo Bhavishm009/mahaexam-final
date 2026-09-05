@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/db";
+import { getDevanagariOgFont } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam सराव परीक्षा";
@@ -43,6 +44,18 @@ const fallbackExams = {
 export default async function Image({ params }) {
   const { examId } = await params;
 
+  const fontData = await getDevanagariOgFont();
+  const fonts = fontData
+    ? [
+        {
+          name: "Noto Sans Devanagari",
+          data: fontData,
+          style: "normal",
+          weight: 700,
+        },
+      ]
+    : [];
+
   let exam = fallbackExams[examId] || null;
 
   if (!exam && examId) {
@@ -63,20 +76,20 @@ export default async function Image({ params }) {
       if (dbExam) {
         exam = {
           title: dbExam.title,
-          category: dbExam.category?.name || "महाराष्ट्र स्पर्धा परीक्षा",
+          category: dbExam.category?.name || "मॉक टेस्ट",
           questions: dbExam.totalQuestions || 100,
           duration: dbExam.durationMinutes || 90,
           marks: dbExam.totalMarks || 100,
         };
       }
     } catch {
-      // fallback
+      // fallback below
     }
   }
 
   if (!exam) {
     exam = {
-      title: "महाराष्ट्र स्पर्धा परीक्षा संपूर्ण सराव मॉक टेस्ट",
+      title: `${examId?.replace(/-/g, " ")?.toUpperCase() || "सराव परीक्षा"}`,
       category: "MahaExam Test Series",
       questions: 100,
       duration: 90,
@@ -97,7 +110,7 @@ export default async function Image({ params }) {
         backgroundImage:
           "radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.45), transparent 45%), radial-gradient(circle at 10% 80%, rgba(220, 38, 38, 0.35), transparent 45%), radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.25), transparent 50%)",
         padding: "60px 70px",
-        fontFamily: "sans-serif",
+        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -246,6 +259,7 @@ export default async function Image({ params }) {
     </div>,
     {
       ...size,
+      fonts,
     },
   );
 }
