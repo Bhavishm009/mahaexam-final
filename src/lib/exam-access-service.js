@@ -42,17 +42,34 @@ export async function getStudentExamAccess(userId, examIdOrSlug) {
 
     // Check batch assignment for coaching exams
     if (!isAssigned && exam.organizationId) {
-      const batchAssignment = await prisma.examBatch.findFirst({
+      const coachingBatchAssignment = await prisma.batchExamAssignment.findFirst({
         where: {
           examId: exam.id,
           batch: {
-            students: {
-              some: { studentId: userId },
+            memberships: {
+              some: {
+                studentId: userId,
+                status: "ACTIVE",
+              },
             },
           },
         },
       });
-      isAssigned = Boolean(batchAssignment);
+      isAssigned = Boolean(coachingBatchAssignment);
+
+      if (!isAssigned) {
+        const batchAssignment = await prisma.examBatch.findFirst({
+          where: {
+            examId: exam.id,
+            batch: {
+              students: {
+                some: { studentId: userId },
+              },
+            },
+          },
+        });
+        isAssigned = Boolean(batchAssignment);
+      }
     }
   }
 
@@ -212,15 +229,33 @@ export async function listStudentAvailableExams(userId = null) {
       }),
       prisma.exam.findMany({
         where: {
-          batches: {
-            some: {
-              batch: {
-                students: {
-                  some: { studentId: userId },
+          OR: [
+            {
+              batches: {
+                some: {
+                  batch: {
+                    students: {
+                      some: { studentId: userId },
+                    },
+                  },
                 },
               },
             },
-          },
+            {
+              batchAssignments: {
+                some: {
+                  batch: {
+                    memberships: {
+                      some: {
+                        studentId: userId,
+                        status: "ACTIVE",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
           status: { in: ["SCHEDULED", "LIVE"] },
         },
         orderBy: { createdAt: "desc" },

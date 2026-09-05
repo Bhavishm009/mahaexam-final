@@ -82,12 +82,31 @@ export async function POST(request) {
         },
       });
 
+      // Update student coaching status
+      await prisma.studentProfile.upsert({
+        where: { userId: existingUser.id },
+        create: {
+          userId: existingUser.id,
+          coachingStatus: "COACHING",
+        },
+        update: {
+          coachingStatus: "COACHING",
+        },
+      });
+
+      if (!existingUser.organizationId) {
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: { organizationId: orgId },
+        });
+      }
+
       // Send notification email
       if (sendEmail && existingUser.email) {
         await sendStudentCredentialsEmail({
           email: existingUser.email,
           name: existingUser.name,
-          password: "(Your existing platform password)",
+          password: "(Use your existing MahaExam password / तुमचा जुना पासवर्ड वापरा)",
           coachingName: org.name,
           batchName: targetBatch.name,
         }).catch(() => {});
@@ -95,10 +114,12 @@ export async function POST(request) {
 
       return NextResponse.json({
         success: true,
-        message: `Existing student ${existingUser.name} enrolled into ${targetBatch.name}`,
+        alreadyRegistered: true,
+        isNewUser: false,
+        messageMr: `हा विद्यार्थी (${existingUser.name}) आधीच MahaExam वर नोंदणीकृत आहे! त्याला यशस्वीरित्या ${targetBatch.name} बॅचमध्ये जोडले गेले आहे आणि सूचना ईमेल पाठवला आहे.`,
+        message: `This student (${existingUser.name}) is already registered on MahaExam! They have been successfully enrolled in ${targetBatch.name}, and an email was sent.`,
         user: { id: existingUser.id, name: existingUser.name, email: existingUser.email },
         batch: { id: targetBatch.id, name: targetBatch.name },
-        isNewUser: false,
       });
     }
 
@@ -115,6 +136,7 @@ export async function POST(request) {
           passwordHash,
           role: "STUDENT",
           status: "ACTIVE",
+          organizationId: orgId,
           studentProfile: {
             create: {
               targetExam: "Police Bharti",
@@ -145,17 +167,16 @@ export async function POST(request) {
       }).catch(() => {});
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: `Student ${newUser.name} created and added to ${targetBatch.name}. Login credentials sent via email!`,
-        user: { id: newUser.id, name: newUser.name, email: newUser.email },
-        credentials: { email: newUser.email, tempPassword },
-        batch: { id: targetBatch.id, name: targetBatch.name },
-        isNewUser: true,
-      },
-      { status: 201 },
-    );
+    return NextResponse.json({
+      success: true,
+      alreadyRegistered: false,
+      isNewUser: true,
+      messageMr: `नवीन विद्यार्थी (${newUser.name}) यशस्वीरित्या जोडला गेला! लॉगिन माहिती विद्यार्थ्याला ईमेलवर पाठवली आहे.`,
+      message: `New student ${newUser.name} added successfully! Login credentials have been sent to ${newUser.email || "student"}.`,
+      user: { id: newUser.id, name: newUser.name, email: newUser.email },
+      batch: { id: targetBatch.id, name: targetBatch.name },
+      tempPassword,
+    });
   } catch (error) {
     console.error("Add student error:", error);
     return NextResponse.json({ error: error.message || "Failed to add student" }, { status: 500 });

@@ -21,6 +21,9 @@ export default function JoinInvitePage({ params }) {
     email: "",
     phone: "",
     password: "",
+    targetExam: "Maharashtra Police Bharti",
+    district: "",
+    taluka: "",
   });
 
   useEffect(() => {
@@ -58,7 +61,7 @@ export default function JoinInvitePage({ params }) {
 
       setSuccessMsg(json.message || "तुम्ही यशस्वीरित्या अकॅडेमीमध्ये सामील झाला आहात!");
       setTimeout(() => {
-        router.push(json.redirect || "/student/coaching");
+        router.push(json.redirect || "/student/academies");
         router.refresh();
       }, 1500);
     } catch {
@@ -90,7 +93,7 @@ export default function JoinInvitePage({ params }) {
 
       setSuccessMsg(json.message || "नोंदणी यशस्वी! अकॅडेमीमध्ये सामील केले गेले आहे.");
       setTimeout(() => {
-        router.push(json.redirect || "/student/coaching");
+        router.push(json.redirect || "/student/academies");
         router.refresh();
       }, 1500);
     } catch {
@@ -297,6 +300,50 @@ export default function JoinInvitePage({ params }) {
                           onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
                           placeholder="••••••••"
                           className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        लक्ष्य परीक्षा (Target Exam)
+                      </label>
+                      <select
+                        value={regForm.targetExam}
+                        onChange={(e) => setRegForm({ ...regForm, targetExam: e.target.value })}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                      >
+                        <option value="Maharashtra Police Bharti">पोलीस भरती (Maharashtra Police Bharti)</option>
+                        <option value="Maharashtra Talathi Bharti">तलाठी भरती (Talathi Bharti)</option>
+                        <option value="MPSC Combine Group B & C">MPSC संयुक्त पूर्व परीक्षा (Group B & C)</option>
+                        <option value="MPSC Rajyaseva">MPSC राज्यसेवा (Civil Services)</option>
+                        <option value="Zilla Parishad Bharti">जिल्हा परिषद भरती (ZP Bharti)</option>
+                        <option value="Maharashtra Vanrakshak">वनरक्षक भरती (Forest Guard)</option>
+                        <option value="Other Government Exam">इतर स्पर्धा परीक्षा (Other Exam)</option>
+                      </select>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                          जिल्हा (District)
+                        </label>
+                        <input
+                          value={regForm.district}
+                          onChange={(e) => setRegForm({ ...regForm, district: e.target.value })}
+                          placeholder="उदा. पुणे / छत्रपती संभाजीनगर"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                          तालुका (Taluka)
+                        </label>
+                        <input
+                          value={regForm.taluka}
+                          onChange={(e) => setRegForm({ ...regForm, taluka: e.target.value })}
+                          placeholder="उदा. हवेली / शिर्डी"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                         />
                       </div>
                     </div>

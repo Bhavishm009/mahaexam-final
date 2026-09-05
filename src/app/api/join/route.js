@@ -100,7 +100,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { code, name, email, phone, password } = body;
+    const { code, name, email, phone, password, targetExam, district, taluka } = body;
 
     if (!code) {
       return NextResponse.json({ error: "Invite code is required" }, { status: 400 });
@@ -142,7 +142,7 @@ export async function POST(request) {
         defaultBatch = await prisma.coachingBatch.create({
           data: {
             organizationId: targetOrgId,
-            name: "General Batch 2025",
+            name: "General Batch",
             code: `BATCH-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
             isActive: true,
           },
@@ -158,6 +158,24 @@ export async function POST(request) {
 
     if (session && session.role === "STUDENT") {
       studentUser = await prisma.user.findUnique({ where: { id: session.sub } });
+      if (studentUser) {
+        await prisma.studentProfile.upsert({
+          where: { userId: studentUser.id },
+          create: {
+            userId: studentUser.id,
+            targetExam: targetExam || "Police Bharti",
+            district: district || null,
+            taluka: taluka || null,
+            coachingStatus: "COACHING",
+          },
+          update: {
+            coachingStatus: "COACHING",
+            ...(district ? { district } : {}),
+            ...(taluka ? { taluka } : {}),
+            ...(targetExam ? { targetExam } : {}),
+          },
+        });
+      }
     } else {
       // If not logged in, authenticate or create account
       if (!email && !phone) {
@@ -183,6 +201,23 @@ export async function POST(request) {
           );
         }
         studentUser = existing;
+
+        await prisma.studentProfile.upsert({
+          where: { userId: studentUser.id },
+          create: {
+            userId: studentUser.id,
+            targetExam: targetExam || "Police Bharti",
+            district: district || null,
+            taluka: taluka || null,
+            coachingStatus: "COACHING",
+          },
+          update: {
+            coachingStatus: "COACHING",
+            ...(district ? { district } : {}),
+            ...(taluka ? { taluka } : {}),
+            ...(targetExam ? { targetExam } : {}),
+          },
+        });
       } else {
         if (!password || password.length < 6) {
           return NextResponse.json(
@@ -199,9 +234,12 @@ export async function POST(request) {
             passwordHash,
             role: "STUDENT",
             status: "ACTIVE",
+            organizationId: targetOrgId,
             studentProfile: {
               create: {
-                targetExam: "Police Bharti",
+                targetExam: targetExam || "Police Bharti",
+                district: district || null,
+                taluka: taluka || null,
                 coachingStatus: "COACHING",
               },
             },
@@ -212,7 +250,7 @@ export async function POST(request) {
       token = await createSessionToken(studentUser);
     }
 
-    // Attach student to coaching batch (Multi-coaching supported!)
+    // Attach student to coaching batch
     await prisma.batchMembership.upsert({
       where: {
         batchId_studentId: {
@@ -230,6 +268,13 @@ export async function POST(request) {
       },
     });
 
+    if (targetOrgId && !studentUser.organizationId) {
+      await prisma.user.update({
+        where: { id: studentUser.id },
+        data: { organizationId: targetOrgId },
+      });
+    }
+
     if (invite) {
       await prisma.coachingInvite.update({
         where: { id: invite.id },
@@ -240,7 +285,7 @@ export async function POST(request) {
     const response = NextResponse.json({
       success: true,
       message: `You have successfully joined the academy!`,
-      redirect: "/student/coaching",
+      redirect: "/student/academies",
     });
 
     if (token) {

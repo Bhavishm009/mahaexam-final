@@ -87,10 +87,9 @@ export async function GET(request) {
   }
 
   const hasAcademy = Boolean(
-    user.organizationId ||
-    user.studentProfile?.coachingStatus === "COACHING" ||
+    (user._count?.batchMemberships || 0) > 0 ||
     (user.studentProfile?._count?.batchStudents || 0) > 0 ||
-    (user._count?.batchMemberships || 0) > 0
+    (user.organizationId && user.studentProfile?.coachingStatus === "COACHING")
   );
 
   return NextResponse.json({
