@@ -5,6 +5,7 @@ import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
 import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
 import { Sparkles } from "lucide-react";
+import { getBaseUrl } from "@/lib/base-url";
 
 export const metadata = {
   title: "महाराष्ट्र स्पर्धा परीक्षा सराव टेस्ट्स २०२६ | Police, MPSC, Talathi, ZP Mock Tests",
@@ -31,6 +32,8 @@ export const metadata = {
 export default async function ExamsDirectoryPage() {
   const exams = await getCachedPublicExams();
 
+  const siteBase = getBaseUrl();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -38,7 +41,7 @@ export default async function ExamsDirectoryPage() {
       "@type": "ListItem",
       position: index + 1,
       name: e.title,
-      url: `https://mahaexam.in/exam/${e.slug || e.id}`,
+      url: `${siteBase}/exam/${e.slug || e.id}`,
     })),
   };
 

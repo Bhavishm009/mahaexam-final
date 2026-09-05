@@ -23,22 +23,27 @@ export async function POST(req) {
     const body = await req.json();
     const { route, title, titleMr, description, descriptionMr, keywords, canonicalUrl, ogImage } = body;
 
-    if (!route || !title || !description) {
-      return NextResponse.json({ error: "MISSING_REQUIRED_FIELDS" }, { status: 400 });
+    if (!route?.trim()) {
+      return NextResponse.json({ error: "Validation Error: Route path is required." }, { status: 400 });
     }
 
-    const updated = await updateSeoForRoute(route, {
-      title,
+    if (!title?.trim()) {
+      return NextResponse.json({ error: "Validation Error: SEO Title is required." }, { status: 400 });
+    }
+
+    const updated = await updateSeoForRoute(route.trim(), {
+      title: title.trim(),
       titleMr,
-      description,
+      description: description ? description.trim() : "",
       descriptionMr,
       keywords,
       canonicalUrl,
       ogImage,
     });
 
-    return NextResponse.json({ success: true, seoSetting: updated });
+    return NextResponse.json({ success: true, seoSetting: updated, message: "SEO configuration saved successfully!" });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Error saving SEO settings:", error);
+    return NextResponse.json({ error: error.message || "Failed to save SEO settings." }, { status: 500 });
   }
 }

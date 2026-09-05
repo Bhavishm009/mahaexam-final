@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   AlertTriangle,
   RefreshCw,
@@ -31,7 +32,6 @@ export default function AdminLogsPage() {
     apiCallCount: 0,
     avgLatencyMs: 0,
   });
-  const [message, setMessage] = useState({ type: "", text: "" });
 
   const loadLogs = useCallback(async () => {
     try {
@@ -54,10 +54,10 @@ export default function AdminLogsPage() {
           avgLatencyMs: data.avgLatencyMs || 0,
         });
       } else {
-        setMessage({ type: "error", text: data.error || "Failed to load logs" });
+        toast.error(data.error || "Failed to load logs");
       }
     } catch (err) {
-      setMessage({ type: "error", text: err.message || "Failed to connect to server" });
+      toast.error(err.message || "Failed to connect to server");
     } finally {
       setLoading(false);
     }
@@ -77,21 +77,17 @@ export default function AdminLogsPage() {
     }
 
     setClearing(true);
-    setMessage({ type: "", text: "" });
 
     try {
       const { ok, data } = await fetchJson("/api/admin/logs", { method: "DELETE" });
       if (ok && data.success) {
-        setMessage({
-          type: "success",
-          text: "✅ " + (data.message || "Logs cleared successfully."),
-        });
+        toast.success(data.message || "Logs cleared successfully.");
         await loadLogs();
       } else {
-        setMessage({ type: "error", text: data.error || "Failed to clear logs." });
+        toast.error(data.error || "Failed to clear logs.");
       }
     } catch (err) {
-      setMessage({ type: "error", text: err.message || "Failed to clear logs." });
+      toast.error(err.message || "Failed to clear logs.");
     } finally {
       setClearing(false);
     }
@@ -214,23 +210,7 @@ export default function AdminLogsPage() {
           </div>
         </div>
 
-        {/* Global Alert Messages */}
-        {message.text && (
-          <div
-            className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${
-              message.type === "success"
-                ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
-                : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
-            }`}
-          >
-            {message.type === "success" ? (
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-            ) : (
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
-            )}
-            <span>{message.text}</span>
-          </div>
-        )}
+
 
         {/* Filters & Search */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

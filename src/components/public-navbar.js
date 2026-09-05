@@ -94,6 +94,17 @@ export function PublicNavbar() {
               <span className="h-1.5 w-1.5 animate-ping rounded-full bg-rose-500" />
             </span>
           </Link>
+          <Link
+            href="/blogs"
+            prefetch={true}
+            className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 ${
+              pathname?.startsWith("/blogs")
+                ? "bg-blue-50 font-bold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                : "text-slate-700 dark:text-slate-200"
+            }`}
+          >
+            {t.navBlogs}
+          </Link>
         </nav>
 
         {/* Action Buttons, Language Toggle & Theme Toggle */}
@@ -106,7 +117,7 @@ export function PublicNavbar() {
             title="भाषा बदला / Switch Language"
           >
             <Globe className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-            <span>{language === "mr" ? "English" : "मराठी"}</span>
+            <span>{language === "mr" ? "मराठी" : "English"}</span>
           </button>
 
           <ThemeToggle />
@@ -122,7 +133,7 @@ export function PublicNavbar() {
                   onClick={() => setUserMenuOpen((x) => !x)}
                   className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 pr-3 text-xs font-bold text-slate-800 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  <div className="grid h-7 w-7 place-items-center rounded-xl bg-blue-600 font-black text-white shadow-xs">
+                  <div className="shadow-xs grid h-7 w-7 place-items-center rounded-xl bg-blue-600 font-black text-white">
                     {userInitials}
                   </div>
                   <span className="max-w-[110px] truncate font-extrabold text-slate-900 dark:text-white">
@@ -250,126 +261,138 @@ export function PublicNavbar() {
       {mobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs md:hidden"
+            className="backdrop-blur-xs fixed inset-0 z-40 bg-slate-950/40 md:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
           <div className="animate-in slide-in-from-top-2 relative z-50 border-b border-slate-200 bg-white px-4 py-6 shadow-xl duration-200 dark:border-slate-800 dark:bg-slate-900 md:hidden">
-          <nav className="flex flex-col gap-2">
-            <Link
-              href="/exams"
-              prefetch={true}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
-                pathname === "/exams"
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-              }`}
-            >
-              <BookOpen className="h-4 w-4 text-blue-600" />
-              <span>{t.navMockTests}</span>
-            </Link>
-            <Link
-              href="/jobs"
-              prefetch={true}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold transition ${
-                pathname === "/jobs"
-                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Bell className="h-4 w-4 text-rose-500" />
-                <span>{t.navJobs}</span>
-              </div>
-              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-700 dark:bg-rose-950/80 dark:text-rose-300">
-                New
-              </span>
-            </Link>
+            <nav className="flex flex-col gap-2">
+              <Link
+                href="/exams"
+                prefetch={true}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
+                  pathname === "/exams"
+                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                }`}
+              >
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                <span>{t.navMockTests}</span>
+              </Link>
+              <Link
+                href="/jobs"
+                prefetch={true}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold transition ${
+                  pathname === "/jobs"
+                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Bell className="h-4 w-4 text-rose-500" />
+                  <span>{t.navJobs}</span>
+                </div>
+                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-700 dark:bg-rose-950/80 dark:text-rose-300">
+                  New
+                </span>
+              </Link>
+              <Link
+                href="/blogs"
+                prefetch={true}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
+                  pathname?.startsWith("/blogs")
+                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                }`}
+              >
+                <BookOpen className="h-4 w-4 text-indigo-600" />
+                <span>{t.navBlogs}</span>
+              </Link>
 
+              <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+                {loading && !user ? (
+                  <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
+                ) : user ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 rounded-2xl bg-slate-100 p-3 dark:bg-slate-800/80">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-600 font-black text-white">
+                        {userInitials}
+                      </div>
+                      <div className="min-w-0 flex-1 truncate">
+                        <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                          {user.name || "User"}
+                        </div>
+                        <div className="truncate text-[10px] text-slate-500 dark:text-slate-400">
+                          {user.email}
+                        </div>
+                      </div>
+                    </div>
 
-            <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
-              {loading && !user ? (
-                <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
-              ) : user ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 rounded-2xl bg-slate-100 p-3 dark:bg-slate-800/80">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-600 font-black text-white">
-                      {userInitials}
-                    </div>
-                    <div className="min-w-0 flex-1 truncate">
-                      <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
-                        {user.name || "User"}
-                      </div>
-                      <div className="truncate text-[10px] text-slate-500 dark:text-slate-400">
-                        {user.email}
-                      </div>
-                    </div>
+                    <Link
+                      href={dashboardHref}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
+                    </Link>
+
+                    <Link
+                      href={profileHref}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <UserIcon className="h-4 w-4 text-blue-600" />
+                      <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        logout();
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-center text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
+                    </button>
                   </div>
-
-                  <Link
-                    href={dashboardHref}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
-                  </Link>
-
-                  <Link
-                    href={profileHref}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <UserIcon className="h-4 w-4 text-blue-600" />
-                    <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      logout();
-                    }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-center text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {!isLoginPage && (
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {!isLoginPage && (
+                      <Link
+                        href="/login"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        {t.studentSignIn}
+                      </Link>
+                    )}
+                    {!isRegisterPage && (
+                      <Link
+                        href="/register"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-full rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                      >
+                        {t.studentRegister}
+                      </Link>
+                    )}
                     <Link
-                      href="/login"
+                      href="/coaching/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="w-full rounded-xl border border-amber-500/30 bg-amber-500/10 py-2.5 text-center text-xs font-bold text-amber-700 dark:text-amber-400"
                     >
-                      {t.studentSignIn}
+                      {t.coachingRegister}
                     </Link>
-                  )}
-                  {!isRegisterPage && (
-                    <Link
-                      href="/register"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-full rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
-                    >
-                      {t.studentRegister}
-                    </Link>
-                  )}
-                  <Link
-                    href="/coaching/register"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full rounded-xl border border-amber-500/30 bg-amber-500/10 py-2.5 text-center text-xs font-bold text-amber-700 dark:text-amber-400"
-                  >
-                    {t.coachingRegister}
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
-        </div>
-      </>
+                  </div>
+                )}
+              </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { HelpCircle, Search, Plus, X, CheckCircle2 } from "lucide-react";
 
 export default function CoachingQuestionBankPage() {
@@ -64,12 +65,13 @@ export default function CoachingQuestionBankPage() {
             { optionText: "", isCorrect: false },
           ],
         });
+        toast.success("Question saved successfully!");
         loadQuestions();
       } else {
-        alert(d.error || "Failed to save question");
+        toast.error(d.error || "Failed to save question");
       }
     } catch (err) {
-      alert("Error: " + err.message);
+      toast.error(err.message);
     }
   }
 

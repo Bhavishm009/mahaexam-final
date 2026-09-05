@@ -13,9 +13,19 @@ function createClient(url) {
 }
 
 const primaryUrl = process.env.DATABASE_URL;
-const secondaryUrl = process.env.SECONDARY_DATABASE_URL || process.env.SHADOW_DATABASE_URL;
+let secondaryUrl = process.env.SECONDARY_DATABASE_URL || process.env.SHADOW_DATABASE_URL;
 
-// Instantiate Primary and optional Failover Secondary Prisma clients
+// Auto-fix IPv6 Supabase host to IPv4 pooler host if old host is present
+if (secondaryUrl && secondaryUrl.includes("db.mhhmyckndlmylpgciblz.supabase.co:5432")) {
+  secondaryUrl = secondaryUrl.replace(
+    "db.mhhmyckndlmylpgciblz.supabase.co:5432",
+    "aws-0-ap-south-1.pooler.supabase.com:6543"
+  );
+  if (!secondaryUrl.includes("pgbouncer=true")) {
+    secondaryUrl += (secondaryUrl.includes("?") ? "&" : "?") + "pgbouncer=true";
+  }
+}
+
 export const primaryPrisma =
   globalForPrisma.__mahaPrimaryPrisma ||
   (primaryUrl ? createClient(primaryUrl) : new PrismaClient());
@@ -62,7 +72,7 @@ export async function executeWithFailover(fn) {
   } catch (err) {
     if (secondaryPrisma && isConnectionError(err)) {
       console.warn(
-        "⚠️ [DB Failover Active] Primary DB unreachable. Executing query on Secondary Shadow DB..."
+        "⚠️ [DB Failover Active] Primary DB unreachable. Executing query on Secondary Shadow DB...",
       );
       return await fn(secondaryPrisma);
     }
@@ -85,7 +95,7 @@ export const prisma = new Proxy(primaryPrisma, {
         } catch (err) {
           if (secondaryPrisma && isConnectionError(err)) {
             console.warn(
-              "⚠️ [DB Failover Active] $transaction failed on Primary DB. Retrying on Secondary DB..."
+              "⚠️ [DB Failover Active] $transaction failed on Primary DB. Retrying on Secondary DB...",
             );
             return await secondaryPrisma.$transaction(...args);
           }
@@ -102,7 +112,7 @@ export const prisma = new Proxy(primaryPrisma, {
         } catch (err) {
           if (secondaryPrisma && isConnectionError(err)) {
             console.warn(
-              `⚠️ [DB Failover Active] ${String(prop)} failed on Primary DB. Retrying on Secondary DB...`
+              `⚠️ [DB Failover Active] ${String(prop)} failed on Primary DB. Retrying on Secondary DB...`,
             );
             return await secondaryPrisma[prop](...args);
           }
@@ -131,7 +141,7 @@ export const prisma = new Proxy(primaryPrisma, {
               if (secondaryPrisma && isConnectionError(err)) {
                 primaryFailed = true;
                 console.warn(
-                  `⚠️ [DB Failover Active] ${String(prop)}.${String(methodProp)} failed on Primary DB. Retrying on Secondary DB...`
+                  `⚠️ [DB Failover Active] ${String(prop)}.${String(methodProp)} failed on Primary DB. Retrying on Secondary DB...`,
                 );
                 const secondaryModel = secondaryPrisma[prop];
                 if (secondaryModel && typeof secondaryModel[methodProp] === "function") {
@@ -148,7 +158,7 @@ export const prisma = new Proxy(primaryPrisma, {
                 secondaryModel[methodProp](...args).catch((secErr) => {
                   console.warn(
                     `⚠️ [Shadow DB Sync Warning] Secondary DB write failed for ${String(prop)}.${String(methodProp)}:`,
-                    secErr?.message
+                    secErr?.message,
                   );
                 });
               }

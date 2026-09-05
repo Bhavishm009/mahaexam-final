@@ -26,9 +26,24 @@ export async function POST(request) {
     const body = await request.json();
     const { name, email, password, phone, role, organizationId, academyName } = body;
 
-    if (!name || !email || !password) {
+    if (!name || !name.trim()) {
       return NextResponse.json(
-        { error: "Name, email, and password are required" },
+        { error: "Validation Error: Full name is required." },
+        { status: 400 },
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email.trim())) {
+      return NextResponse.json(
+        { error: "Validation Error: A valid email address is required." },
+        { status: 400 },
+      );
+    }
+
+    if (!password || password.length < 6) {
+      return NextResponse.json(
+        { error: "Validation Error: Password must be at least 6 characters." },
         { status: 400 },
       );
     }
@@ -38,7 +53,7 @@ export async function POST(request) {
     });
 
     if (existing) {
-      return NextResponse.json({ error: "A user with this email already exists" }, { status: 409 });
+      return NextResponse.json({ error: "A user with this email address already exists." }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);

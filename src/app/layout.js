@@ -6,6 +6,7 @@ import { AuthProvider } from "@/components/auth-provider";
 import { PWARegister } from "@/components/pwa-register";
 import { NotificationPermissionPrompt } from "@/components/notification-permission-prompt";
 import { NavigationProgress } from "@/components/navigation-progress";
+import { ReactQueryProvider } from "@/components/query-provider";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -29,7 +30,12 @@ const mukta = Mukta({
   variable: "--font-mukta",
 });
 
+import { getBaseUrl } from "@/lib/base-url";
+
+const baseUrl = getBaseUrl();
+
 export const metadata = {
+  metadataBase: new URL(baseUrl),
   title: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल",
   description:
     "पोलीस भरती, MPSC, तलाठी, जिल्हा परिषद आणि सर्व सरकारी स्पर्धा परीक्षांसाठी TCS/IBPS पॅटर्न ऑनलाइन मॉक टेस्ट पोर्टल.",
@@ -61,13 +67,15 @@ export default function RootLayout({ children }) {
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <LanguageProvider>
             <AuthProvider>
-              <PWARegister />
-              <NotificationPermissionPrompt />
-              <Analytics />
-              <Suspense fallback={null}>
-                <NavigationProgress />
-              </Suspense>
-              {children}
+              <ReactQueryProvider>
+                <PWARegister />
+                <NotificationPermissionPrompt />
+                <Analytics />
+                <Suspense fallback={null}>
+                  <NavigationProgress />
+                </Suspense>
+                {children}
+              </ReactQueryProvider>
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>

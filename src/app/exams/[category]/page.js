@@ -5,6 +5,7 @@ import { getCachedPublicExams } from "@/lib/cached-exams";
 import { EXAM_CATEGORIES, getCategoryBySlug, getCategorySlugFromExam } from "@/lib/exam-category-helper";
 import { PublicNavbar } from "@/components/public-navbar";
 import { PublicFooter } from "@/components/public-footer";
+import { getBaseUrl } from "@/lib/base-url";
 import { ExamsDirectoryClient } from "../exams-directory-client";
 import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
 import { ChevronRight, Sparkles, BookOpen, Shield, Award, FileText, Building, Trees, Layers, ArrowLeft } from "lucide-react";
@@ -48,16 +49,18 @@ export default async function ExamCategoryPage({ params }) {
   const allExams = await getCachedPublicExams();
   const categoryExams = allExams.filter((e) => getCategorySlugFromExam(e) === cat.slug);
 
+  const siteBase = getBaseUrl();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: cat.titleMr,
     description: cat.descriptionMr,
-    url: `https://mahaexam.in/exams/${cat.slug}`,
+    url: `${siteBase}/exams/${cat.slug}`,
     hasPart: categoryExams.map((e) => ({
       "@type": "LearningResource",
       name: e.title,
-      url: `https://mahaexam.in/exams/${cat.slug}/${e.slug || e.id}`,
+      url: `${siteBase}/exams/${cat.slug}/${e.slug || e.id}`,
     })),
   };
 

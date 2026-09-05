@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
 import {
   Globe,
@@ -27,7 +28,6 @@ export default function GlobalExamsPage() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
-  const [statusMessage, setStatusMessage] = useState(null);
   const [hasNegativeMarking, setHasNegativeMarking] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
@@ -92,7 +92,24 @@ export default function GlobalExamsPage() {
 
   async function create(e) {
     e.preventDefault();
-    setStatusMessage({ type: "info", text: "Creating & Scheduling global examination..." });
+
+    if (!form.title?.trim()) {
+      toast.error("Please enter an Exam Title.");
+      return;
+    }
+    if (!form.durationMinutes || Number(form.durationMinutes) <= 0) {
+      toast.error("Exam duration must be greater than 0 minutes.");
+      return;
+    }
+    if (!form.totalQuestions || Number(form.totalQuestions) <= 0) {
+      toast.error("Total questions count must be at least 1.");
+      return;
+    }
+    if (form.startAt && form.endAt && new Date(form.endAt) <= new Date(form.startAt)) {
+      toast.error("End time must be after the Start time.");
+      return;
+    }
+
     const payload = {
       ...form,
       negativeMarks: hasNegativeMarking ? Number(form.negativeMarks || 0.25) : 0,
@@ -104,13 +121,10 @@ export default function GlobalExamsPage() {
     });
     const d = await r.json();
     if (!r.ok) {
-      setStatusMessage({ type: "error", text: d.error || "Failed to create exam" });
+      toast.error(d.error || "Failed to create exam");
       return;
     }
-    setStatusMessage({
-      type: "success",
-      text: "Global examination published & notifications dispatched successfully!",
-    });
+    toast.success("Global examination published & notifications dispatched successfully!");
     setForm({
       title: "",
       examType: "Police Bharti",
@@ -126,7 +140,6 @@ export default function GlobalExamsPage() {
       sendNotification: true,
     });
     load();
-    setTimeout(() => setStatusMessage(null), 4000);
   }
 
   async function updateStatus(id, newStatus) {
@@ -139,16 +152,17 @@ export default function GlobalExamsPage() {
     const d = await r.json();
     setUpdatingId(null);
     if (!r.ok) {
-      alert(d.error || "Failed to update status");
+      toast.error(d.error || "Failed to update status");
       return;
     }
+    toast.success(`Exam status updated to ${newStatus}`);
     setExams((prev) => prev.map((x) => (x.id === id ? { ...x, status: newStatus } : x)));
   }
 
   async function handleReschedule(e) {
     e.preventDefault();
     if (!rescheduleModalExam || !newStartAt) {
-      alert("Please specify a valid start date & time.");
+      toast.error("Please specify a valid start date & time.");
       return;
     }
     setRescheduling(true);
@@ -165,7 +179,7 @@ export default function GlobalExamsPage() {
       });
       const d = await r.json();
       if (!r.ok) {
-        alert(d.error || "Failed to reschedule exam");
+        toast.error(d.error || "Failed to reschedule exam");
         return;
       }
       setExams((prev) =>
@@ -176,9 +190,9 @@ export default function GlobalExamsPage() {
         ),
       );
       setRescheduleModalExam(null);
-      alert("✅ Examination rescheduled successfully! Target students have been notified.");
+      toast.success("✅ Examination rescheduled successfully! Target students notified.");
     } catch (err) {
-      alert("Error: " + err.message);
+      toast.error("Error: " + err.message);
     } finally {
       setRescheduling(false);
     }
@@ -186,10 +200,7 @@ export default function GlobalExamsPage() {
 
   async function toggleFreePaid(exam) {
     const newIsFree = !exam.isFree;
-    const newPrice = newIsFree ? 0 : Number(prompt("Enter Exam Price (INR ₹):", "49") || 49);
-    if (!newIsFree && isNaN(newPrice)) {
-      return;
-    }
+    const newPrice = newIsFree ? 0 : 49;
 
     setUpdatingId(exam.id);
     const r = await fetch("/api/admin/global-exams", {
@@ -204,9 +215,10 @@ export default function GlobalExamsPage() {
     const d = await r.json();
     setUpdatingId(null);
     if (!r.ok) {
-      alert(d.error || "Failed to update pricing");
+      toast.error(d.error || "Failed to update pricing");
       return;
     }
+    toast.success(`Exam plan updated to ${newIsFree ? "Free" : `Paid (₹${newPrice})`}`);
     setExams((prev) =>
       prev.map((x) => (x.id === exam.id ? { ...x, isFree: newIsFree, price: newPrice } : x)),
     );
@@ -226,9 +238,10 @@ export default function GlobalExamsPage() {
     });
     setUpdatingId(null);
     if (!r.ok) {
-      alert("Failed to delete exam");
+      toast.error("Failed to delete exam");
       return;
     }
+    toast.success(`Exam "${title}" deleted successfully.`);
     setExams((prev) => prev.filter((x) => x.id !== id));
   }
 
@@ -261,25 +274,7 @@ export default function GlobalExamsPage() {
         </Link>
       </div>
 
-      {/* Alert Banner */}
-      {statusMessage && (
-        <div
-          className={`flex items-center gap-2 rounded-2xl p-4 text-xs font-semibold sm:text-sm ${
-            statusMessage.type === "success"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-              : statusMessage.type === "error"
-                ? "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                : "border border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
-          }`}
-        >
-          {statusMessage.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          ) : (
-            <AlertCircle className="h-4 w-4 shrink-0" />
-          )}
-          <span>{statusMessage.text}</span>
-        </div>
-      )}
+
 
       {/* Reschedule Exam Modal */}
       {rescheduleModalExam && (
@@ -313,7 +308,7 @@ export default function GlobalExamsPage() {
 
               <div>
                 <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  New Start Date &amp; Time (नवीन सुरू होण्याची वेळ) *
+                  New Start Date &amp; Time *
                 </label>
                 <input
                   type="datetime-local"
@@ -326,7 +321,7 @@ export default function GlobalExamsPage() {
 
               <div>
                 <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  End Date &amp; Time (पर्यायी समाप्ती वेळ)
+                  End Date &amp; Time (Optional)
                 </label>
                 <input
                   type="datetime-local"
@@ -395,7 +390,7 @@ export default function GlobalExamsPage() {
 
             <div>
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Exam Category (परीक्षेचा प्रकार) *
+                Exam Category *
               </label>
               <select
                 value={form.examType}
@@ -552,7 +547,7 @@ export default function GlobalExamsPage() {
             {/* Negative Marking */}
             <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-950">
               <label className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
-                <span>Negative Marking (नकारात्मक गुण)</span>
+                <span>Negative Marking</span>
                 <input
                   type="checkbox"
                   checked={hasNegativeMarking}

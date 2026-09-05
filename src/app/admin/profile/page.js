@@ -12,6 +12,7 @@ import {
   Calendar,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { getInitials } from "@/lib/avatar";
 import { PasskeyManager } from "@/components/passkey-manager";
 import { ChangePasswordCard } from "@/components/change-password-card";
@@ -19,13 +20,14 @@ import { ChangePasswordCard } from "@/components/change-password-card";
 export default function AdminProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
 
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    preferredLanguage: "mr",
+    preferredLanguage: "en",
+    profilePhoto: "",
   });
 
   const [profileMeta, setProfileMeta] = useState(null);
@@ -41,7 +43,8 @@ export default function AdminProfilePage() {
             name: u.name || "",
             email: u.email || "",
             phone: u.phone || "",
-            preferredLanguage: u.preferredLanguage || "mr",
+            preferredLanguage: u.preferredLanguage || "en",
+            profilePhoto: u.profilePhoto || "",
           });
           setProfileMeta({
             role: u.role,
@@ -49,13 +52,10 @@ export default function AdminProfilePage() {
             createdAt: u.createdAt,
           });
         } else {
-          setMessage({
-            type: "error",
-            text: data.error || "Failed to load profile details.",
-          });
+          toast.error(data.error || "Failed to load profile details.");
         }
       } catch (err) {
-        setMessage({ type: "error", text: err.message || "Failed to connect to server." });
+        toast.error(err.message || "Failed to connect to server.");
       } finally {
         setLoading(false);
       }
@@ -63,9 +63,53 @@ export default function AdminProfilePage() {
     loadProfile();
   }, []);
 
+  async function handlePhotoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await res.json();
+      if (res.ok && result.url) {
+        setForm((prev) => ({ ...prev, profilePhoto: result.url }));
+
+        // Automatically save updated photo URL to backend
+        const saveRes = await fetch("/api/auth/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profilePhoto: result.url }),
+        });
+
+        if (saveRes.ok) {
+          toast.success("Profile photo updated successfully!");
+        } else {
+          toast.error("Failed to save photo to profile.");
+        }
+      } else {
+        toast.error(result.error || "Failed to upload avatar image.");
+      }
+    } catch (err) {
+      toast.error("Avatar upload error: " + err.message);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
   async function handleSave(e) {
     e.preventDefault();
-    setMessage({ type: "", text: "" });
+
+    if (!form.name?.trim()) {
+      toast.error("Full Name is required.");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -76,26 +120,18 @@ export default function AdminProfilePage() {
           name: form.name,
           phone: form.phone,
           preferredLanguage: form.preferredLanguage,
+          profilePhoto: form.profilePhoto,
         }),
       });
       const data = await res.json();
 
       if (res.ok) {
-        setMessage({
-          type: "success",
-          text: "✅ Profile updated successfully! All changes have been saved.",
-        });
+        toast.success("Profile updated successfully!");
       } else {
-        setMessage({
-          type: "error",
-          text: data.error || "Failed to update profile.",
-        });
+        toast.error(data.error || "Failed to update profile.");
       }
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: err.message || "Failed to submit updates.",
-      });
+      toast.error(err.message || "Failed to submit updates.");
     } finally {
       setSaving(false);
     }
@@ -145,8 +181,28 @@ export default function AdminProfilePage() {
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 p-6 text-white shadow-xl sm:p-8">
         <div className="relative z-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/15 text-2xl font-black shadow-inner backdrop-blur-md">
-              {initials}
+            <div className="relative group">
+              <div className="grid h-20 w-20 place-items-center rounded-2xl border-2 border-white/30 bg-white/15 text-2xl font-black shadow-inner backdrop-blur-md overflow-hidden">
+                {form.profilePhoto ? (
+                  <img src={form.profilePhoto} alt={form.name} className="h-full w-full object-cover" />
+                ) : (
+                  <span>{initials}</span>
+                )}
+              </div>
+              <label
+                htmlFor="avatar-upload"
+                className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-[10px] font-bold text-white text-center p-1"
+              >
+                {uploadingPhoto ? "Uploading..." : "Change Photo"}
+              </label>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                disabled={uploadingPhoto}
+                className="hidden"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -192,53 +248,37 @@ export default function AdminProfilePage() {
         </div>
       </div>
 
-      {/* Global Alerts */}
-      {message.text && (
-        <div
-          className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${
-            message.type === "success"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
-              : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
-          }`}
-        >
-          {message.type === "success" ? (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          ) : (
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
-          )}
-          <span>{message.text}</span>
-        </div>
-      )}
+
 
       {/* Personal Details Form */}
       <form onSubmit={handleSave} className="space-y-6">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
             <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span>वैयक्तिक माहिती (Personal Information)</span>
+            <span>Personal Information</span>
           </h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            आपले नाव, संपर्क माहिती व भाषा प्राधान्ये अपडेट करा.
+            Update your name, contact details, and preferred language.
           </p>
 
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                पूर्ण नाव (Full Name) *
+                Full Name *
               </label>
               <input
                 type="text"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="उदा. प्रथम नाव आडनाव"
+                placeholder="e.g. Firstname Lastname"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
               />
             </div>
 
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                ईमेल पत्ता (Email Address)
+                Email Address
               </label>
               <input
                 type="email"
@@ -247,35 +287,35 @@ export default function AdminProfilePage() {
                 className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-500"
               />
               <span className="mt-1 block text-[10px] text-slate-400">
-                सुरक्षेसाठी ईमेल बदलता येत नाही.
+                Email address cannot be changed for security reasons.
               </span>
             </div>
 
             <div>
               <label className="mb-1.5 flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-300">
                 <Phone className="h-3.5 w-3.5 text-slate-500" />
-                <span>मोबाईल नंबर (Phone Number)</span>
+                <span>Phone Number</span>
               </label>
               <input
                 type="tel"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="१० अंकी मोबाईल नंबर"
+                placeholder="10-digit mobile number"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
               />
             </div>
 
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                पसंतीची भाषा (Preferred Language)
+                Preferred Language
               </label>
               <select
                 value={form.preferredLanguage}
                 onChange={(e) => setForm({ ...form, preferredLanguage: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
               >
-                <option value="mr">मराठी (Marathi)</option>
-                <option value="en">English (इंग्रजी)</option>
+                <option value="en">English</option>
+                <option value="mr">Marathi</option>
               </select>
             </div>
           </div>
@@ -289,12 +329,12 @@ export default function AdminProfilePage() {
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>बदल सेव्ह होत आहेत...</span>
+                  <span>Saving changes...</span>
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  <span>माहिती सेव्ह करा (Save Details)</span>
+                  <span>Save Details</span>
                 </>
               )}
             </button>

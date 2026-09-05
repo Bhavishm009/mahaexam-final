@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Bell,
   Plus,
@@ -9,8 +12,6 @@ import {
   Calendar,
   GraduationCap,
   Briefcase,
-  CheckCircle2,
-  AlertCircle,
   Link as LinkIcon,
   FileText,
   DollarSign,
@@ -19,13 +20,15 @@ import {
 } from "lucide-react";
 
 export default function AdminJobsManagementPage() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [notifyStudents, setNotifyStudents] = useState(true);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -41,68 +44,149 @@ export default function AdminJobsManagementPage() {
     notificationPdf: "",
     description: "",
     descriptionMr: "",
-    examSlug: "police-bharti-mock-01",
-    salaryRange: "₹२१,७०० - ₹६९,१०० (S-6 Level)",
-    ageLimit: "१८ ते २८ वर्षे (मागासवर्गीय उमेदवारांसाठी ५ वर्षे सूट)",
-    selectionProcess: "१) CBT लेखी परीक्षा  २) शारीरिक चाचणी / कागदपत्र पडताळणी",
+    examSlug: "",
+    imageUrl: "",
+    salaryRange: "₹21,700 - ₹69,100 (S-6 Level)",
+    ageLimit: "18 to 28 Years (5 Years relaxation for reserved categories)",
+    selectionProcess: "1) CBT Written Test  2) Physical Test / Document Verification",
   });
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  async function fetchJobs() {
-    setLoading(true);
-    try {
+  // 1. Fetch Jobs with TanStack Query
+  const { data: jobsData, isLoading: loading } = useQuery({
+    queryKey: ["admin-jobs"],
+    queryFn: async () => {
       const res = await fetch("/api/admin/jobs");
       const data = await res.json();
-      if (res.ok && data.success) {
-        setJobs(data.jobs || []);
+      if (!res.ok) throw new Error(data.error || "Failed to fetch jobs");
+      return data.jobs || data.jobAlerts || [];
+    },
+  });
+
+  const jobs = jobsData || [];
+
+  function generateSlug(text) {
+    if (!text) return "";
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
+  function handleTitleChange(val, isMarathi = false) {
+    const updated = isMarathi
+      ? { ...formData, titleMr: val, title: formData.title || val }
+      : { ...formData, title: val };
+
+    const baseTitle = isMarathi ? formData.title || val : val;
+    if (!formData.examSlug || formData.examSlug === generateSlug(formData.title || formData.titleMr) + "-mock-test") {
+      updated.examSlug = generateSlug(baseTitle) ? `${generateSlug(baseTitle)}-mock-test` : "";
+    }
+
+    setFormData(updated);
+  }
+
+  async function handleImageUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await res.json();
+      if (res.ok && result.url) {
+        setFormData((prev) => ({ ...prev, imageUrl: result.url }));
+        toast.success("Image uploaded successfully!");
+      } else {
+        toast.error(result.error || "Failed to upload image.");
       }
     } catch (err) {
-      console.error("Error fetching jobs:", err);
+      toast.error("Upload error: " + err.message);
     } finally {
-      setLoading(false);
+      setUploadingImage(false);
     }
   }
 
-  async function handleCreateJob(e) {
-    e.preventDefault();
-    setSubmitting(true);
-    setSuccessMsg("");
-    setErrorMsg("");
-
-    try {
+  // 2. Create Job Mutation with Optimistic Update
+  const createJobMutation = useMutation({
+    mutationFn: async (payload) => {
       const res = await fetch("/api/admin/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          notifyStudents,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (res.ok && data.success) {
-        setSuccessMsg(
-          notifyStudents
-            ? "🚀 भरती जाहिरात प्रसिद्ध झाली व सर्व विद्यार्थ्यांना सूचना (Web Push & In-app) पाठवण्यात आल्या!"
-            : "✅ भरती जाहिरात यशस्वीरीत्या सेव्ह झाली!"
-        );
-        setShowCreateModal(false);
-        fetchJobs();
-      } else {
-        setErrorMsg(data.error || "जाहिरात जोडताना त्रुटी झाली.");
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to publish job notification.");
       }
-    } catch (err) {
-      setErrorMsg("नेटवर्क त्रुटी: " + err.message);
-    } finally {
-      setSubmitting(false);
+      return data;
+    },
+    onMutate: async (newJobPayload) => {
+      await queryClient.cancelQueries({ queryKey: ["admin-jobs"] });
+      const previousJobs = queryClient.getQueryData(["admin-jobs"]) || [];
+
+      // Optimistically insert draft job alert into UI
+      const optimisticJob = {
+        id: "temp-" + Date.now(),
+        ...newJobPayload,
+        publishedAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData(["admin-jobs"], [optimisticJob, ...previousJobs]);
+      return { previousJobs };
+    },
+    onError: (err, newJobPayload, context) => {
+      if (context?.previousJobs) {
+        queryClient.setQueryData(["admin-jobs"], context.previousJobs);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-jobs"] });
+    },
+  });
+
+  function handleCreateJob(e) {
+    e.preventDefault();
+
+    if (!formData.title.trim() && !formData.titleMr.trim()) {
+      toast.error("Please enter a Job Title.");
+      return;
     }
+    if (!formData.department.trim()) {
+      toast.error("Please enter the Department name.");
+      return;
+    }
+
+    const payload = {
+      ...formData,
+      examSlug: formData.examSlug || generateSlug(formData.title || formData.titleMr) + "-mock-test",
+      notifyStudents,
+    };
+
+    setShowCreateModal(false);
+
+    toast.promise(createJobMutation.mutateAsync(payload), {
+      loading: "Publishing job recruitment alert & broadcasting to students...",
+      success: () =>
+        notifyStudents
+          ? "Recruitment notification published & broadcast sent to all students!"
+          : "Recruitment job notification saved successfully!",
+      error: (err) => `Failed to save job alert: ${err.message}`,
+    });
   }
 
+  const submitting = createJobMutation.isPending;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Top Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -111,10 +195,10 @@ export default function AdminJobsManagementPage() {
             Recruitment Job Alerts & Broadcasts
           </div>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-            सरकारी भरती जाहिराती व नोटिफिकेशन्स
+            Government Job Recruitment Alerts
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            नवीन भरती जाहिराती पोस्ट करा व एकाच वेळी सर्व विद्यार्थ्यांना इन-ॲप व Web Push नोटिफिकेशन्स ब्रॉडकास्ट करा.
+            Post new recruitment alerts and broadcast in-app & web push notifications to candidates simultaneously.
           </p>
         </div>
 
@@ -124,40 +208,25 @@ export default function AdminJobsManagementPage() {
           className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-xs font-black text-white shadow-lg transition hover:bg-blue-500 active:scale-95"
         >
           <Plus className="h-4 w-4" />
-          <span>नवीन जाहिरात पोस्ट करा</span>
+          <span>+ Post New Job Alert</span>
         </button>
       </div>
-
-      {/* Status Alerts */}
-      {successMsg && (
-        <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 p-4 text-xs font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-          <span>{successMsg}</span>
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="flex items-center gap-2 rounded-2xl bg-rose-50 p-4 text-xs font-bold text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
-          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
 
       {/* Jobs List Data Grid */}
       <div className="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="border-b border-slate-100 p-5 dark:border-slate-800">
           <h2 className="text-base font-black text-slate-900 dark:text-white">
-            प्रसिद्ध झालेल्या भरती जाहिराती ({jobs.length})
+            Published Job Notifications ({jobs.length})
           </h2>
         </div>
 
         {loading ? (
           <div className="p-8 text-center text-xs font-semibold text-slate-400">
-            लोड होत आहे...
+            Loading job alerts...
           </div>
         ) : jobs.length === 0 ? (
           <div className="p-8 text-center text-xs text-slate-400">
-            कोणतीही जाहिरात आढळली नाही.
+            No job notifications found.
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -166,33 +235,42 @@ export default function AdminJobsManagementPage() {
                 key={job.id}
                 className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                      {job.status}
-                    </span>
-                    <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400">
-                      {job.vacancies}
-                    </span>
-                  </div>
+                <div className="flex items-start gap-4">
+                  {job.imageUrl && (
+                    <img
+                      src={job.imageUrl}
+                      alt={job.title}
+                      className="h-14 w-14 rounded-2xl object-cover border border-slate-200 dark:border-slate-800 shrink-0"
+                    />
+                  )}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-extrabold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        {job.status}
+                      </span>
+                      <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400">
+                        {job.vacancies}
+                      </span>
+                    </div>
 
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white">
-                    {job.titleMr || job.title}
-                  </h3>
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                      {job.title || job.titleMr}
+                    </h3>
 
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <Building2 className="h-3 w-3" />
-                      {job.departmentMr || job.department}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <GraduationCap className="h-3 w-3" />
-                      {job.qualificationMr || job.qualification}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {job.lastDate}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <Building2 className="h-3 w-3" />
+                        {job.department || job.departmentMr}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <GraduationCap className="h-3 w-3" />
+                        {job.qualification || job.qualificationMr}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {job.lastDate}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -203,7 +281,7 @@ export default function AdminJobsManagementPage() {
                     rel="noopener noreferrer"
                     className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
                   >
-                    पेज पहा ↗
+                    View Page ↗
                   </a>
                 </div>
               </div>
@@ -213,48 +291,86 @@ export default function AdminJobsManagementPage() {
       </div>
 
       {/* Modal for Creating New Job */}
-      {showCreateModal && (
+      {showCreateModal && mounted && createPortal(
         <div
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreateModal(false);
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md overflow-hidden"
         >
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+          <div className="max-h-[90vh] w-full max-w-2xl flex flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden dark:border-slate-800 dark:bg-slate-900 animate-in fade-in zoom-in-95 duration-150">
+            {/* Fixed Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800 shrink-0 bg-slate-50/80 dark:bg-slate-900/80">
               <div className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                  नवीन सरकारी भरती जाहिरात जोडा
+                  Add New Job Recruitment Alert
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateJob} className="mt-4 space-y-4">
+            {/* Scrollable Form Body */}
+            <form id="job-form" onSubmit={handleCreateJob} className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Job Image Upload Section */}
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  Job / Banner Image (Supabase Storage / Upload)
+                </label>
+                <div className="flex items-center gap-4">
+                  {formData.imageUrl ? (
+                    <div className="relative h-16 w-20 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+                      <img src={formData.imageUrl} alt="Uploaded Banner" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: "" })}
+                        className="absolute right-1 top-1 rounded-full bg-rose-600 p-0.5 text-white"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid h-16 w-20 place-items-center rounded-xl bg-slate-200/60 text-xs font-bold text-slate-400 dark:bg-slate-800">
+                      No Image
+                    </div>
+                  )}
+
+                  <div className="flex-1 space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="block w-full text-xs text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-blue-500"
+                    />
+                    <input
+                      type="url"
+                      placeholder="Or paste Image URL (e.g. https://...)"
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    जाहिरात शीर्षक (मराठी) *
+                    Job Title (Marathi) *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="उदा: महाराष्ट्र पोलीस शिपाई भरती २०२६"
+                    placeholder="e.g. Maharashtra Police Bharti 2026"
                     value={formData.titleMr}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        titleMr: e.target.value,
-                        title: formData.title || e.target.value,
-                      })
-                    }
+                    onChange={(e) => handleTitleChange(e.target.value, true)}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
@@ -265,9 +381,9 @@ export default function AdminJobsManagementPage() {
                   </label>
                   <input
                     type="text"
-                    placeholder="Maharashtra Police Constable Recruitment 2026"
+                    placeholder="e.g. Maharashtra Police Constable Recruitment 2026"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) => handleTitleChange(e.target.value, false)}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
@@ -276,32 +392,26 @@ export default function AdminJobsManagementPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    विभाग (Department) *
+                    Department *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="महाराष्ट्र पोलीस विभाग"
-                    value={formData.departmentMr}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        departmentMr: e.target.value,
-                        department: formData.department || e.target.value,
-                      })
-                    }
+                    placeholder="e.g. Maharashtra Police Department"
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    एकूण पदे (Vacancies) *
+                    Vacancies *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="१७,४७१+ पदे"
+                    placeholder="e.g. 17,471+ Posts"
                     value={formData.vacancies}
                     onChange={(e) => setFormData({ ...formData, vacancies: e.target.value })}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
@@ -312,32 +422,26 @@ export default function AdminJobsManagementPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    शैक्षणिक पात्रता (Qualification) *
+                    Qualification *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="१२ वी उत्तीर्ण (HSC) व शारीरिक पात्रता"
-                    value={formData.qualificationMr}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        qualificationMr: e.target.value,
-                        qualification: formData.qualification || e.target.value,
-                      })
-                    }
+                    placeholder="e.g. 12th Pass (HSC) & Physical Qualification"
+                    value={formData.qualification}
+                    onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    अंतिम तारीख / स्टेटस *
+                    Last Date / Status *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="३१ मार्च २०२६ / लवकरच"
+                    placeholder="e.g. 31st March 2026 / Opening Soon"
                     value={formData.lastDate}
                     onChange={(e) => setFormData({ ...formData, lastDate: e.target.value })}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
@@ -347,20 +451,14 @@ export default function AdminJobsManagementPage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  जाहिरात संक्षिप्त माहिती (Description) *
+                  Job Description *
                 </label>
                 <textarea
-                  rows={3}
                   required
-                  placeholder="महाराष्ट्र पोलीस शिपाई व चालक भरतीबाबत संपूर्ण माहिती, वयोमर्यादा व शारीरिक निकष..."
-                  value={formData.descriptionMr}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      descriptionMr: e.target.value,
-                      description: formData.description || e.target.value,
-                    })
-                  }
+                  rows={3}
+                  placeholder="e.g. Complete details, age limits, and physical requirements for Police Constable recruitment..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                 />
               </div>
@@ -368,7 +466,7 @@ export default function AdminJobsManagementPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    अधिकृत वेबसाईट लिंक (Official URL)
+                    Official Website URL
                   </label>
                   <input
                     type="url"
@@ -381,13 +479,13 @@ export default function AdminJobsManagementPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    अधिकृत PDF लिंक (Notification PDF)
+                    Notification PDF Link
                   </label>
                   <input
                     type="url"
                     placeholder="https://example.com/notice.pdf"
-                    value={formData.notificationPdf}
-                    onChange={(e) => setFormData({ ...formData, notificationPdf: e.target.value })}
+                    value={formData.pdfUrl}
+                    onChange={(e) => setFormData({ ...formData, pdfUrl: e.target.value })}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
@@ -396,11 +494,11 @@ export default function AdminJobsManagementPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    वेतनश्रेणी (Salary Range)
+                    Salary Range
                   </label>
                   <input
                     type="text"
-                    placeholder="₹२१,७०० - ₹६९,१०० (S-6 Level)"
+                    placeholder="₹21,700 - ₹69,100 (S-6 Level)"
                     value={formData.salaryRange}
                     onChange={(e) => setFormData({ ...formData, salaryRange: e.target.value })}
                     className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
@@ -408,15 +506,29 @@ export default function AdminJobsManagementPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    संबंधित सराव परीक्षा (Mock Exam Slug)
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Related Mock Exam Slug
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          examSlug: `${generateSlug(formData.title || formData.titleMr || "mock-exam")}-mock-test`,
+                        })
+                      }
+                      className="text-[10px] font-bold text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      ⚡ Auto-Generate
+                    </button>
+                  </div>
                   <input
                     type="text"
-                    placeholder="police-bharti-mock-01"
+                    placeholder="e.g. police-bharti-mock-01 (Autogenerated)"
                     value={formData.examSlug}
                     onChange={(e) => setFormData({ ...formData, examSlug: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-mono font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                   />
                 </div>
               </div>
@@ -431,31 +543,34 @@ export default function AdminJobsManagementPage() {
                   className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor="notifyCheck" className="text-xs font-bold text-blue-950 dark:text-blue-200 cursor-pointer">
-                  🔔 सर्व विद्यार्थ्यांना इन-ॲप व Web Push नोटिफिकेशन्स ब्रॉडकास्ट करा
+                  🔔 Broadcast In-App & Web Push notifications to all students
                 </label>
               </div>
-
-              <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="rounded-2xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  रद्द करा
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-50"
-                >
-                  <Send className="h-4 w-4" />
-                  <span>{submitting ? "पोस्ट होत आहे..." : "प्रसिद्ध करा & पाठवा"}</span>
-                </button>
-              </div>
             </form>
+
+            {/* Fixed Footer */}
+            <div className="flex justify-end gap-3 border-t border-slate-100 px-6 py-4 dark:border-slate-800 shrink-0 bg-slate-50/80 dark:bg-slate-900/80">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="rounded-2xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                form="job-form"
+                disabled={submitting}
+                className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-50"
+              >
+                <Send className="h-4 w-4" />
+                <span>{submitting ? "Publishing..." : "Publish & Broadcast"}</span>
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

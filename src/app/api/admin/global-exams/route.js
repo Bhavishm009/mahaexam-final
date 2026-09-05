@@ -32,12 +32,35 @@ export async function POST(request) {
   }
   try {
     const b = await request.json();
-    if (!b.title || !b.durationMinutes || !b.totalQuestions) {
+    if (!b.title || !b.title.trim()) {
       return NextResponse.json(
-        { error: "title, durationMinutes and totalQuestions are required" },
-        { status: 422 },
+        { error: "Validation Error: Exam Title is required." },
+        { status: 400 }
       );
     }
+    const duration = Number(b.durationMinutes);
+    const questionsCount = Number(b.totalQuestions);
+
+    if (isNaN(duration) || duration <= 0) {
+      return NextResponse.json(
+        { error: "Validation Error: Duration must be a positive number of minutes." },
+        { status: 400 }
+      );
+    }
+    if (isNaN(questionsCount) || questionsCount <= 0) {
+      return NextResponse.json(
+        { error: "Validation Error: Total Questions must be at least 1." },
+        { status: 400 }
+      );
+    }
+
+    if (b.startAt && b.endAt && new Date(b.endAt) <= new Date(b.startAt)) {
+      return NextResponse.json(
+        { error: "Validation Error: End time must be after the Start time." },
+        { status: 400 }
+      );
+    }
+
     const cleanSlug = (b.slug || b.title || "exam")
       .toLowerCase()
       .trim()
@@ -49,14 +72,14 @@ export async function POST(request) {
 
     const exam = await prisma.exam.create({
       data: {
-        title: b.title,
+        title: b.title.trim(),
         slug: generatedSlug,
-        description: b.description || null,
+        description: b.description ? b.description.trim() : null,
         examType: b.examType || "Police Bharti",
         language: b.language || "mr",
-        durationMinutes: Number(b.durationMinutes),
-        totalQuestions: Number(b.totalQuestions),
-        totalMarks: Number(b.totalMarks || b.totalQuestions),
+        durationMinutes: duration,
+        totalQuestions: questionsCount,
+        totalMarks: Number(b.totalMarks || questionsCount),
         negativeMarks: Number(b.negativeMarks || 0),
         passingScore:
           b.passingScore === null || b.passingScore === undefined ? null : Number(b.passingScore),
@@ -74,7 +97,7 @@ export async function POST(request) {
 
     // Auto-link existing questions if any
     const existingQuestions = await prisma.question.findMany({
-      take: Number(b.totalQuestions),
+      take: questionsCount,
       orderBy: { createdAt: "asc" },
     });
     if (existingQuestions.length) {
@@ -93,9 +116,10 @@ export async function POST(request) {
     if (b.sendNotification !== false) {
       await scheduleExamNotifications(exam, { isReschedule: false });
     }
-    return NextResponse.json({ exam }, { status: 201 });
+    return NextResponse.json({ exam, success: true, message: "Global examination published successfully!" }, { status: 201 });
   } catch (e) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+    console.error("Global exam creation error:", e);
+    return NextResponse.json({ error: e.message || "Failed to create examination." }, { status: 500 });
   }
 }
 
@@ -120,6 +144,13 @@ export async function PATCH(request) {
     } = await request.json();
     if (!id) {
       return NextResponse.json({ error: "Exam ID is required" }, { status: 400 });
+    }
+
+    if (startAt && endAt && new Date(endAt) <= new Date(startAt)) {
+      return NextResponse.json(
+        { error: "Validation Error: End date & time must be after the Start date & time." },
+        { status: 400 }
+      );
     }
 
     const dataToUpdate = {};

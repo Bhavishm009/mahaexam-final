@@ -21,6 +21,7 @@
 .env.test.local
 .env.production.local
 .env.local
+.env.production
 
 # Debug logs
 npm-debug.log*
@@ -38,3 +39,4 @@ yarn-error.log*
 
 .vercel
 .env*.local
+/scratch

@@ -143,6 +143,7 @@ async function fetchAllJobAlertsInternal() {
         salaryRange: j.salaryRange || "७व्या वेतन आयोगानुसार",
         ageLimit: j.ageLimit || "१८ ते ३८ वर्षे",
         selectionProcess: j.selectionProcess || "CBT लेखी परीक्षा व कागदपत्र पडताळणी",
+        imageUrl: j.imageUrl || null,
         publishedAt: j.publishedAt,
       }));
     }
@@ -199,6 +200,7 @@ export async function getJobAlertById(idOrSlug) {
         salaryRange: dbJob.salaryRange || "७व्या वेतन आयोगानुसार",
         ageLimit: dbJob.ageLimit || "१८ ते ३८ वर्षे",
         selectionProcess: dbJob.selectionProcess || "CBT लेखी परीक्षा व कागदपत्र पडताळणी",
+        imageUrl: dbJob.imageUrl || null,
         publishedAt: dbJob.publishedAt,
       };
     }
@@ -243,6 +245,7 @@ export async function createJobAlert(data, notifyStudents = true) {
       salaryRange: data.salaryRange || "७व्या वेतन आयोगानुसार",
       ageLimit: data.ageLimit || "१८ ते ३८ वर्षे",
       selectionProcess: data.selectionProcess || "CBT ऑनलाइन परीक्षा व कागदपत्र पडताळणी",
+      imageUrl: data.imageUrl || null,
     },
   });
 

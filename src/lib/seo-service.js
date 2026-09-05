@@ -1,5 +1,8 @@
 import { unstable_cache as cache, revalidateTag } from "next/cache";
 import { prisma } from "./db.js";
+import { getBaseUrl } from "./base-url.js";
+
+const siteBase = getBaseUrl();
 
 export const DEFAULT_SEO_CONFIG = {
   "/": {
@@ -9,7 +12,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "महाराष्ट्र पोलीस भरती, तलाठी, MPSC राज्यसेवा, संयुक्त गट ब व क, जिल्हा परिषद आणि वनरक्षक भरतीसाठी TCS/IBPS पॅटर्न मोफत ऑनलाइन मॉक टेस्ट व अधिकृत PYQ प्रश्नपत्रिका.",
     descriptionMr: "महाराष्ट्र पोलीस भरती, तलाठी, MPSC राज्यसेवा, संयुक्त गट ब व क, जिल्हा परिषद आणि वनरक्षक भरतीसाठी TCS/IBPS पॅटर्न मोफत ऑनलाइन मॉक टेस्ट पोर्टल.",
     keywords: "Police Bharti Mock Test, MPSC Test Series, Talathi TCS Exam, ZP Arogya Sevak Mock Test, Maharashtra Online CBT, पोलीस भरती सराव पेपर",
-    canonicalUrl: "https://mahaexam.in/",
+    canonicalUrl: `${siteBase}/`,
     ogImage: "/og-image.png",
   },
   "/exams": {
@@ -19,7 +22,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद व सरळसेवा परीक्षांचे १०० गुणांचे परिपूर्ण ऑनलाईन CBT सराव पेपर्स. मोफत सोडवा व निकाल पहा.",
     descriptionMr: "पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद व सरळसेवा परीक्षांचे परिपूर्ण ऑनलाईन CBT सराव पेपर्स.",
     keywords: "Maharashtra Exams Directory, Police Bharti Mock Test, MPSC Rajyaseva, Talathi Bharti TCS, ZP Mock Tests",
-    canonicalUrl: "https://mahaexam.in/exams",
+    canonicalUrl: `${siteBase}/exams`,
     ogImage: "/og-exams.png",
   },
   "/jobs": {
@@ -29,8 +32,18 @@ export const DEFAULT_SEO_CONFIG = {
     description: "महाराष्ट्र पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद (ZP) आणि वनरक्षक भरतीच्या ताज्या अधिकृत जाहिराती, रिक्त पदे, पात्रता व अंतिम तारीख.",
     descriptionMr: "महाराष्ट्र पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद व वनरक्षक भरतीच्या ताज्या अधिकृत जाहिराती.",
     keywords: "Maharashtra Police Bharti 2026, MPSC Job Notification, Talathi Bharti 2026, ZP Bharti Alert, Govt Jobs Maharashtra",
-    canonicalUrl: "https://mahaexam.in/jobs",
+    canonicalUrl: `${siteBase}/jobs`,
     ogImage: "/og-jobs.png",
+  },
+  "/blogs": {
+    route: "/blogs",
+    title: "महाराष्ट्र स्पर्धा परीक्षा ब्लॉग व बातम्या २०२६ | MahaExam Articles",
+    titleMr: "महाराष्ट्र स्पर्धा परीक्षा ब्लॉग व बातम्या",
+    description: "पोलीस भरती, MPSC, तलाठी व जिल्हा परिषद परीक्षांच्या ताज्या बातम्या, अभ्यासक्रम, मार्गदर्शक लेख आणि टॉपर नीती.",
+    descriptionMr: "पोलीस भरती, MPSC, तलाठी व जिल्हा परिषद परीक्षांच्या ताज्या बातम्या व अभ्यास मार्गदर्शक.",
+    keywords: "MahaExam Blog, Maharashtra Bharti News 2026, Exam Preparation Tips, MPSC Topper Strategy",
+    canonicalUrl: `${siteBase}/blogs`,
+    ogImage: "/og-image.png",
   },
   "/pricing": {
     route: "/pricing",
@@ -39,7 +52,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "विद्यार्थ्यांसाठी मोफत व अकॅडेमींसाठी परवडणारे परीक्षा पोर्टल प्लॅन्स. अमर्याद सराव पेपर्स व अँटी-चीट CBT सिम्युलेटर.",
     descriptionMr: "विद्यार्थ्यांसाठी मोफत व अकॅडेमींसाठी परवडणारे परीक्षा पोर्टल प्लॅन्स.",
     keywords: "MahaExam Pricing, Coaching Institute Software, Online Exam Portal Subscription",
-    canonicalUrl: "https://mahaexam.in/pricing",
+    canonicalUrl: `${siteBase}/pricing`,
     ogImage: "/og-pricing.png",
   },
   "/faq": {
@@ -49,7 +62,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "MahaExam प्लॅटफॉर्म, ऑनलाईन सराव परीक्षा, TCS/IBPS पॅटर्न, निकाल आणि तांत्रिक अडचणींबाबत सर्व प्रश्नांची स्पष्ट उत्तरे.",
     descriptionMr: "MahaExam प्लॅटफॉर्म, सराव परीक्षा, निकाल आणि तांत्रिक अडचणींबाबत स्पष्ट उत्तरे.",
     keywords: "MahaExam FAQ, Online Exam Help, TCS IBPS Pattern Doubt Clear",
-    canonicalUrl: "https://mahaexam.in/faq",
+    canonicalUrl: `${siteBase}/faq`,
     ogImage: "/og-faq.png",
   },
   "/features": {
@@ -59,7 +72,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "महाराष्ट्रातील पहिल्या हाय-टेक CBT परीक्षा सिम्युलेटरची वैशिष्ट्ये: लाईव्ह रँकिंग, सविस्तर स्पष्टीकरणे, आणि फुलस्क्रीन अँटी-चीट लॉक.",
     descriptionMr: "हाय-टेक CBT परीक्षा सिम्युलेटरची वैशिष्ट्ये: लाईव्ह रँकिंग व अँटी-चीट लॉक.",
     keywords: "CBT Exam Engine, Anti Cheat Exam Guard, Live Leaderboard Maharashtra",
-    canonicalUrl: "https://mahaexam.in/features",
+    canonicalUrl: `${siteBase}/features`,
     ogImage: "/og-features.png",
   },
   "/for-coaching": {
@@ -69,7 +82,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "तुमच्या कोचिंग क्लाससाठी स्वतःच्या नावाने ऑनलाईन परीक्षा पोर्टल सुरू करा. ५ मिनिटांत बॅच व्यवस्थापन व टेस्ट सिरीज लाइव्ह करा.",
     descriptionMr: "तुमच्या कोचिंग क्लाससाठी स्वतःच्या नावाने ऑनलाईन परीक्षा पोर्टल सुरू करा.",
     keywords: "Coaching Class Test Portal, White Label Exam Engine Maharashtra, Academy Test Manager",
-    canonicalUrl: "https://mahaexam.in/for-coaching",
+    canonicalUrl: `${siteBase}/for-coaching`,
     ogImage: "/og-coaching.png",
   },
   "/login": {
@@ -79,7 +92,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "तुमच्या MahaExam खात्यात लॉगिन करा आणि सराव चाचण्या, निकाल व प्रगतीचा तक्ता पहा.",
     descriptionMr: "तुमच्या खात्यात लॉगिन करा आणि सराव चाचण्या व निकाल पहा.",
     keywords: "MahaExam Login, Student Portal Signin",
-    canonicalUrl: "https://mahaexam.in/login",
+    canonicalUrl: `${siteBase}/login`,
   },
   "/register": {
     route: "/register",
@@ -88,7 +101,7 @@ export const DEFAULT_SEO_CONFIG = {
     description: "MahaExam वर १ मिनिटात मोफत नोंदणी करा आणि महाराष्ट्रातील सर्व स्पर्धा परीक्षांचे सराव पेपर्स सोडवा.",
     descriptionMr: "१ मिनिटात मोफत नोंदणी करा आणि सर्व सराव पेपर्स सोडवा.",
     keywords: "MahaExam Register, Free Account Creation",
-    canonicalUrl: "https://mahaexam.in/register",
+    canonicalUrl: `${siteBase}/register`,
   },
 };
 
@@ -112,7 +125,7 @@ async function fetchSeoForRouteInternal(routePath) {
           description: dbSeo.description,
           descriptionMr: dbSeo.descriptionMr || dbSeo.description,
           keywords: dbSeo.keywords || "",
-          canonicalUrl: dbSeo.canonicalUrl || `https://mahaexam.in${cleanPath}`,
+          canonicalUrl: dbSeo.canonicalUrl || `${siteBase}${cleanPath}`,
           ogImage: dbSeo.ogImage || "/og-image.png",
           structuredJson: dbSeo.structuredJson || null,
         };
@@ -129,7 +142,7 @@ async function fetchSeoForRouteInternal(routePath) {
     description: "महाराष्ट्र पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद आणि सरळसेवा परीक्षांचे ऑनलाईन CBT सराव पेपर्स.",
     descriptionMr: "महाराष्ट्र स्पर्धा परीक्षांचे ऑनलाईन CBT सराव पेपर्स.",
     keywords: "Maharashtra Exam Portal, Online Mock Test, CBT Exam",
-    canonicalUrl: `https://mahaexam.in${cleanPath}`,
+    canonicalUrl: `${siteBase}${cleanPath}`,
     ogImage: "/og-image.png",
   };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { toast } from "sonner";
 import {
   Users,
   Search,
@@ -83,16 +84,17 @@ export default function AdminUsersPage() {
       });
       if (res.ok) {
         setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, status: nextStatus } : u)));
+        toast.success(`User status updated to ${nextStatus}`);
       }
     } catch (err) {
-      alert("Failed to update status: " + err.message);
+      toast.error("Failed to update status: " + err.message);
     }
   }
 
   // Safe delete
   async function deleteUser(u) {
     if (u.email === "bhavishm009@gmail.com") {
-      alert("⚠️ Primary Super Admin account cannot be deleted.");
+      toast.error("⚠️ Primary Super Admin account cannot be deleted.");
       return;
     }
 
@@ -107,21 +109,39 @@ export default function AdminUsersPage() {
       const res = await fetch(`/api/admin/users?id=${u.id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
-        alert("✅ " + data.message);
+        toast.success("✅ " + data.message);
         setUsers((prev) => prev.filter((item) => item.id !== u.id));
       } else {
-        alert("❌ Error: " + (data.error || "Failed to delete"));
+        toast.error("❌ Error: " + (data.error || "Failed to delete"));
       }
     } catch (err) {
-      alert("❌ " + err.message);
+      toast.error("❌ " + err.message);
     }
   }
 
   // Handle Add User Form Submission
   async function handleAddUser(e) {
     e.preventDefault();
-    setAddLoading(true);
     setAddError("");
+
+    if (!newUser.name?.trim()) {
+      setAddError("⚠️ Full Name is required.");
+      toast.error("Full Name is required");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newUser.email?.trim() || !emailRegex.test(newUser.email.trim())) {
+      setAddError("⚠️ Please enter a valid email address.");
+      toast.error("Valid email address is required");
+      return;
+    }
+    if (!newUser.password || newUser.password.length < 6) {
+      setAddError("⚠️ Password must be at least 6 characters long.");
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    setAddLoading(true);
 
     try {
       const res = await fetch("/api/admin/users", {
@@ -131,7 +151,7 @@ export default function AdminUsersPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(`✅ ${data.message || "User created successfully!"}`);
+        toast.success(`✅ ${data.message || "User created successfully!"}`);
         setShowAddUserModal(false);
         setNewUser({
           name: "",
@@ -145,9 +165,11 @@ export default function AdminUsersPage() {
         loadUsers();
       } else {
         setAddError(data.error || "Failed to create user");
+        toast.error(data.error || "Failed to create user");
       }
     } catch (err) {
       setAddError(err.message);
+      toast.error(err.message);
     } finally {
       setAddLoading(false);
     }
@@ -262,7 +284,7 @@ export default function AdminUsersPage() {
                   required
                   value={newUser.name}
                   onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                  placeholder="उदा. राहुल पाटील / प्रा. राजेश देशमुख"
+                  placeholder="e.g. Rahul Patil / Prof. Rajesh Deshmukh"
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 outline-none focus:border-blue-600 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
@@ -306,9 +328,9 @@ export default function AdminUsersPage() {
                     onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900 outline-none focus:border-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
-                    <option value="STUDENT">Student (विद्यार्थी)</option>
-                    <option value="COACHING_ADMIN">Coaching Admin (अकॅडेमी)</option>
-                    <option value="TEACHER">Teacher / Faculty (शिक्षक)</option>
+                    <option value="STUDENT">Student</option>
+                    <option value="COACHING_ADMIN">Coaching Admin (Academy)</option>
+                    <option value="TEACHER">Teacher / Faculty</option>
                     <option value="SUPER_ADMIN">Super Admin</option>
                   </select>
                 </div>
@@ -329,12 +351,12 @@ export default function AdminUsersPage() {
               {newUser.role === "COACHING_ADMIN" && (
                 <div>
                   <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    New Academy Name (अकॅडेमीचे नाव)
+                    New Academy Name
                   </label>
                   <input
                     value={newUser.academyName}
                     onChange={(e) => setNewUser({ ...newUser, academyName: e.target.value })}
-                    placeholder="उदा. शिवनेरी करिअर अकॅडेमी"
+                    placeholder="e.g. Shivneri Career Academy"
                     className="w-full rounded-xl border border-blue-200 bg-blue-50/60 px-3.5 py-2 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 dark:border-blue-900 dark:bg-blue-950/40 dark:text-white"
                   />
                 </div>
@@ -419,10 +441,10 @@ export default function AdminUsersPage() {
                   }}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
-                  <option value="ALL">All Roles (सर्व युजर्स)</option>
-                  <option value="STUDENT">Students (विद्यार्थी)</option>
-                  <option value="TEACHER">Teachers (शिक्षक)</option>
-                  <option value="COACHING_ADMIN">Coaching Admins (संस्था / अकॅडेमी)</option>
+                  <option value="ALL">All Roles</option>
+                  <option value="STUDENT">Students</option>
+                  <option value="TEACHER">Teachers</option>
+                  <option value="COACHING_ADMIN">Coaching Admins (Academy)</option>
                   <option value="SUPER_ADMIN">Super Admins</option>
                 </select>
               </div>
@@ -439,9 +461,9 @@ export default function AdminUsersPage() {
                   }}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
-                  <option value="ALL">All Statuses (सर्व स्थिती)</option>
-                  <option value="ACTIVE">Active (सक्रिय)</option>
-                  <option value="SUSPENDED">Suspended (निलंबित)</option>
+                  <option value="ALL">All Statuses</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="SUSPENDED">Suspended</option>
                 </select>
               </div>
 

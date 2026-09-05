@@ -43,6 +43,7 @@ export async function GET() {
         studentProfile: {
           select: {
             id: true,
+            profilePhoto: true,
             targetExam: true,
             education: true,
             district: true,
@@ -73,7 +74,10 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      profile: user,
+      profile: {
+        ...user,
+        profilePhoto: user.studentProfile?.profilePhoto || null,
+      },
     });
   } catch (err) {
     return NextResponse.json({ error: err.message || "Failed to load profile" }, { status: 500 });
@@ -91,7 +95,7 @@ export async function PATCH(request) {
     }
 
     const body = await request.json();
-    const { name, phone, preferredLanguage, newPassword } = body;
+    const { name, phone, preferredLanguage, newPassword, profilePhoto } = body;
 
     const updateUserData = {};
     if (typeof name === "string" && name.trim()) {
@@ -105,6 +109,14 @@ export async function PATCH(request) {
     }
     if (newPassword && typeof newPassword === "string" && newPassword.length >= 6) {
       updateUserData.passwordHash = await bcrypt.hash(newPassword, 12);
+    }
+
+    if (typeof profilePhoto === "string") {
+      await prisma.studentProfile.upsert({
+        where: { userId: session.sub },
+        create: { userId: session.sub, profilePhoto },
+        update: { profilePhoto },
+      });
     }
 
     const updatedUser = await prisma.user.update({

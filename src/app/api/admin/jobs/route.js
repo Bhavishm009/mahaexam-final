@@ -33,37 +33,60 @@ export async function POST(req) {
       salaryRange,
       ageLimit,
       selectionProcess,
+      imageUrl,
       notifyStudents,
     } = body;
 
-    if (!title || !department || !description) {
-      return NextResponse.json({ error: "MISSING_REQUIRED_FIELDS" }, { status: 400 });
+    if (!title?.trim() && !titleMr?.trim()) {
+      return NextResponse.json(
+        { error: "Validation Error: Job Title is required." },
+        { status: 400 }
+      );
+    }
+
+    if (!department?.trim() && !departmentMr?.trim()) {
+      return NextResponse.json(
+        { error: "Validation Error: Department name is required." },
+        { status: 400 }
+      );
+    }
+
+    if (!description?.trim() && !descriptionMr?.trim()) {
+      return NextResponse.json(
+        { error: "Validation Error: Job Description is required." },
+        { status: 400 }
+      );
     }
 
     const newJob = await createJobAlert(
       {
-        title,
-        titleMr,
-        department,
-        departmentMr,
-        vacancies,
-        qualification,
-        qualificationMr,
-        lastDate,
-        officialUrl,
-        notificationPdf,
-        description,
-        descriptionMr,
-        examSlug,
-        salaryRange,
-        ageLimit,
-        selectionProcess,
+        title: title?.trim() || titleMr?.trim(),
+        titleMr: titleMr?.trim() || title?.trim(),
+        department: department?.trim() || departmentMr?.trim(),
+        departmentMr: departmentMr?.trim() || department?.trim(),
+        vacancies: vacancies?.trim() || "Not Specified",
+        qualification: qualification?.trim() || "",
+        qualificationMr: qualificationMr?.trim() || qualification?.trim() || "",
+        lastDate: lastDate?.trim() || "",
+        officialUrl: officialUrl?.trim() || "",
+        notificationPdf: notificationPdf?.trim() || "",
+        description: description?.trim() || descriptionMr?.trim() || "",
+        descriptionMr: descriptionMr?.trim() || description?.trim() || "",
+        examSlug: examSlug?.trim() || "",
+        salaryRange: salaryRange?.trim() || "",
+        ageLimit: ageLimit?.trim() || "",
+        selectionProcess: selectionProcess?.trim() || "",
+        imageUrl: imageUrl?.trim() || "",
       },
       notifyStudents !== false
     );
 
-    return NextResponse.json({ success: true, jobAlert: newJob });
+    return NextResponse.json({ success: true, jobAlert: newJob, message: "Job notification created successfully!" });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Error creating job alert:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to save job notification. Please try again." },
+      { status: 500 }
+    );
   }
 }

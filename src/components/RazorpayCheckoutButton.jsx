@@ -1,5 +1,4 @@
-"use client";
-import { useState } from "react";
+import { toast } from "sonner";
 
 export default function RazorpayCheckoutButton({ examId, title, onSuccess }) {
   const [loading, setLoading] = useState(false);
@@ -14,6 +13,7 @@ export default function RazorpayCheckoutButton({ examId, title, onSuccess }) {
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "Unable to create order");
       if (d.alreadyPurchased) {
+        toast.info("Exam is already unlocked!");
         onSuccess?.();
         return;
       }
@@ -33,14 +33,17 @@ export default function RazorpayCheckoutButton({ examId, title, onSuccess }) {
             body: JSON.stringify(response),
           });
           const vd = await vr.json();
-          if (!vr.ok) alert(vd.error || "Payment verification failed");
-          else onSuccess?.();
+          if (!vr.ok) toast.error(vd.error || "Payment verification failed");
+          else {
+            toast.success("🎉 Payment verified! Exam unlocked successfully.");
+            onSuccess?.();
+          }
         },
         modal: { ondismiss: () => setLoading(false) },
       });
       rz.open();
     } catch (e) {
-      alert(e.message);
+      toast.error(e.message);
       setLoading(false);
     }
   }

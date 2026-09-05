@@ -15,6 +15,67 @@
       }
     ]
   },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const token = pm.environment.get('authToken') || pm.collectionVariables.get('authToken');",
+          "if (token) {",
+          "    pm.request.headers.upsert({ key: 'Cookie', value: 'maha_exam_token=' + token });",
+          "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "studentEmail",
+      "value": "student@example.com"
+    },
+    {
+      "key": "studentPassword",
+      "value": "demo123"
+    },
+    {
+      "key": "coachingEmail",
+      "value": "academy@example.com"
+    },
+    {
+      "key": "coachingPassword",
+      "value": "demo123"
+    },
+    {
+      "key": "adminEmail",
+      "value": "bhavishm009@gmail.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "admin123"
+    },
+    {
+      "key": "examId",
+      "value": "police-01"
+    },
+    {
+      "key": "attemptId",
+      "value": ""
+    },
+    {
+      "key": "batchId",
+      "value": ""
+    }
+  ],
   "item": [
     {
       "name": "01 - Health & System",
@@ -62,10 +123,25 @@
                   "const res = pm.response.json();",
                   "if (res.token) {",
                   "    pm.environment.set(\"authToken\", res.token);",
+                  "    pm.environment.set(\"authCookie\", res.token);",
+                  "    pm.environment.set(\"maha_exam_token\", res.token);",
                   "}",
                   "if (res.user) {",
                   "    pm.environment.set(\"userId\", res.user.id);",
                   "    pm.environment.set(\"userRole\", res.user.role);",
+                  "    pm.environment.set(\"userEmail\", res.user.email);",
+                  "    pm.environment.set(\"userName\", res.user.name);",
+                  "    if (res.user.organizationId) {",
+                  "        pm.environment.set(\"organizationId\", res.user.organizationId);",
+                  "    }",
+                  "}",
+                  "const setCookieHeader = pm.response.headers.get(\"Set-Cookie\");",
+                  "if (setCookieHeader) {",
+                  "    const match = setCookieHeader.match(/maha_exam_token=([^;]+)/);",
+                  "    if (match) {",
+                  "        pm.environment.set(\"authCookie\", match[1]);",
+                  "        pm.environment.set(\"maha_exam_token\", match[1]);",
+                  "    }",
                   "}",
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
@@ -109,10 +185,25 @@
                   "const res = pm.response.json();",
                   "if (res.token) {",
                   "    pm.environment.set(\"authToken\", res.token);",
+                  "    pm.environment.set(\"authCookie\", res.token);",
+                  "    pm.environment.set(\"maha_exam_token\", res.token);",
                   "}",
                   "if (res.user) {",
                   "    pm.environment.set(\"userId\", res.user.id);",
                   "    pm.environment.set(\"userRole\", res.user.role);",
+                  "    pm.environment.set(\"userEmail\", res.user.email);",
+                  "    pm.environment.set(\"userName\", res.user.name);",
+                  "    if (res.user.organizationId) {",
+                  "        pm.environment.set(\"organizationId\", res.user.organizationId);",
+                  "    }",
+                  "}",
+                  "const setCookieHeader = pm.response.headers.get(\"Set-Cookie\");",
+                  "if (setCookieHeader) {",
+                  "    const match = setCookieHeader.match(/maha_exam_token=([^;]+)/);",
+                  "    if (match) {",
+                  "        pm.environment.set(\"authCookie\", match[1]);",
+                  "        pm.environment.set(\"maha_exam_token\", match[1]);",
+                  "    }",
                   "}",
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
@@ -156,10 +247,25 @@
                   "const res = pm.response.json();",
                   "if (res.token) {",
                   "    pm.environment.set(\"authToken\", res.token);",
+                  "    pm.environment.set(\"authCookie\", res.token);",
+                  "    pm.environment.set(\"maha_exam_token\", res.token);",
                   "}",
                   "if (res.user) {",
                   "    pm.environment.set(\"userId\", res.user.id);",
                   "    pm.environment.set(\"userRole\", res.user.role);",
+                  "    pm.environment.set(\"userEmail\", res.user.email);",
+                  "    pm.environment.set(\"userName\", res.user.name);",
+                  "    if (res.user.organizationId) {",
+                  "        pm.environment.set(\"organizationId\", res.user.organizationId);",
+                  "    }",
+                  "}",
+                  "const setCookieHeader = pm.response.headers.get(\"Set-Cookie\");",
+                  "if (setCookieHeader) {",
+                  "    const match = setCookieHeader.match(/maha_exam_token=([^;]+)/);",
+                  "    if (match) {",
+                  "        pm.environment.set(\"authCookie\", match[1]);",
+                  "        pm.environment.set(\"maha_exam_token\", match[1]);",
+                  "    }",
                   "}",
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
@@ -1144,6 +1250,166 @@
               "path": ["api", "admin", "logs"]
             },
             "description": "Application error logs and exceptions."
+          },
+          "response": []
+        },
+        {
+          "name": "Database Sync Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/db-sync",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "db-sync"]
+            },
+            "description": "Fetch live record counts and connection status for all 31 tables across Primary and Secondary DBs."
+          },
+          "response": []
+        },
+        {
+          "name": "Database Sync Trigger",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/db-sync",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "db-sync"]
+            },
+            "description": "Trigger full 1:1 synchronization and obsolete record cleanup between Primary and Secondary DBs."
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Job Alerts List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/jobs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "jobs"]
+            },
+            "description": "List all job recruitment alerts."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Job Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Maharashtra Police Constable Recruitment 2026\",\n  \"titleMr\": \"महाराष्ट्र पोलीस भरती २०२६\",\n  \"department\": \"Maharashtra Police Department\",\n  \"vacancies\": \"17,471+ Posts\",\n  \"qualification\": \"12th Pass (HSC) & Physical Qualification\",\n  \"lastDate\": \"31st March 2026 / Opening Soon\",\n  \"description\": \"Complete details, age limits, and physical requirements for Police Constable recruitment...\",\n  \"officialUrl\": \"https://policeshipai2024.mahait.org\",\n  \"notificationPdf\": \"https://example.com/notice.pdf\",\n  \"salaryRange\": \"₹21,700 - ₹69,100 (S-6 Level)\",\n  \"notifyStudents\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/jobs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "jobs"]
+            },
+            "description": "Create and broadcast new government recruitment alert."
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Blogs List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/blogs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "blogs"]
+            },
+            "description": "List all draft and published blog posts for Super Admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Create / Edit Blog Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"How to Crack Maharashtra Police Bharti 2026\",\n  \"titleMr\": \"महाराष्ट्र पोलीस भरती २०२६ तयारी मार्गदर्शक\",\n  \"category\": \"Preparation Tips\",\n  \"excerpt\": \"Complete strategy, book list, and physical tips for Police Bharti exam...\",\n  \"content\": \"Full strategy article content written here...\",\n  \"published\": true,\n  \"authorName\": \"MahaExam Team\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/blogs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "blogs"]
+            },
+            "description": "Create or update a blog post with feature image and category."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Blog Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/blogs?id=sample_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "blogs"],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "sample_id"
+                }
+              ]
+            },
+            "description": "Delete a blog post by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Media File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload"]
+            },
+            "description": "Upload image or file to Supabase storage with Base64 data URL fallback."
+          },
+          "response": []
+        },
+        {
+          "name": "Realtime SSE Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/realtime",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "realtime"]
+            },
+            "description": "Server-Sent Events (SSE) realtime stream for live notifications and database metrics."
           },
           "response": []
         }

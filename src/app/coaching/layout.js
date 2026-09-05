@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getServerUser } from "@/lib/server-user";
 import { AppShell } from "@/components/shell";
 

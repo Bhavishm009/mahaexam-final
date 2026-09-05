@@ -170,6 +170,15 @@ export function PublicFooter() {
             <ul className="mt-3 space-y-2 text-xs">
               <li>
                 <Link
+                  href="/blogs"
+                  prefetch={true}
+                  className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                >
+                  {language === "mr" ? "ब्लॉग व ताज्या बातम्या 📰" : "Blog & Latest Articles 📰"}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/features"
                   prefetch={true}
                   className="transition hover:text-blue-600 dark:hover:text-white"
@@ -192,7 +201,9 @@ export function PublicFooter() {
                   prefetch={true}
                   className="font-bold text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  {language === "mr" ? "🏷️ किंमत व प्लॅन्स (Pricing & Plans)" : "🏷️ Pricing & Subscription Plans"}
+                  {language === "mr"
+                    ? "🏷️ किंमत व प्लॅन्स (Pricing & Plans)"
+                    : "🏷️ Pricing & Subscription Plans"}
                 </Link>
               </li>
               {user?.role === "COACHING_ADMIN" || user?.role === "TEACHER" ? (

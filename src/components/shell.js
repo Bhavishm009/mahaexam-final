@@ -1,38 +1,37 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useLanguage } from "@/components/language-provider";
+import { getInitials } from "@/lib/avatar";
+import NotificationCenter from "@/components/notification-center";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
-  Menu,
-  X,
   LayoutDashboard,
+  Building2,
   BookOpen,
   ClipboardList,
   BarChart3,
   Trophy,
   Bell,
-  Users,
-  Layers3,
   CreditCard,
-  Settings,
-  Database,
-  FileText,
-  Wallet,
-  LogOut,
   User,
-  ChevronDown,
-  Building2,
-  UserCheck,
-  Sparkles,
+  LogOut,
+  Menu,
+  X,
+  Database,
   Globe,
   Activity,
+  Users,
+  Wallet,
+  Settings,
+  UserCheck,
+  Layers3,
+  FileText,
   UserCircle,
+  ChevronDown,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { useLanguage } from "@/components/language-provider";
-import NotificationCenter from "@/components/notification-center";
-import { getInitials } from "@/lib/avatar";
 
 const navDefinitions = {
   student: [
@@ -44,8 +43,8 @@ const navDefinitions = {
     },
     {
       labelMr: "माझ्या अकॅडेमी",
-      labelEn: "My Coaching",
-      href: "/student/coaching",
+      labelEn: "My Academies",
+      href: "/student/academies",
       icon: Building2,
     },
     { labelMr: "माझ्या परीक्षा", labelEn: "My Exams", href: "/student/exams", icon: BookOpen },
@@ -60,7 +59,7 @@ const navDefinitions = {
     { labelMr: "सूचना", labelEn: "Notifications", href: "/student/notifications", icon: Bell },
     {
       labelMr: "माझे पेमेंट्स",
-      labelEn: "My Purchases",
+      labelEn: "My Payments",
       href: "/student/payments",
       icon: CreditCard,
     },
@@ -77,15 +76,15 @@ const navDefinitions = {
     { labelMr: "शिक्षक टीम", labelEn: "Teachers", href: "/coaching/teachers", icon: UserCheck },
     {
       labelMr: "नोंदणी लिंक्स",
-      labelEn: "Invite Links",
+      labelEn: "Registration Links",
       href: "/coaching/invites",
-      icon: Sparkles,
+      icon: Link,
     },
     { labelMr: "बॅचेस", labelEn: "Batches", href: "/coaching/batches", icon: Layers3 },
     {
       labelMr: "प्रश्न बँक",
       labelEn: "Question Bank",
-      href: "/coaching/question-bank",
+      href: "/coaching/questions",
       icon: Database,
     },
     { labelMr: "परीक्षा", labelEn: "Exams", href: "/coaching/exams", icon: FileText },
@@ -107,49 +106,61 @@ const navDefinitions = {
   ],
   admin: [
     {
-      labelMr: "ॲडमिन डॅशबोर्ड",
+      labelMr: "Dashboard",
       labelEn: "Dashboard",
       href: "/admin",
       icon: LayoutDashboard,
     },
     {
-      labelMr: "SEO मॅनेजमेंट 🚀",
-      labelEn: "SEO Management",
+      labelMr: "SEO Management 🚀",
+      labelEn: "SEO Management 🚀",
       href: "/admin/seo",
       icon: Globe,
     },
     {
-      labelMr: "नोकरी भरती जाहिराती 🔔",
-      labelEn: "Job Alerts & Push",
+      labelMr: "Job Alerts & Push 🔔",
+      labelEn: "Job Alerts & Push 🔔",
       href: "/admin/jobs",
       icon: Bell,
     },
     {
-      labelMr: "सिस्टम व एरर लॉग्स 🚨",
-      labelEn: "System & Error Logs",
+      labelMr: "Blog Posts 📰",
+      labelEn: "Blog Posts 📰",
+      href: "/admin/blogs",
+      icon: FileText,
+    },
+    {
+      labelMr: "System & Error Logs 🚨",
+      labelEn: "System & Error Logs 🚨",
       href: "/admin/logs",
       icon: Activity,
     },
     {
-      labelMr: "संस्था व अकॅडेमी",
+      labelMr: "Database Sync & Failover 🗄️",
+      labelEn: "Database Sync & Failover 🗄️",
+      href: "/admin/db-sync",
+      icon: Database,
+    },
+    {
+      labelMr: "Organizations",
       labelEn: "Organizations",
       href: "/admin/organizations",
       icon: Users,
     },
     {
-      labelMr: "ग्लोबल परीक्षा",
+      labelMr: "Global Exams",
       labelEn: "Global Exams",
       href: "/admin/global-exams",
       icon: BookOpen,
     },
-    { labelMr: "प्रश्न बँक", labelEn: "Questions", href: "/questions/bank", icon: Database },
-    { labelMr: "विश्लेषण", labelEn: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { labelMr: "पेमेंट्स", labelEn: "Payments", href: "/admin/payments", icon: CreditCard },
-    { labelMr: "उत्पन्न", labelEn: "Finance", href: "/admin/finance", icon: Wallet },
-    { labelMr: "युजर्स", labelEn: "Users", href: "/admin/users", icon: Users },
-    { labelMr: "प्लॅन्स", labelEn: "Plans", href: "/admin/plans", icon: Settings },
+    { labelMr: "Questions", labelEn: "Questions", href: "/questions/bank", icon: Database },
+    { labelMr: "Analytics", labelEn: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { labelMr: "Payments", labelEn: "Payments", href: "/admin/payments", icon: CreditCard },
+    { labelMr: "Finance", labelEn: "Finance", href: "/admin/finance", icon: Wallet },
+    { labelMr: "Users", labelEn: "Users", href: "/admin/users", icon: Users },
+    { labelMr: "Plans", labelEn: "Plans", href: "/admin/plans", icon: Settings },
     {
-      labelMr: "माझे प्रोफाइल",
+      labelMr: "My Profile",
       labelEn: "My Profile",
       href: "/admin/profile",
       icon: User,
@@ -163,7 +174,7 @@ function NavLinks({ role, close }) {
   const items = navDefinitions[role] || navDefinitions.student;
 
   return (
-    <nav className="space-y-1">
+    <nav className="space-y-1 font-sans">
       {items.map((item) => {
         const isRootDashboard =
           item.href === "/admin" ||
@@ -173,7 +184,7 @@ function NavLinks({ role, close }) {
           ? pathname === item.href
           : pathname === item.href || pathname.startsWith(item.href + "/");
         const Icon = item.icon;
-        const label = language === "mr" ? item.labelMr : item.labelEn;
+        const label = (role === "admin" || language !== "mr") ? item.labelEn : item.labelMr;
 
         return (
           <Link
@@ -240,10 +251,10 @@ export function Shell({ children, role = "student", user }) {
   }
 
   const roleLabels = {
-    STUDENT: "विद्यार्थी (Student)",
-    COACHING_ADMIN: "अकॅडेमी संचालक (Coaching Admin)",
-    TEACHER: "शिक्षक (Faculty)",
-    SUPER_ADMIN: "सुपर ॲडमिन (Super Admin)",
+    STUDENT: "Student Candidate",
+    COACHING_ADMIN: "Coaching Academy Admin",
+    TEACHER: "Faculty / Teacher",
+    SUPER_ADMIN: "Super Admin Console",
   };
 
   const userInitials = getInitials(currentUser?.name);
@@ -272,7 +283,7 @@ export function Shell({ children, role = "student", user }) {
                 Maha<span className="text-blue-600 dark:text-blue-400">Exam</span>
               </div>
               <div className="text-[10px] font-semibold text-slate-400">
-                {roleLabels[currentUser?.role] || roleLabels[user?.role] || role}
+                {roleLabels[currentUser?.role] || roleLabels[user?.role] || (role === "admin" ? "Super Admin Console" : role)}
               </div>
             </div>
           </Link>
@@ -289,7 +300,7 @@ export function Shell({ children, role = "student", user }) {
             <Link
               href={profileUrl}
               className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-slate-200/60 dark:hover:bg-slate-800"
-              title="माझे प्रोफाइल पहा"
+              title="View Profile"
             >
               <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-100 font-black text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                 {userInitials}
@@ -307,7 +318,7 @@ export function Shell({ children, role = "student", user }) {
               type="button"
               onClick={handleLogout}
               className="rounded-xl p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/60 dark:hover:text-rose-400"
-              title="लॉगआउट करा"
+              title="Sign Out"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -333,22 +344,24 @@ export function Shell({ children, role = "student", user }) {
             <div className="whitespace-nowrap text-xs font-black tracking-tight text-slate-900 dark:text-white sm:text-sm">
               {role === "student" && (language === "mr" ? "विद्यार्थी डॅशबोर्ड" : "Student Portal")}
               {role === "coaching" && (language === "mr" ? "अकॅडेमी कन्सोल" : "Coaching Portal")}
-              {role === "admin" && (language === "mr" ? "सुपर ॲडमिन पॅनेल" : "Admin Panel")}
+              {role === "admin" && "Super Admin Console"}
             </div>
           </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {/* Language Switcher */}
-            <button
-              type="button"
-              onClick={toggleLanguage}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1.5 text-xs font-bold text-slate-800 transition hover:bg-slate-200 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:px-2.5 sm:py-1.5"
-              title="Switch Language / भाषा बदला"
-            >
-              <Globe className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-              <span className="hidden sm:inline">{language === "mr" ? "English" : "मराठी"}</span>
-              <span className="sm:hidden">{language === "mr" ? "EN" : "म"}</span>
-            </button>
+            {role !== "admin" && (
+              <button
+                type="button"
+                onClick={toggleLanguage}
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1.5 text-xs font-bold text-slate-800 transition hover:bg-slate-200 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:px-2.5 sm:py-1.5"
+                title="Language / भाषा"
+              >
+                <Globe className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                <span className="hidden sm:inline">{language === "mr" ? "मराठी" : "English"}</span>
+                <span className="sm:hidden">{language === "mr" ? "म" : "EN"}</span>
+              </button>
+            )}
 
             <ThemeToggle />
 
@@ -389,7 +402,7 @@ export function Shell({ children, role = "student", user }) {
                       className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                     >
                       <UserCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
+                      <span>{role === "admin" ? "My Profile" : language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
                     </Link>
 
                     <button
@@ -398,7 +411,7 @@ export function Shell({ children, role = "student", user }) {
                       className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
                     >
                       <LogOut className="h-4 w-4" />
-                      <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
+                      <span>{role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
                     </button>
                   </div>
                 </>
@@ -454,7 +467,7 @@ export function Shell({ children, role = "student", user }) {
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 py-3 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
               >
                 <LogOut className="h-4 w-4" />
-                <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
+                <span>{role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
               </button>
             </div>
           </div>

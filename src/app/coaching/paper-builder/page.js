@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { toast } from "sonner";
+
 export default function PaperBuilder() {
   const [rules, setRules] = useState([
     { subjectId: "", chapterId: "", difficulty: "MEDIUM", count: 10 },
@@ -14,8 +16,9 @@ export default function PaperBuilder() {
     const d = await r.json();
     if (r.ok) {
       setResult(d);
+      toast.success("Question paper generated successfully!");
     } else {
-      alert(d.error);
+      toast.error(d.error || "Failed to generate paper");
     }
   }
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { toast } from "sonner";
 import {
   Building2,
   Plus,
@@ -69,8 +70,6 @@ export default function OrganizationsPage() {
 
   const [showModal, setShowModal] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [alert, setAlert] = useState({ type: "", text: "" });
-  const [lastCreated, setLastCreated] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -98,9 +97,19 @@ export default function OrganizationsPage() {
 
   async function handleCreate(e) {
     e.preventDefault();
+
+    if (!form.name?.trim()) {
+      toast.error("Academy / Coaching Institute name is required.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email?.trim() || !emailRegex.test(form.email.trim())) {
+      toast.error("Please enter a valid Admin email address.");
+      return;
+    }
+
     setCreating(true);
-    setAlert({ type: "", text: "" });
-    setLastCreated(null);
 
     try {
       const res = await fetch("/api/admin/organizations", {
@@ -111,13 +120,9 @@ export default function OrganizationsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setAlert({ type: "error", text: data.error || "Failed to create academy" });
+        toast.error(data.error || "Failed to create academy");
       } else {
-        setAlert({
-          type: "success",
-          text: `Academy '${data.organization?.name}' onboarded successfully! Login details emailed to ${data.credentials?.email}`,
-        });
-        setLastCreated(data.credentials);
+        toast.success(`Academy '${data.organization?.name}' onboarded successfully! Login details emailed to ${data.credentials?.email}`);
         setForm({
           name: "",
           adminName: "",
@@ -130,7 +135,7 @@ export default function OrganizationsPage() {
         load();
       }
     } catch {
-      setAlert({ type: "error", text: "Network error. Please try again." });
+      toast.error("Network error. Please try again.");
     } finally {
       setCreating(false);
     }
@@ -148,13 +153,13 @@ export default function OrganizationsPage() {
       const res = await fetch(`/api/admin/organizations?id=${o.id}`, { method: "DELETE" });
       const d = await res.json();
       if (d.success) {
-        alert("✅ " + d.message);
+        toast.success("✅ " + d.message);
         load();
       } else {
-        alert("❌ Delete error: " + (d.error || "Failed to delete"));
+        toast.error("❌ Delete error: " + (d.error || "Failed to delete"));
       }
     } catch (err) {
-      alert("❌ " + err.message);
+      toast.error("❌ " + err.message);
     }
   }
 
@@ -227,36 +232,7 @@ export default function OrganizationsPage() {
         </div>
       </div>
 
-      {/* Success Alert */}
-      {alert.text && (
-        <div
-          className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-bold sm:text-sm ${
-            alert.type === "success"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-200"
-              : "border border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-800 dark:bg-rose-950/80 dark:text-rose-200"
-          }`}
-        >
-          {alert.type === "success" ? (
-            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          ) : (
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
-          )}
-          <div className="flex-1">
-            <div>{alert.text}</div>
-            {lastCreated && (
-              <div className="mt-2.5 rounded-xl bg-white/60 p-3 text-xs dark:bg-slate-900/80">
-                <div className="font-bold text-slate-900 dark:text-white">Credentials Sent:</div>
-                <div className="mt-1 font-mono text-slate-700 dark:text-slate-300">
-                  Email: <strong>{lastCreated.email}</strong> | Temporary Password:{" "}
-                  <strong className="text-amber-600 dark:text-amber-400">
-                    {lastCreated.password}
-                  </strong>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+
 
       {/* Filter Modal */}
       {showFilterModal && (
@@ -286,7 +262,7 @@ export default function OrganizationsPage() {
             <div className="mt-4 space-y-4">
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  District (जिल्हा)
+                  District
                 </label>
                 <select
                   value={districtFilter}
@@ -296,7 +272,7 @@ export default function OrganizationsPage() {
                   }}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
-                  <option value="ALL">All Districts (सर्व जिल्हे)</option>
+                  <option value="ALL">All Districts</option>
                   {maharashtraDistricts.map((d) => (
                     <option key={d} value={d}>
                       {d}
@@ -307,7 +283,7 @@ export default function OrganizationsPage() {
 
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Page Size (प्रति पृष्ठ संख्या)
+                  Page Size
                 </label>
                 <select
                   value={pageSize}
@@ -377,7 +353,7 @@ export default function OrganizationsPage() {
             <form onSubmit={handleCreate} className="mt-5 space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Academy / Institute Name (संस्थेचे नाव) *
+                  Academy / Institute Name *
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
@@ -385,7 +361,7 @@ export default function OrganizationsPage() {
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="उदा. सह्याद्री करिअर अकॅडेमी"
+                    placeholder="e.g. Sahyadri Career Academy"
                     className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-xs text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
@@ -394,7 +370,7 @@ export default function OrganizationsPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Director / Admin Name (संचालकांचे नाव) *
+                    Director / Admin Name *
                   </label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
@@ -402,7 +378,7 @@ export default function OrganizationsPage() {
                       required
                       value={form.adminName}
                       onChange={(e) => setForm({ ...form, adminName: e.target.value })}
-                      placeholder="उदा. प्रा. किरण माने"
+                      placeholder="e.g. Prof. Kiran Mane"
                       className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-xs text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </div>
@@ -410,7 +386,7 @@ export default function OrganizationsPage() {
 
                 <div>
                   <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    District (जिल्हा) *
+                    District *
                   </label>
                   <div className="relative">
                     <MapPin className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
@@ -432,7 +408,7 @@ export default function OrganizationsPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Admin Email (अधिकृत ईमेल) *
+                    Admin Email *
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
@@ -449,7 +425,7 @@ export default function OrganizationsPage() {
 
                 <div>
                   <label className="mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Mobile Number (मोबाईल क्र.)
+                    Mobile Number
                   </label>
                   <div className="relative">
                     <Phone className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />

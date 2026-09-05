@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useCallback } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -31,7 +32,7 @@ export default function ExamReviewPage({ params }) {
   const [scheduleStart, setScheduleStart] = useState("");
   const [scheduleEnd, setScheduleEnd] = useState("");
 
-  async function loadExam() {
+  const loadExam = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/exams/${examId}/review`);
@@ -49,16 +50,17 @@ export default function ExamReviewPage({ params }) {
       }
     } catch (err) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
-  }
+  }, [examId]);
 
   useEffect(() => {
     if (examId) {
       loadExam();
     }
-  }, [examId]);
+  }, [examId, loadExam]);
 
   async function handleAction(action, extraPayload = {}) {
     try {
@@ -70,14 +72,14 @@ export default function ExamReviewPage({ params }) {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(`✅ ${data.message || "Exam status updated successfully!"}`);
+        toast.success(data.message || "Exam status updated successfully!");
         setShowScheduleModal(false);
         loadExam();
       } else {
-        alert(`❌ Error: ${data.error || "Failed to update exam"}`);
+        toast.error(data.error || "Failed to update exam");
       }
     } catch (err) {
-      alert("❌ " + err.message);
+      toast.error(err.message);
     } finally {
       setActionLoading(false);
     }

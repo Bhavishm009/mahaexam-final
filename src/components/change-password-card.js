@@ -6,10 +6,9 @@ import {
   KeyRound,
   Eye,
   EyeOff,
-  CheckCircle2,
-  AlertCircle,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { fetchJson } from "@/lib/api-client";
 
@@ -21,25 +20,17 @@ export function ChangePasswordCard() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
 
   async function handlePasswordSubmit(e) {
     e.preventDefault();
-    setMessage({ type: "", text: "" });
 
     if (newPassword.length < 6) {
-      setMessage({
-        type: "error",
-        text: "New password must be at least 6 characters long.",
-      });
+      toast.error("New password must be at least 6 characters long.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setMessage({
-        type: "error",
-        text: "New password and Confirm password do not match.",
-      });
+      toast.error("New password and Confirm password do not match.");
       return;
     }
 
@@ -56,24 +47,15 @@ export function ChangePasswordCard() {
       });
 
       if (ok && data.success) {
-        setMessage({
-          type: "success",
-          text: "✅ Password changed successfully! Your account is now secured with the new password.",
-        });
+        toast.success("Password changed successfully!");
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setMessage({
-          type: "error",
-          text: data.error || "Failed to change password.",
-        });
+        toast.error(data.error || "Failed to change password.");
       }
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: err.message || "Failed to change password. Please try again.",
-      });
+      toast.error(err.message || "Failed to change password. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -87,30 +69,13 @@ export function ChangePasswordCard() {
         </div>
         <div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white">
-            पासवर्ड बदला (Change Password)
+            Change Password
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            आपल्या खात्याच्या सुरक्षिततेसाठी नियमितपणे नवीन मजबूत पासवर्ड सेट करा.
+            Set a new strong password to keep your account secure.
           </p>
         </div>
       </div>
-
-      {message.text && (
-        <div
-          className={`mt-5 flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${
-            message.type === "success"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
-              : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
-          }`}
-        >
-          {message.type === "success" ? (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          ) : (
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
-          )}
-          <span>{message.text}</span>
-        </div>
-      )}
 
       <form onSubmit={handlePasswordSubmit} className="mt-6 space-y-4">
         <div>

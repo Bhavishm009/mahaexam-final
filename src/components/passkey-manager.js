@@ -6,10 +6,9 @@ import {
   Trash2,
   Plus,
   Smartphone,
-  CheckCircle2,
-  AlertCircle,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { fetchJson } from "@/lib/api-client";
 
@@ -18,7 +17,6 @@ export function PasskeyManager() {
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-  const [message, setMessage] = useState({ type: "", text: "" });
 
   async function loadCredentials() {
     try {
@@ -38,13 +36,8 @@ export function PasskeyManager() {
   }, []);
 
   async function handleRegisterPasskey() {
-    setMessage({ type: "", text: "" });
-
     if (typeof window === "undefined" || !window.PublicKeyCredential) {
-      setMessage({
-        type: "error",
-        text: "Your browser or device does not support WebAuthn Passkeys / Biometrics.",
-      });
+      toast.error("Your browser or device does not support WebAuthn Passkeys / Biometrics.");
       return;
     }
 
@@ -94,20 +87,14 @@ export function PasskeyManager() {
       });
 
       if (verifyOk && d.success) {
-        setMessage({
-          type: "success",
-          text: "✅ Biometric / Passkey added successfully! You can now log in using fingerprint or Face ID.",
-        });
+        toast.success("Biometric / Passkey added successfully!");
         await loadCredentials();
       } else {
         throw new Error(d.error || "Failed to verify biometric registration");
       }
     } catch (err) {
       if (err.name !== "NotAllowedError") {
-        setMessage({
-          type: "error",
-          text: err.message || "Failed to register passkey.",
-        });
+        toast.error(err.message || "Failed to register passkey.");
       }
     } finally {
       setRegistering(false);
@@ -124,7 +111,6 @@ export function PasskeyManager() {
     }
 
     setDeletingId(id);
-    setMessage({ type: "", text: "" });
 
     try {
       const { ok, data } = await fetchJson(`/api/auth/webauthn/credentials?id=${id}`, {
@@ -132,22 +118,13 @@ export function PasskeyManager() {
       });
 
       if (ok && data.success) {
-        setMessage({
-          type: "success",
-          text: "Passkey removed successfully.",
-        });
+        toast.success("Passkey removed successfully.");
         setCredentials((prev) => prev.filter((c) => c.id !== id));
       } else {
-        setMessage({
-          type: "error",
-          text: data.error || "Failed to delete passkey.",
-        });
+        toast.error(data.error || "Failed to delete passkey.");
       }
     } catch (err) {
-      setMessage({
-        type: "error",
-        text: err.message || "Failed to remove passkey.",
-      });
+      toast.error(err.message || "Failed to remove passkey.");
     } finally {
       setDeletingId(null);
     }
@@ -160,11 +137,10 @@ export function PasskeyManager() {
         <div>
           <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white">
             <Fingerprint className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            <span>Passkeys & Biometrics (फिंगरप्रिंट व फेस आयडी)</span>
+            <span>Passkeys & Biometrics</span>
           </h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            लॉगिनसाठी सुरक्षित फिंगरप्रिंट, Touch ID, Face ID किंवा Windows Hello जोडा किंवा
-            व्यवस्थापित करा.
+            Add or manage fingerprint, Touch ID, Face ID, or Windows Hello for instant login.
           </p>
         </div>
 
@@ -188,23 +164,7 @@ export function PasskeyManager() {
         </button>
       </div>
 
-      {/* Status Messages */}
-      {message.text && (
-        <div
-          className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${
-            message.type === "success"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
-              : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
-          }`}
-        >
-          {message.type === "success" ? (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          ) : (
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
-          )}
-          <span>{message.text}</span>
-        </div>
-      )}
+
 
       {/* Credentials List */}
       <div className="space-y-3">
