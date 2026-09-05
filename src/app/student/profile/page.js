@@ -24,6 +24,7 @@ import { PasskeyManager } from "@/components/passkey-manager";
 import { ChangePasswordCard } from "@/components/change-password-card";
 import { MfaManager } from "@/components/mfa-manager";
 import { fetchJson } from "@/lib/api-client";
+import { useAuth } from "@/components/auth-provider";
 import { toast } from "sonner";
 
 const maharashtraDistricts = [
@@ -88,6 +89,7 @@ const educationList = [
 ];
 
 export default function StudentProfilePage() {
+  const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -192,6 +194,7 @@ export default function StudentProfilePage() {
 
         if (saveRes.ok) {
           toast.success("प्रोफाइल फोटो यशस्वीरित्या अपडेट झाला!");
+          refreshUser();
         } else {
           toast.error("फोटो सेव्ह करताना त्रुटी आली.");
         }
@@ -239,6 +242,7 @@ export default function StudentProfilePage() {
         setOriginalForm(form);
         setIsEditing(false);
         toast.success("✅ प्रोफाइल माहिती यशस्वीरित्या सेव्ह झाली!");
+        refreshUser();
       } else {
         toast.error(data.error || "प्रोफाइल अपडेट करताना त्रुटी आली.");
       }

@@ -161,13 +161,20 @@ export async function listStudentAvailableExams(userId = null) {
       visibilityMode: true,
       startAt: true,
       endAt: true,
+      _count: {
+        select: {
+          questions: true,
+        },
+      },
     },
   });
 
   const map = new Map();
   for (const e of globalExams) {
+    const qCount = e.totalQuestions || e._count?.questions || 100;
     map.set(e.id, {
       ...e,
+      totalQuestions: qCount,
       source: e.isFree || e.visibilityMode === "FREE_GLOBAL" ? "FREE_GLOBAL" : "COACHING",
     });
   }
@@ -196,6 +203,11 @@ export async function listStudentAvailableExams(userId = null) {
           visibilityMode: true,
           startAt: true,
           endAt: true,
+          _count: {
+            select: {
+              questions: true,
+            },
+          },
         },
       }),
       prisma.exam.findMany({
@@ -228,15 +240,22 @@ export async function listStudentAvailableExams(userId = null) {
           visibilityMode: true,
           startAt: true,
           endAt: true,
+          _count: {
+            select: {
+              questions: true,
+            },
+          },
         },
       }),
     ]);
 
     for (const e of assignedDirect) {
-      map.set(e.id, { ...e, source: "COACHING" });
+      const qCount = e.totalQuestions || e._count?.questions || 100;
+      map.set(e.id, { ...e, totalQuestions: qCount, source: "COACHING" });
     }
     for (const e of assignedBatches) {
-      map.set(e.id, { ...e, source: "COACHING" });
+      const qCount = e.totalQuestions || e._count?.questions || 100;
+      map.set(e.id, { ...e, totalQuestions: qCount, source: "COACHING" });
     }
   }
 

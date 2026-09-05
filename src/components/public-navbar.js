@@ -243,10 +243,14 @@ export function PublicNavbar() {
           {user && (
             <Link
               href={dashboardHref}
-              className="grid h-9 w-9 place-items-center rounded-xl bg-blue-600 text-xs font-black text-white shadow-sm"
+              className="shrink-0 transition-transform active:scale-95"
               title="Dashboard"
             >
-              {userInitials}
+              <UserAvatar
+                src={user?.profilePhoto || user?.studentProfile?.profilePhoto}
+                name={user?.name}
+                size="sm"
+              />
             </Link>
           )}
 

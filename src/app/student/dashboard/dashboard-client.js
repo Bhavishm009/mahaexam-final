@@ -226,7 +226,7 @@ function ExamList({ items, emptyText }) {
             <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
               <span>⏱ {e.durationMinutes} मिनिटे</span>
               <span>•</span>
-              <span>📝 {e._count?.questions || 0} प्रश्न</span>
+              <span>📝 {e.totalQuestions || e._count?.questions || 100} प्रश्न</span>
               <span>•</span>
               <span>🎯 {e.totalMarks || 100} गुण</span>
             </div>

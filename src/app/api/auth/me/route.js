@@ -46,6 +46,13 @@ export async function GET(request) {
         },
       },
       lastLoginAt: true,
+      _count: {
+        select: {
+          batchMemberships: {
+            where: { status: "ACTIVE" },
+          },
+        },
+      },
       studentProfile: {
         select: {
           id: true,
@@ -55,6 +62,11 @@ export async function GET(request) {
           district: true,
           taluka: true,
           coachingStatus: true,
+          _count: {
+            select: {
+              batchStudents: true,
+            },
+          },
         },
       },
     },
@@ -74,11 +86,19 @@ export async function GET(request) {
       .catch(() => {});
   }
 
+  const hasAcademy = Boolean(
+    user.organizationId ||
+    user.studentProfile?.coachingStatus === "COACHING" ||
+    (user.studentProfile?._count?.batchStudents || 0) > 0 ||
+    (user._count?.batchMemberships || 0) > 0
+  );
+
   return NextResponse.json({
     authenticated: true,
     user: {
       ...user,
       profilePhoto: user.studentProfile?.profilePhoto || null,
+      hasAcademy,
     },
   });
 }

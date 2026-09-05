@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { getInitials } from "@/lib/avatar";
 import { UserAvatar } from "@/components/user-avatar";
+import { useAuth } from "@/components/auth-provider";
 import NotificationCenter from "@/components/notification-center";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -169,10 +170,24 @@ const navDefinitions = {
   ],
 };
 
-function NavLinks({ role, close }) {
+function NavLinks({ role, close, user }) {
   const pathname = usePathname();
   const { language } = useLanguage();
-  const items = navDefinitions[role] || navDefinitions.student;
+  let items = navDefinitions[role] || navDefinitions.student;
+
+  if (role === "student") {
+    const hasAcademy = Boolean(
+      user?.hasAcademy ||
+      user?.organizationId ||
+      user?.studentProfile?.coachingStatus === "COACHING" ||
+      (user?.batchMembershipsCount || 0) > 0 ||
+      (user?._count?.batchMemberships || 0) > 0 ||
+      (user?.studentProfile?._count?.batchStudents || 0) > 0
+    );
+    if (!hasAcademy) {
+      items = items.filter((item) => item.href !== "/student/academies");
+    }
+  }
 
   return (
     <nav className="space-y-1 font-sans">
@@ -220,28 +235,48 @@ export function Shell({ children, role = "student", user }) {
   const [currentUser, setCurrentUser] = useState(user || null);
   const router = useRouter();
   const { language, toggleLanguage } = useLanguage();
+  const { user: authUser } = useAuth();
 
   useEffect(() => {
     if (user) {
-      setCurrentUser(user);
+      setCurrentUser((prev) => ({
+        ...prev,
+        ...user,
+        profilePhoto: user.profilePhoto || user.studentProfile?.profilePhoto || prev?.profilePhoto,
+      }));
     }
   }, [user]);
 
   useEffect(() => {
-    if (currentUser) return;
+    if (authUser) {
+      setCurrentUser((prev) => ({
+        ...prev,
+        ...authUser,
+        profilePhoto: authUser.profilePhoto || authUser.studentProfile?.profilePhoto || prev?.profilePhoto,
+      }));
+    }
+  }, [authUser]);
+
+  useEffect(() => {
+    // If profilePhoto is missing, fetch fresh user data from /api/auth/me
+    if (currentUser?.profilePhoto) return;
     async function loadCurrentUser() {
       try {
         const res = await fetch("/api/auth/me");
         const data = await res.json();
         if (res.ok && data.authenticated && data.user) {
-          setCurrentUser(data.user);
+          setCurrentUser((prev) => ({
+            ...prev,
+            ...data.user,
+            profilePhoto: data.user.profilePhoto || data.user.studentProfile?.profilePhoto || null,
+          }));
         }
       } catch {
         // ignore network error
       }
     }
     loadCurrentUser();
-  }, [currentUser]);
+  }, [currentUser?.profilePhoto]);
 
   async function handleLogout() {
     try {
@@ -258,7 +293,16 @@ export function Shell({ children, role = "student", user }) {
     SUPER_ADMIN: "Super Admin Console",
   };
 
-  const userInitials = getInitials(currentUser?.name);
+  const activeUser = authUser || currentUser || user;
+  const profilePhotoUrl =
+    currentUser?.profilePhoto ||
+    authUser?.profilePhoto ||
+    user?.profilePhoto ||
+    currentUser?.studentProfile?.profilePhoto ||
+    authUser?.studentProfile?.profilePhoto ||
+    user?.studentProfile?.profilePhoto ||
+    null;
+
   const profileUrl =
     role === "admin"
       ? "/admin/profile"
@@ -284,14 +328,14 @@ export function Shell({ children, role = "student", user }) {
                 Maha<span className="text-blue-600 dark:text-blue-400">Exam</span>
               </div>
               <div className="text-[10px] font-semibold text-slate-400">
-                {roleLabels[currentUser?.role] || roleLabels[user?.role] || (role === "admin" ? "Super Admin Console" : role)}
+                {roleLabels[activeUser?.role] || (role === "admin" ? "Super Admin Console" : role)}
               </div>
             </div>
           </Link>
 
           {/* Navigation Links */}
           <div className="overflow-y-auto pr-1">
-            <NavLinks role={role} />
+            <NavLinks role={role} user={activeUser} />
           </div>
         </div>
 
@@ -304,16 +348,16 @@ export function Shell({ children, role = "student", user }) {
               title="View Profile"
             >
               <UserAvatar
-                src={currentUser?.profilePhoto || user?.profilePhoto}
-                name={currentUser?.name || user?.name}
+                src={profilePhotoUrl}
+                name={activeUser?.name || "User"}
                 size="xs"
               />
               <div className="min-w-0 truncate">
                 <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
-                  {currentUser?.name || user?.name || "User"}
+                  {activeUser?.name || "User"}
                 </div>
                 <div className="truncate text-[10px] text-slate-400">
-                  {currentUser?.email || user?.email || "Account"}
+                  {activeUser?.email || "Account"}
                 </div>
               </div>
             </Link>
@@ -378,12 +422,12 @@ export function Shell({ children, role = "student", user }) {
                 className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 pr-2.5 text-xs font-bold text-slate-800 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               >
                 <UserAvatar
-                  src={currentUser?.profilePhoto || user?.profilePhoto}
-                  name={currentUser?.name || user?.name}
+                  src={profilePhotoUrl}
+                  name={activeUser?.name || "User"}
                   size="xs"
                 />
                 <span className="hidden sm:inline">
-                  {currentUser?.name?.split(" ")[0] || user?.name?.split(" ")[0] || "Account"}
+                  {activeUser?.name?.split(" ")[0] || "Account"}
                 </span>
                 <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
               </button>
@@ -394,10 +438,10 @@ export function Shell({ children, role = "student", user }) {
                   <div className="absolute right-0 z-50 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
                     <div className="border-b border-slate-100 px-3 py-2 text-xs dark:border-slate-800">
                       <div className="font-bold text-slate-900 dark:text-white">
-                        {currentUser?.name || user?.name || "User"}
+                        {activeUser?.name || "User"}
                       </div>
                       <div className="truncate text-[10px] text-slate-400">
-                        {currentUser?.email || user?.email || "Account"}
+                        {activeUser?.email || "Account"}
                       </div>
                     </div>
 
@@ -412,8 +456,11 @@ export function Shell({ children, role = "student", user }) {
 
                     <button
                       type="button"
-                      onClick={handleLogout}
-                      className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>{role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
@@ -425,8 +472,8 @@ export function Shell({ children, role = "student", user }) {
           </div>
         </header>
 
-        {/* Page Content */}
-        <main data-shell-main="true" className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        {/* Page Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
@@ -461,11 +508,32 @@ export function Shell({ children, role = "student", user }) {
               </div>
 
               <div className="overflow-y-auto pr-1">
-                <NavLinks role={role} close={() => setOpen(false)} />
+                <NavLinks role={role} close={() => setOpen(false)} user={activeUser} />
               </div>
             </div>
 
-            <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
+            <div className="border-t border-slate-100 pt-4 dark:border-slate-800 space-y-3">
+              <Link
+                href={profileUrl}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-2xl bg-slate-50 p-2 dark:bg-slate-900"
+                title="View Profile"
+              >
+                <UserAvatar
+                  src={profilePhotoUrl}
+                  name={activeUser?.name || "User"}
+                  size="xs"
+                />
+                <div className="min-w-0 truncate">
+                  <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                    {activeUser?.name || "User"}
+                  </div>
+                  <div className="truncate text-[10px] text-slate-400">
+                    {activeUser?.email || "Account"}
+                  </div>
+                </div>
+              </Link>
+
               <button
                 type="button"
                 onClick={handleLogout}

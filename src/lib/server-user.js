@@ -23,7 +23,7 @@ export async function getServerUser() {
 
     if (!userId) return null;
 
-    return await prisma.user.findUnique({
+    const u = await prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -31,8 +31,48 @@ export async function getServerUser() {
         email: true,
         phone: true,
         role: true,
+        organizationId: true,
+        studentProfile: {
+          select: {
+            profilePhoto: true,
+            coachingStatus: true,
+            _count: {
+              select: {
+                batchStudents: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            batchMemberships: {
+              where: { status: "ACTIVE" },
+            },
+          },
+        },
       },
     });
+
+    if (!u) return null;
+
+    const hasAcademy = Boolean(
+      u.organizationId ||
+      u.studentProfile?.coachingStatus === "COACHING" ||
+      (u.studentProfile?._count?.batchStudents || 0) > 0 ||
+      (u._count?.batchMemberships || 0) > 0
+    );
+
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      role: u.role,
+      organizationId: u.organizationId,
+      profilePhoto: u.studentProfile?.profilePhoto || null,
+      studentProfile: u.studentProfile,
+      hasAcademy,
+    };
   } catch {
     return null;
   }
