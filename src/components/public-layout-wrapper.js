@@ -17,7 +17,8 @@ export function PublicLayoutWrapper({ children }) {
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/exam-builder") ||
     pathname.startsWith("/questions") ||
-    pathname.includes("/attempt");
+    pathname.includes("/attempt") ||
+    pathname.includes("/test");
 
   if (isDashboard) {
     return <>{children}</>;
