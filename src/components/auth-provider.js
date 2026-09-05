@@ -41,8 +41,9 @@ function persistUser(user) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUserState] = useState(getStoredUser);
-  const [loading, setLoading] = useState(() => !getStoredUser());
+  // Initialize with null to guarantee matching SSR and client initial hydration
+  const [user, setUserState] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const setUser = useCallback((newUser) => {
     setUserState(newUser);
@@ -73,6 +74,12 @@ export function AuthProvider({ children }) {
   }, [setUser]);
 
   useEffect(() => {
+    // Restore cached session after mount to ensure SSR matches client initial render
+    const cached = getStoredUser();
+    if (cached) {
+      setUserState(cached);
+      setLoading(false);
+    }
     refreshUser();
   }, [refreshUser]);
 

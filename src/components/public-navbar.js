@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -23,11 +23,16 @@ import { getInitials } from "@/lib/avatar";
 import { UserAvatar } from "@/components/user-avatar";
 
 export function PublicNavbar() {
+  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user, loading, logout } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isLoginPage = pathname === "/login" || pathname === "/coaching/login";
   const isRegisterPage = pathname === "/register" || pathname === "/coaching/register";
@@ -123,7 +128,7 @@ export function PublicNavbar() {
 
           <ThemeToggle />
 
-          {loading && !user ? (
+          {!mounted || (loading && !user) ? (
             <div className="h-8 w-28 animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
           ) : user ? (
             <div className="flex items-center gap-2.5">
@@ -311,14 +316,12 @@ export function PublicNavbar() {
               </Link>
 
               <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
-                {loading && !user ? (
+                {!mounted || (loading && !user) ? (
                   <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
                 ) : user ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-3 rounded-2xl bg-slate-100 p-3 dark:bg-slate-800/80">
-                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-600 font-black text-white">
-                        {userInitials}
-                      </div>
+                      <UserAvatar src={user?.profilePhoto} name={user?.name} size="sm" />
                       <div className="min-w-0 flex-1 truncate">
                         <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
                           {user.name || "User"}
