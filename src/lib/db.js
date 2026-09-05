@@ -34,8 +34,8 @@ export const secondaryPrisma =
   globalForPrisma.__mahaSecondaryPrisma ||
   (secondaryUrl ? createClient(secondaryUrl) : null);
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.__mahaPrimaryPrisma = primaryPrisma;
+globalForPrisma.__mahaPrimaryPrisma = primaryPrisma;
+if (secondaryPrisma) {
   globalForPrisma.__mahaSecondaryPrisma = secondaryPrisma;
 }
 
@@ -51,15 +51,26 @@ const WRITE_METHODS = new Set([
 
 function isConnectionError(err) {
   if (!err) return false;
-  const msg = err.message || "";
-  const code = err.code || "";
+  const msg = typeof err === "string" ? err : (err?.message || "");
+  const code = err?.code || "";
+  const metaMsg = typeof err?.meta?.message === "string" ? err.meta.message : "";
+  const combined = (msg + " " + metaMsg + " " + code).toLowerCase();
+
   return (
     code.startsWith("P10") ||
-    msg.includes("Can't reach database server") ||
-    msg.includes("ECONNREFUSED") ||
-    msg.includes("ETIMEDOUT") ||
-    msg.includes("connection closed") ||
-    msg.includes("Connection terminated")
+    code === "P2037" ||
+    combined.includes("p2037") ||
+    combined.includes("can't reach database server") ||
+    combined.includes("econnrefused") ||
+    combined.includes("etimedout") ||
+    combined.includes("connection closed") ||
+    combined.includes("connection terminated") ||
+    combined.includes("remaining connection slots") ||
+    combined.includes("superuser attribute") ||
+    combined.includes("too many clients") ||
+    combined.includes("too many connections") ||
+    combined.includes("max_connections") ||
+    combined.includes("pool_timeout")
   );
 }
 
