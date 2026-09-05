@@ -17,8 +17,8 @@ function createClient(url) {
   }
 
   // Ensure connection pool timeout allows sufficient buffer (30s) during high concurrency bursts
-  if (tunedUrl.includes("pool_timeout=10") || tunedUrl.includes("pool_timeout=20")) {
-    tunedUrl = tunedUrl.replace(/pool_timeout=\d+/, "pool_timeout=30");
+  if (tunedUrl.match(/pool_timeout=\d+[a-zA-Z]*/)) {
+    tunedUrl = tunedUrl.replace(/pool_timeout=\d+[a-zA-Z]*/, "pool_timeout=30");
   } else if (!tunedUrl.includes("pool_timeout=")) {
     tunedUrl += (tunedUrl.includes("?") ? "&" : "?") + "pool_timeout=30";
   }
