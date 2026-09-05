@@ -91,12 +91,11 @@ export async function sendWebPushNotification({
             sentCount++;
           } catch (err) {
             failCount++;
-            // If subscription has expired or unsubscribed on browser (410 or 404)
+            // If subscription has expired or unsubscribed on browser (410 Gone or 404 Not Found)
             if (err.statusCode === 404 || err.statusCode === 410) {
               await prisma.pushSubscription
-                .update({
+                .delete({
                   where: { id: sub.id },
-                  data: { isActive: false },
                 })
                 .catch(() => {});
             }
@@ -114,6 +113,74 @@ export async function sendWebPushNotification({
     };
   } catch (error) {
     console.error("sendWebPushNotification error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Maintenance function: purge expired, inactive, or unlinked stale push subscriptions
+ * - Permanently removes inactive subscriptions
+ * - Removes guest subscriptions older than 60 days
+ * - Ensures any registered user with > maxDevices has their oldest excess devices pruned
+ */
+export async function pruneStalePushSubscriptions(maxDevicesPerUser = 5) {
+  try {
+    // 1. Delete all deactivated/failed subscriptions
+    const deletedInactive = await prisma.pushSubscription.deleteMany({
+      where: { isActive: false },
+    });
+
+    // 2. Delete unlinked guest subscriptions older than 60 days
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    const deletedGuest = await prisma.pushSubscription.deleteMany({
+      where: {
+        userId: null,
+        updatedAt: { lt: sixtyDaysAgo },
+      },
+    });
+
+    // 3. For any user with > maxDevicesPerUser, prune oldest active subscriptions
+    const usersWithSubs = await prisma.pushSubscription.groupBy({
+      by: ["userId"],
+      where: {
+        userId: { not: null },
+        isActive: true,
+      },
+      _count: { id: true },
+      having: {
+        id: {
+          _count: {
+            gt: maxDevicesPerUser,
+          },
+        },
+      },
+    });
+
+    let prunedPerUser = 0;
+    for (const group of usersWithSubs) {
+      if (!group.userId) continue;
+      const subs = await prisma.pushSubscription.findMany({
+        where: { userId: group.userId, isActive: true },
+        orderBy: { updatedAt: "desc" },
+        select: { id: true },
+      });
+      if (subs.length > maxDevicesPerUser) {
+        const toDelete = subs.slice(maxDevicesPerUser).map((s) => s.id);
+        const res = await prisma.pushSubscription.deleteMany({
+          where: { id: { in: toDelete } },
+        });
+        prunedPerUser += res.count;
+      }
+    }
+
+    return {
+      success: true,
+      deletedInactive: deletedInactive.count,
+      deletedGuest: deletedGuest.count,
+      prunedPerUser,
+    };
+  } catch (error) {
+    console.error("pruneStalePushSubscriptions error:", error);
     return { success: false, error: error.message };
   }
 }

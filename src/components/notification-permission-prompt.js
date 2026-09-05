@@ -22,6 +22,34 @@ export function NotificationPermissionPrompt() {
         const timer = setTimeout(() => setShow(true), 2500);
         return () => clearTimeout(timer);
       }
+    } else if (Notification.permission === "granted") {
+      // Sync subscription with server in background once per session
+      // This links the current device's endpoint with the logged-in user's account seamlessly
+      const alreadySynced = sessionStorage.getItem("mahaexam_push_synced");
+      if (!alreadySynced && "serviceWorker" in navigator) {
+        navigator.serviceWorker.ready.then(async (reg) => {
+          try {
+            const pushSub = await reg.pushManager?.getSubscription();
+            if (pushSub) {
+              const json = pushSub.toJSON();
+              if (pushSub.endpoint && json.keys?.p256dh && json.keys?.auth) {
+                await fetch("/api/notifications/subscribe", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    endpoint: pushSub.endpoint,
+                    keys: json.keys,
+                    userAgent: navigator.userAgent,
+                  }),
+                });
+                sessionStorage.setItem("mahaexam_push_synced", "true");
+              }
+            }
+          } catch {
+            // Silently ignore background sync failures
+          }
+        });
+      }
     }
   }, []);
 
@@ -45,18 +73,10 @@ export function NotificationPermissionPrompt() {
 
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
-        let subData = {
-          endpoint: `https://fcm.googleapis.com/fcm/send/guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          keys: {
-            p256dh: "BMahaExamKeyP256dh" + Math.random().toString(36).substring(2),
-            auth: "AuthToken" + Math.random().toString(36).substring(2),
-          },
-          userAgent: navigator.userAgent,
-        };
-
+        let pushSub = null;
         if (reg && reg.pushManager) {
           try {
-            let pushSub = await reg.pushManager.getSubscription();
+            pushSub = await reg.pushManager.getSubscription();
             if (!pushSub) {
               const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
               if (vapidKey) {
@@ -66,24 +86,27 @@ export function NotificationPermissionPrompt() {
                 });
               }
             }
-            if (pushSub) {
-              const json = pushSub.toJSON();
-              subData = {
-                endpoint: pushSub.endpoint,
-                keys: json.keys || subData.keys,
-                userAgent: navigator.userAgent,
-              };
-            }
           } catch (pErr) {
             console.warn("PushManager subscription warning:", pErr);
           }
         }
 
-        await fetch("/api/notifications/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(subData),
-        }).catch(() => {});
+        if (pushSub) {
+          const json = pushSub.toJSON();
+          const subData = {
+            endpoint: pushSub.endpoint,
+            keys: json.keys,
+            userAgent: navigator.userAgent,
+          };
+
+          await fetch("/api/notifications/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(subData),
+          }).catch(() => {});
+
+          sessionStorage.setItem("mahaexam_push_synced", "true");
+        }
 
         // Show test welcome notification
         if (reg && reg.showNotification) {
