@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getDevanagariOgFont } from "@/lib/og-font";
+import { getDevanagariOgFont, ShapedText } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam — महाराष्ट्र स्पर्धा परीक्षा मॉक टेस्ट पोर्टल";
@@ -14,7 +14,7 @@ export default async function Image() {
   const fonts = fontData
     ? [
         {
-          name: "Noto Sans Devanagari",
+          name: "Mukta",
           data: fontData,
           style: "normal",
           weight: 700,
@@ -35,7 +35,6 @@ export default async function Image() {
         backgroundImage:
           "radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.45), transparent 45%), radial-gradient(circle at 90% 80%, rgba(147, 51, 234, 0.35), transparent 45%), radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.15), transparent 50%)",
         padding: "60px 70px",
-        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -64,13 +63,7 @@ export default async function Image() {
         }}
       >
         {/* Logo Brand */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div
             style={{
               display: "flex",
@@ -88,28 +81,9 @@ export default async function Image() {
           >
             ME
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span
-              style={{
-                fontSize: 32,
-                fontWeight: 900,
-                letterSpacing: "-0.02em",
-                color: "#ffffff",
-              }}
-            >
-              MahaExam
-            </span>
-            <span
-              style={{
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#93c5fd",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              स्पर्धा परीक्षा पोर्टल २०२६
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="MahaExam" fontSize={32} fill="#ffffff" />
+            <ShapedText text="स्पर्धा परीक्षा पोर्टल २०२६" fontSize={14} fill="#93c5fd" />
           </div>
         </div>
 
@@ -123,26 +97,9 @@ export default async function Image() {
             borderRadius: 9999,
             backgroundColor: "rgba(255, 255, 255, 0.1)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
-            backdropFilter: "blur(10px)",
           }}
         >
-          <div
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              backgroundColor: "#10b981",
-            }}
-          />
-          <span
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#f3f4f6",
-            }}
-          >
-            TCS / IBPS लेटेस्ट पॅटर्न
-          </span>
+          <ShapedText text="● TCS / IBPS लेटेस्ट पॅटर्न" fontSize={16} fill="#4ade80" />
         </div>
       </div>
 
@@ -152,60 +109,29 @@ export default async function Image() {
           display: "flex",
           flexDirection: "column",
           gap: 16,
-          maxWidth: 1000,
+          maxWidth: 1050,
         }}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 10,
+            padding: "6px 14px",
+            borderRadius: 10,
+            backgroundColor: "rgba(249, 115, 22, 0.2)",
+            border: "1px solid rgba(249, 115, 22, 0.4)",
           }}
         >
-          <span
-            style={{
-              padding: "6px 14px",
-              borderRadius: 10,
-              backgroundColor: "rgba(249, 115, 22, 0.2)",
-              border: "1px solid rgba(249, 115, 22, 0.4)",
-              color: "#fdba74",
-              fontSize: 16,
-              fontWeight: 800,
-            }}
-          >
-            🎯 महाराष्ट्र भरती टेस्ट सिरीज
-          </span>
+          <ShapedText text="🎯 महाराष्ट्र भरती टेस्ट सिरीज" fontSize={16} fill="#fdba74" />
         </div>
 
-        <h1
-          style={{
-            fontSize: 54,
-            fontWeight: 900,
-            lineHeight: 1.15,
-            letterSpacing: "-0.03em",
-            margin: 0,
-            background: "linear-gradient(to right, #ffffff, #e0e7ff, #93c5fd)",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
-          पोलीस भरती • तलाठी • MPSC
-          <br />
-          १०० गुणांच्या ऑनलाइन मॉक टेस्ट
-        </h1>
-
-        <p
-          style={{
-            fontSize: 22,
-            fontWeight: 500,
-            color: "#94a3b8",
-            lineHeight: 1.4,
-            margin: 0,
-          }}
-        >
-          २,७००+ दर्जेदार प्रश्न, मराठी स्पष्टीकरण, इन्स्टंट महाराष्ट्र मेरिट रँक आणि अचूक
-          उत्तरतालिका.
-        </p>
+        <ShapedText text="पोलीस भरती • तलाठी • MPSC" fontSize={48} fill="#ffffff" />
+        <ShapedText text="१०० गुणांच्या ऑनलाइन मॉक टेस्ट" fontSize={42} fill="#c7d2fe" />
+        <ShapedText
+          text="२,७००+ दर्जेदार प्रश्न, मराठी स्पष्टीकरण, इन्स्टंट महाराष्ट्र मेरिट रँक आणि अचूक उत्तरतालिका."
+          fontSize={20}
+          fill="#94a3b8"
+        />
       </div>
 
       {/* Bottom Stats Pills */}
@@ -220,25 +146,17 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", gap: 32 }}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 24, fontWeight: 900, color: "#38bdf8" }}>२,७००+ प्रश्न</span>
-            <span style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>
-              १० विषयनिहाय बँक
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="२,७००+ प्रश्न" fontSize={24} fill="#38bdf8" />
+            <ShapedText text="१० विषयनिहाय बँक" fontSize={13} fill="#64748b" />
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 24, fontWeight: 900, color: "#4ade80" }}>
-              २७+ संपूर्ण टेस्ट
-            </span>
-            <span style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>
-              १००% मोफत व सराव
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="२७+ संपूर्ण टेस्ट" fontSize={24} fill="#4ade80" />
+            <ShapedText text="१००% मोफत व सराव" fontSize={13} fill="#64748b" />
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 24, fontWeight: 900, color: "#c084fc" }}>राज्यस्तरीय रँक</span>
-            <span style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>
-              रिअल-टाइम विश्लेषण
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="राज्यस्तरीय रँक" fontSize={24} fill="#c084fc" />
+            <ShapedText text="रिअल-टाइम विश्लेषण" fontSize={13} fill="#64748b" />
           </div>
         </div>
 
@@ -246,24 +164,19 @@ export default async function Image() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 12,
             padding: "12px 24px",
             borderRadius: 16,
             background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-            color: "#ffffff",
-            fontSize: 18,
-            fontWeight: 800,
             boxShadow: "0 10px 20px -5px rgba(37, 99, 235, 0.4)",
           }}
         >
-          <span>mahaexam.com</span>
-          <span>➔</span>
+          <ShapedText text="mahaexam.com ➔" fontSize={18} fill="#ffffff" />
         </div>
       </div>
     </div>,
     {
       ...size,
       fonts,
-    },
+    }
   );
 }

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getBlogPostBySlug } from "@/lib/blog-service";
-import { getDevanagariOgFont } from "@/lib/og-font";
+import { getDevanagariOgFont, ShapedText } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam Blog Article";
@@ -21,7 +21,7 @@ export default async function Image({ params }) {
   const fonts = fontData
     ? [
         {
-          name: "Noto Sans Devanagari",
+          name: "Mukta",
           data: fontData,
           style: "normal",
           weight: 700,
@@ -53,7 +53,6 @@ export default async function Image({ params }) {
         backgroundImage:
           "radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.45), transparent 45%), radial-gradient(circle at 85% 80%, rgba(147, 51, 234, 0.4), transparent 45%)",
         padding: "60px 70px",
-        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -98,48 +97,28 @@ export default async function Image({ params }) {
           >
             M
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.5px" }}>
-              Maha<span style={{ color: "#818cf8" }}>Exam</span>
-            </span>
-            <span style={{ fontSize: 13, color: "#9ca3af", fontWeight: 600 }}>
-              Knowledge Hub & Articles 📚
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="MahaExam" fontSize={28} fill="#ffffff" />
+            <ShapedText text="Knowledge Hub & Articles 📚" fontSize={13} fill="#9ca3af" />
           </div>
         </div>
 
         <div
           style={{
+            display: "flex",
             padding: "8px 20px",
             borderRadius: 30,
             backgroundColor: "rgba(99, 102, 241, 0.2)",
             border: "1px solid rgba(129, 140, 248, 0.3)",
-            fontSize: 15,
-            fontWeight: 700,
-            color: "#a5b4fc",
           }}
         >
-          {category}
+          <ShapedText text={category} fontSize={15} fill="#a5b4fc" />
         </div>
       </div>
 
       {/* Middle Content Row */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 1000 }}>
-        <h1
-          style={{
-            fontSize: 48,
-            fontWeight: 900,
-            lineHeight: 1.2,
-            color: "#ffffff",
-            margin: 0,
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}
-        >
-          {title}
-        </h1>
+        <ShapedText text={title} fontSize={46} fill="#ffffff" />
       </div>
 
       {/* Bottom Footer Info */}
@@ -154,18 +133,12 @@ export default async function Image({ params }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <span style={{ fontSize: 16, color: "#cbd5e1", fontWeight: 600 }}>
-            ✍️ {author}
-          </span>
+          <ShapedText text={`✍️ ${author}`} fontSize={16} fill="#cbd5e1" />
           <span style={{ fontSize: 16, color: "#94a3b8" }}>•</span>
-          <span style={{ fontSize: 16, color: "#cbd5e1", fontWeight: 600 }}>
-            📅 {dateStr}
-          </span>
+          <ShapedText text={`📅 ${dateStr}`} fontSize={16} fill="#cbd5e1" />
         </div>
 
-        <span style={{ fontSize: 16, fontWeight: 700, color: "#818cf8" }}>
-          mahaexam.in/blogs
-        </span>
+        <ShapedText text="mahaexam.in/blogs" fontSize={16} fill="#818cf8" />
       </div>
     </div>,
     {

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/db";
-import { getDevanagariOgFont } from "@/lib/og-font";
+import { getDevanagariOgFont, ShapedText } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam कोचिंग बॅच आमंत्रण";
@@ -17,7 +17,7 @@ export default async function Image({ params }) {
   const fonts = fontData
     ? [
         {
-          name: "Noto Sans Devanagari",
+          name: "Mukta",
           data: fontData,
           style: "normal",
           weight: 700,
@@ -59,9 +59,8 @@ export default async function Image({ params }) {
         justifyContent: "space-between",
         backgroundColor: "#060919",
         backgroundImage:
-          "radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.45), transparent 45%), radial-gradient(circle at 10% 80%, rgba(37, 99, 235, 0.35), transparent 45%)",
+          "radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.5), transparent 45%), radial-gradient(circle at 85% 80%, rgba(124, 58, 237, 0.4), transparent 45%)",
         padding: "60px 70px",
-        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
       }}
     >
@@ -90,48 +89,33 @@ export default async function Image({ params }) {
           >
             ME
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 30, fontWeight: 900, color: "#ffffff" }}>MahaExam</span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#a5b4fc" }}>
-              COACHING BATCH INVITE
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="MahaExam" fontSize={30} fill="#ffffff" />
+            <ShapedText text="COACHING BATCH INVITE" fontSize={14} fill="#a5b4fc" />
           </div>
         </div>
 
         <div
           style={{
+            display: "flex",
             padding: "10px 22px",
             borderRadius: 9999,
             backgroundColor: "rgba(99, 102, 241, 0.2)",
             border: "1px solid rgba(129, 140, 248, 0.5)",
-            color: "#c7d2fe",
-            fontSize: 16,
-            fontWeight: 800,
           }}
         >
-          Code: {code?.toUpperCase()}
+          <ShapedText text={`Code: ${code?.toUpperCase()}`} fontSize={16} fill="#c7d2fe" />
         </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <span style={{ fontSize: 18, fontWeight: 800, color: "#f59e0b" }}>🏛️ {academyName}</span>
-        <h1
-          style={{
-            fontSize: 50,
-            fontWeight: 900,
-            lineHeight: 1.15,
-            margin: 0,
-            background: "linear-gradient(to right, #ffffff, #e0e7ff, #c7d2fe)",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
-          {batchTitle}
-        </h1>
-        <p style={{ fontSize: 22, color: "#94a3b8", margin: 0, fontWeight: 500 }}>
-          अकॅडमीच्या खास सराव चाचण्या, रँकिंग आणि टेस्ट सिरीजमध्ये सहभागी होण्यासाठी लिंकवर क्लिक
-          करा.
-        </p>
+        <ShapedText text={`🏛️ ${academyName}`} fontSize={18} fill="#f59e0b" />
+        <ShapedText text={batchTitle} fontSize={48} fill="#ffffff" />
+        <ShapedText
+          text="अकॅडमीच्या खास सराव चाचण्या, रँकिंग आणि टेस्ट सिरीजमध्ये सहभागी होण्यासाठी लिंकवर क्लिक करा."
+          fontSize={22}
+          fill="#94a3b8"
+        />
       </div>
 
       <div
@@ -144,26 +128,26 @@ export default async function Image({ params }) {
           borderTop: "1px solid rgba(255, 255, 255, 0.12)",
         }}
       >
-        <span style={{ fontSize: 18, color: "#cbd5e1", fontWeight: 700 }}>
-          ✓ मोफत नोंदणी • इन्स्टंट टेस्ट अॅक्सेस • अचूक विश्लेषण
-        </span>
+        <ShapedText
+          text="✓ मोफत नोंदणी • इन्स्टंट टेस्ट अॅक्सेस • अचूक विश्लेषण"
+          fontSize={18}
+          fill="#cbd5e1"
+        />
         <div
           style={{
+            display: "flex",
             padding: "14px 28px",
             borderRadius: 18,
             background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-            color: "#ffffff",
-            fontSize: 18,
-            fontWeight: 900,
           }}
         >
-          बॅचमध्ये जॉईन व्हा ➔
+          <ShapedText text="बॅचमध्ये जॉईन व्हा ➔" fontSize={18} fill="#ffffff" />
         </div>
       </div>
     </div>,
     {
       ...size,
       fonts,
-    },
+    }
   );
 }

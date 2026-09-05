@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getJobAlertById } from "@/lib/job-service";
-import { getDevanagariOgFont } from "@/lib/og-font";
+import { getDevanagariOgFont, ShapedText } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam Job Recruitment Alert";
@@ -21,7 +21,7 @@ export default async function Image({ params }) {
   const fonts = fontData
     ? [
         {
-          name: "Noto Sans Devanagari",
+          name: "Mukta",
           data: fontData,
           style: "normal",
           weight: 700,
@@ -47,7 +47,6 @@ export default async function Image({ params }) {
         backgroundImage:
           "radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.5), transparent 45%), radial-gradient(circle at 85% 80%, rgba(225, 29, 72, 0.4), transparent 45%)",
         padding: "60px 70px",
-        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -92,44 +91,28 @@ export default async function Image({ params }) {
           >
             M
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.5px" }}>
-              Maha<span style={{ color: "#60a5fa" }}>Exam</span>
-            </span>
-            <span style={{ fontSize: 13, color: "#9ca3af", fontWeight: 600 }}>
-              Govt Job Alerts 🔔
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="MahaExam" fontSize={28} fill="#ffffff" />
+            <ShapedText text="Govt Job Alerts 🔔" fontSize={13} fill="#9ca3af" />
           </div>
         </div>
 
         <div
           style={{
+            display: "flex",
             padding: "8px 20px",
             borderRadius: 30,
             backgroundColor: "rgba(225, 29, 72, 0.2)",
             border: "1px solid rgba(244, 63, 94, 0.3)",
-            fontSize: 15,
-            fontWeight: 700,
-            color: "#fda4af",
           }}
         >
-          {dept}
+          <ShapedText text={dept} fontSize={15} fill="#fda4af" />
         </div>
       </div>
 
       {/* Middle Content Row */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 1000 }}>
-        <h1
-          style={{
-            fontSize: 46,
-            fontWeight: 900,
-            lineHeight: 1.2,
-            color: "#ffffff",
-            margin: 0,
-          }}
-        >
-          {title}
-        </h1>
+        <ShapedText text={title} fontSize={44} fill="#ffffff" />
       </div>
 
       {/* Bottom Key Details Grid */}
@@ -144,19 +127,17 @@ export default async function Image({ params }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 13, color: "#94a3b8", fontWeight: 600 }}>एकूण रिक्त पदे</span>
-            <span style={{ fontSize: 20, color: "#38bdf8", fontWeight: 900 }}>{vacancies}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="एकूण रिक्त पदे" fontSize={13} fill="#94a3b8" />
+            <ShapedText text={vacancies} fontSize={20} fill="#38bdf8" />
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 13, color: "#94a3b8", fontWeight: 600 }}>अर्ज अंतिम तारीख</span>
-            <span style={{ fontSize: 20, color: "#f43f5e", fontWeight: 900 }}>{lastDate}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="अर्ज अंतिम तारीख" fontSize={13} fill="#94a3b8" />
+            <ShapedText text={lastDate} fontSize={20} fill="#f43f5e" />
           </div>
         </div>
 
-        <span style={{ fontSize: 16, fontWeight: 700, color: "#60a5fa" }}>
-          mahaexam.in/jobs
-        </span>
+        <ShapedText text="mahaexam.in/jobs" fontSize={16} fill="#60a5fa" />
       </div>
     </div>,
     {

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getDevanagariOgFont } from "@/lib/og-font";
+import { getDevanagariOgFont, ShapedText } from "@/lib/og-font";
 
 export const runtime = "nodejs";
 export const alt = "MahaExam — महाराष्ट्र स्पर्धा परीक्षा मॉक टेस्ट पोर्टल";
@@ -14,7 +14,7 @@ export default async function Image() {
   const fonts = fontData
     ? [
         {
-          name: "Noto Sans Devanagari",
+          name: "Mukta",
           data: fontData,
           style: "normal",
           weight: 700,
@@ -35,7 +35,6 @@ export default async function Image() {
         backgroundImage:
           "radial-gradient(circle at 15% 25%, rgba(37, 99, 235, 0.4), transparent 45%), radial-gradient(circle at 85% 75%, rgba(124, 58, 237, 0.35), transparent 45%)",
         padding: "50px 60px",
-        fontFamily: '"Noto Sans Devanagari", sans-serif',
         color: "#ffffff",
         position: "relative",
       }}
@@ -66,49 +65,34 @@ export default async function Image() {
           >
             ME
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 28, fontWeight: 900, color: "#ffffff" }}>MahaExam</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#93c5fd" }}>
-              महाराष्ट्र स्पर्धा परीक्षा पोर्टल
-            </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <ShapedText text="MahaExam" fontSize={28} fill="#ffffff" />
+            <ShapedText text="महाराष्ट्र स्पर्धा परीक्षा पोर्टल" fontSize={13} fill="#93c5fd" />
           </div>
         </div>
 
         <div
           style={{
+            display: "flex",
             padding: "8px 18px",
             borderRadius: 9999,
             backgroundColor: "rgba(255, 255, 255, 0.1)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
-            color: "#4ade80",
-            fontSize: 14,
-            fontWeight: 800,
           }}
         >
-          ● TCS / IBPS Mock Tests
+          <ShapedText text="● TCS / IBPS Mock Tests" fontSize={14} fill="#4ade80" />
         </div>
       </div>
 
       {/* Center Content */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <h1
-          style={{
-            fontSize: 48,
-            fontWeight: 900,
-            lineHeight: 1.15,
-            margin: 0,
-            background: "linear-gradient(to right, #ffffff, #c7d2fe, #93c5fd)",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
-          पोलीस भरती • MPSC • तलाठी भरती
-          <br />
-          १०० गुणांच्या मोफत सराव चाचण्या
-        </h1>
-        <p style={{ fontSize: 20, color: "#94a3b8", margin: 0, fontWeight: 500 }}>
-          २,७००+ प्रश्न, अचूक मराठी स्पष्टीकरण, राज्यस्तरीय रँक आणि परिपूर्ण परीक्षा सराव.
-        </p>
+        <ShapedText text="पोलीस भरती • MPSC • तलाठी भरती" fontSize={44} fill="#ffffff" />
+        <ShapedText text="१०० गुणांच्या मोफत सराव चाचण्या" fontSize={38} fill="#c7d2fe" />
+        <ShapedText
+          text="२,७००+ प्रश्न, अचूक मराठी स्पष्टीकरण, राज्यस्तरीय रँक आणि परिपूर्ण परीक्षा सराव."
+          fontSize={20}
+          fill="#94a3b8"
+        />
       </div>
 
       {/* Bottom Bar */}
@@ -122,17 +106,17 @@ export default async function Image() {
           borderTop: "1px solid rgba(255, 255, 255, 0.1)",
         }}
       >
-        <div style={{ display: "flex", gap: 24, fontSize: 16, fontWeight: 700, color: "#e2e8f0" }}>
-          <span>✓ १००% अचूक उत्तरतालिका</span>
-          <span>✓ इन्स्टंट निकाल व रँक</span>
-          <span>✓ मोबाईल व लॅपटॉप कम्पॅटिबल</span>
+        <div style={{ display: "flex", gap: 24 }}>
+          <ShapedText text="✓ १००% अचूक उत्तरतालिका" fontSize={15} fill="#e2e8f0" />
+          <ShapedText text="✓ इन्स्टंट निकाल व रँक" fontSize={15} fill="#e2e8f0" />
+          <ShapedText text="✓ मोबाईल व लॅपटॉप कम्पॅटिबल" fontSize={15} fill="#e2e8f0" />
         </div>
-        <span style={{ fontSize: 16, fontWeight: 800, color: "#38bdf8" }}>mahaexam.com</span>
+        <ShapedText text="mahaexam.com" fontSize={16} fill="#38bdf8" />
       </div>
     </div>,
     {
       ...size,
       fonts,
-    },
+    }
   );
 }
