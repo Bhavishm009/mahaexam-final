@@ -156,11 +156,10 @@ export function ExamsDirectoryClient({
                 key={c.id}
                 type="button"
                 onClick={() => setActiveCategory(c.id)}
-                className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition active:scale-95 ${
-                  activeCategory === c.id
-                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 dark:bg-blue-600"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-                }`}
+                className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition active:scale-95 ${activeCategory === c.id
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 dark:bg-blue-600"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                  }`}
               >
                 {language === "mr" ? c.labelMr : c.labelEn}
               </button>
