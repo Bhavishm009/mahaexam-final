@@ -6,6 +6,7 @@ import {
   sessionCookieOptions,
   COOKIE,
 } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 export async function POST(request) {
   try {
@@ -53,6 +54,7 @@ export async function POST(request) {
     response.cookies.set(COOKIE, token, sessionCookieOptions());
     return response;
   } catch (error) {
+    console.error("Login error:", error);
     const messages = {
       INVALID_CREDENTIALS: "Invalid email or password.",
       USER_SUSPENDED: "Your account is currently suspended.",
