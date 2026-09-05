@@ -6,12 +6,23 @@ const globalForPrisma = globalThis;
 function createClient(url) {
   if (!url) return null;
   let tunedUrl = url;
-  // Ensure connection pool timeout allows sufficient buffer (20s) during deployment container restarts
-  if (tunedUrl.includes("pool_timeout=10")) {
-    tunedUrl = tunedUrl.replace("pool_timeout=10", "pool_timeout=20");
-  } else if (!tunedUrl.includes("pool_timeout=")) {
-    tunedUrl += (tunedUrl.includes("?") ? "&" : "?") + "pool_timeout=20";
+  
+  // Optimize connection limit from 3 to 10 (or configurable via DB_CONNECTION_LIMIT)
+  // Aiven max_connections is 20, so 10 provides 3.3x more concurrency headroom while leaving 10 for background jobs/admin.
+  const targetLimit = process.env.DB_CONNECTION_LIMIT || "10";
+  if (tunedUrl.includes("connection_limit=3")) {
+    tunedUrl = tunedUrl.replace("connection_limit=3", `connection_limit=${targetLimit}`);
+  } else if (!tunedUrl.includes("connection_limit=")) {
+    tunedUrl += (tunedUrl.includes("?") ? "&" : "?") + `connection_limit=${targetLimit}`;
   }
+
+  // Ensure connection pool timeout allows sufficient buffer (30s) during high concurrency bursts
+  if (tunedUrl.includes("pool_timeout=10") || tunedUrl.includes("pool_timeout=20")) {
+    tunedUrl = tunedUrl.replace(/pool_timeout=\d+/, "pool_timeout=30");
+  } else if (!tunedUrl.includes("pool_timeout=")) {
+    tunedUrl += (tunedUrl.includes("?") ? "&" : "?") + "pool_timeout=30";
+  }
+
   return new PrismaClient({
     datasources: {
       db: { url: tunedUrl },

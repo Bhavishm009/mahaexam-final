@@ -3,11 +3,10 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { withApiLogger } from "@/lib/logger";
 
 import { auth } from "@/auth";
 
-export const GET = withApiLogger(async function GET(request) {
+export async function GET(request) {
   try {
     const cookieStore = await cookies();
     let token =
@@ -91,9 +90,9 @@ export const GET = withApiLogger(async function GET(request) {
       { status: 500 },
     );
   }
-}, "/api/student/profile");
+}
 
-export const PATCH = withApiLogger(async function PATCH(request) {
+export async function PATCH(request) {
   const cookieStore = await cookies();
   let token =
     cookieStore.get(COOKIE)?.value ||
@@ -212,4 +211,4 @@ export const PATCH = withApiLogger(async function PATCH(request) {
       { status: 400 },
     );
   }
-}, "/api/student/profile");
+}
