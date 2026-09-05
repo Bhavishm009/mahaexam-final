@@ -58,6 +58,26 @@ export async function POST() {
   const syncLog = [];
   const stats = {};
 
+  const NATURAL_KEYS = {
+    organization: "slug",
+    user: "email",
+    coachingBatch: "code",
+    passkeyCredential: "credentialId",
+    pushSubscription: "endpoint",
+    subject: "slug",
+    exam: "slug",
+    subscriptionPlan: "slug",
+  };
+
+  // Replay any pending failover outbox mutations first
+  try {
+    const { replayFailoverQueue } = await import("@/lib/db-sync-queue.js");
+    const replayRes = await replayFailoverQueue();
+    if (replayRes && replayRes.replayed > 0) {
+      syncLog.push(`📦 Replayed ${replayRes.replayed} failover outbox mutations from Secondary to Primary`);
+    }
+  } catch (_) {}
+
   try {
     for (const { key, label } of SYNC_MODELS) {
       if (!primaryPrisma[key] || !secondaryPrisma[key]) continue;
@@ -71,13 +91,6 @@ export async function POST() {
 
         if (pCount === null || sCount === null) {
           syncLog.push(`⚠️ ${label}: Skipped (Table missing or inaccessible)`);
-          continue;
-        }
-
-        // For massive static tables (questions, questionOptions), count equality is a safe fast-path
-        if (pCount === sCount && pCount > 5000) {
-          stats[key] = pCount;
-          syncLog.push(`In Sync (${pCount} ${label})`);
           continue;
         }
 
@@ -101,6 +114,7 @@ export async function POST() {
         }
 
         const CHUNK_SIZE = 150;
+        const naturalKey = NATURAL_KEYS[key];
 
         // 1. Copy records missing in Secondary (Primary -> Secondary)
         if (missingInSecondary.length > 0) {
@@ -119,12 +133,32 @@ export async function POST() {
               });
               syncedToSecondary += res.count || cleanChunk.length;
             } catch (chunkErr) {
-              // Fallback to per-item insertion if a unique constraint or relation fails
+              // Fallback to per-item upsert with natural key reconciliation
               for (const item of cleanChunk) {
                 try {
-                  await secondaryPrisma[key].create({ data: item });
+                  await secondaryPrisma[key].upsert({
+                    where: { id: item.id },
+                    create: item,
+                    update: item,
+                  });
                   syncedToSecondary++;
-                } catch (_) {}
+                } catch (itemErr) {
+                  // If unique natural key exists with a different ID on secondary, reconcile it
+                  if (naturalKey && item[naturalKey]) {
+                    try {
+                      const conflict = await secondaryPrisma[key].findFirst({
+                        where: { [naturalKey]: item[naturalKey] },
+                        select: { id: true },
+                      });
+                      if (conflict && conflict.id !== item.id) {
+                        await secondaryPrisma[key].delete({ where: { id: conflict.id } }).catch(() => {});
+                        await secondaryPrisma[key].create({ data: item });
+                        syncedToSecondary++;
+                        continue;
+                      }
+                    } catch (_) {}
+                  }
+                }
               }
             }
           }
@@ -148,10 +182,14 @@ export async function POST() {
               });
               syncedToPrimary += res.count || cleanChunk.length;
             } catch (chunkErr) {
-              // Fallback to per-item insertion
+              // Fallback to per-item upsert
               for (const item of cleanChunk) {
                 try {
-                  await primaryPrisma[key].create({ data: item });
+                  await primaryPrisma[key].upsert({
+                    where: { id: item.id },
+                    create: item,
+                    update: item,
+                  });
                   syncedToPrimary++;
                 } catch (_) {}
               }

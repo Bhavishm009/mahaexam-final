@@ -255,6 +255,13 @@ export async function handlePrimaryRecovery() {
     invalidateDbSyncCache();
   } catch (_) {}
 
+  // Automatically replay any mutations that occurred while Primary was offline
+  import("./db-sync-queue.js")
+    .then(({ replayFailoverQueue }) => replayFailoverQueue())
+    .catch((replayErr) => {
+      console.warn("⚠️ [DB Failover Recovery] Error during queue replay:", replayErr?.message);
+    });
+
   // Only dispatch recovery notification if an actual outage alert was sent earlier
   if (!wasAdminNotified) {
     return;
@@ -462,8 +469,28 @@ export const prisma = new Proxy(primaryPrisma, {
                 const secRes = await secondaryModel[methodProp](...args);
                 if (WRITE_METHODS.has(String(methodProp))) {
                   invalidateDbSyncCache();
+                  // Log mutation to durable outbox queue for replay when Primary recovers
+                  import("./db-sync-queue.js")
+                    .then(({ enqueueFailoverMutation }) =>
+                      enqueueFailoverMutation({
+                        model: String(prop),
+                        method: String(methodProp),
+                        args,
+                        resultId: secRes?.id || null,
+                      })
+                    )
+                    .catch(() => {});
                 }
                 return secRes;
+              }
+            }
+
+            // Pre-populate IDs for createMany so both Primary and Secondary receive identical records
+            if (String(methodProp) === "createMany" && args[0]?.data && Array.isArray(args[0].data)) {
+              for (const item of args[0].data) {
+                if (item && typeof item === "object" && !item.id) {
+                  item.id = "cm" + Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
+                }
               }
             }
 
@@ -484,6 +511,18 @@ export const prisma = new Proxy(primaryPrisma, {
                 if (secondaryModel && typeof secondaryModel[methodProp] === "function") {
                   const secRes = await secondaryModel[methodProp](...args);
                   invalidateDbSyncCache();
+                  if (WRITE_METHODS.has(String(methodProp))) {
+                    import("./db-sync-queue.js")
+                      .then(({ enqueueFailoverMutation }) =>
+                        enqueueFailoverMutation({
+                          model: String(prop),
+                          method: String(methodProp),
+                          args,
+                          resultId: secRes?.id || null,
+                        })
+                      )
+                      .catch(() => {});
+                  }
                   return secRes;
                 }
               }
@@ -496,9 +535,41 @@ export const prisma = new Proxy(primaryPrisma, {
               if (!primaryFailed && secondaryPrisma) {
                 const secondaryModel = secondaryPrisma[prop];
                 if (secondaryModel && typeof secondaryModel[methodProp] === "function") {
-                  secondaryModel[methodProp](...args)
+                  // Construct secondary args ensuring identical ID preservation
+                  let secArgs = args;
+                  try {
+                    secArgs = JSON.parse(
+                      JSON.stringify(args, (k, v) => (typeof v === "bigint" ? Number(v) : v))
+                    );
+
+                    // Ensure secondary create uses the EXACT id created by Primary
+                    if (String(methodProp) === "create" && primaryResult?.id && secArgs[0]?.data) {
+                      if (!secArgs[0].data.id) {
+                        secArgs[0].data.id = primaryResult.id;
+                      }
+                    } else if (String(methodProp) === "upsert" && primaryResult?.id && secArgs[0]?.create) {
+                      if (!secArgs[0].create.id) {
+                        secArgs[0].create.id = primaryResult.id;
+                      }
+                    }
+                  } catch (_) {
+                    secArgs = args;
+                  }
+
+                  secondaryModel[methodProp](...secArgs)
                     .then(() => invalidateDbSyncCache())
-                    .catch((secErr) => {
+                    .catch(async (secErr) => {
+                      // If create fails due to unique constraint, try safe upsert/update
+                      if (secErr?.code === "P2002" && primaryResult?.id && secArgs[0]?.data) {
+                        try {
+                          await secondaryModel.update({
+                            where: { id: primaryResult.id },
+                            data: secArgs[0].data,
+                          });
+                          invalidateDbSyncCache();
+                          return;
+                        } catch (_) {}
+                      }
                       console.warn(
                         `⚠️ [Shadow DB Sync Warning] Secondary DB write failed for ${String(prop)}.${String(methodProp)}:`,
                         secErr?.message

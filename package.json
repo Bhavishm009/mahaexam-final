@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "db:push": "prisma db push",
+    "db:push:all": "node scripts/db-push-all.mjs",
     "db:seed": "node prisma/seed.js",
     "db:seed-pyqs": "node prisma/seed-pyqs.js",
     "prisma:generate": "prisma generate",
