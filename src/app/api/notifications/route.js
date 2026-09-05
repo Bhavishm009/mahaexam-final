@@ -5,10 +5,13 @@ import { getNotifications, markNotificationRead } from "@/lib/result-service";
 
 export async function GET() {
   const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
-  if (!session) {
+  if (!session || !session.sub) {
     return NextResponse.json({ error: "Login required" }, { status: 401 });
   }
-  return NextResponse.json({ notifications: await getNotifications(session.sub) });
+  const isSuperAdmin = session.role === "SUPER_ADMIN";
+  return NextResponse.json({
+    notifications: await getNotifications(session.sub, isSuperAdmin),
+  });
 }
 
 export async function PATCH(request) {

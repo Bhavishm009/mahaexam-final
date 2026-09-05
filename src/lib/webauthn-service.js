@@ -126,6 +126,7 @@ export async function verifyPasskeyLoginAndCreateSession(credentialData) {
 
   // Create JWT session
   const token = await createSessionToken({
+    id: user.id,
     sub: user.id,
     email: user.email,
     role: user.role,

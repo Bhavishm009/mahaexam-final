@@ -203,20 +203,22 @@ export function LoginForm() {
         throw new Error(data.error || "Passkey login failed");
       }
 
-      const next = params.get("next");
-      if (next) {
-        router.push(next);
+      if (data.user) {
+        setUser(data.user);
       } else {
-        const role = data.user?.role;
-        if (role === "SUPER_ADMIN" || role === "ADMIN") {
-          router.push("/admin");
-        } else if (role === "COACHING_ADMIN" || role === "TEACHER") {
-          router.push("/coaching/dashboard");
-        } else {
-          router.push("/student/dashboard");
-        }
+        await refreshUser();
       }
-      router.refresh();
+
+      const next = params.get("next");
+      const targetRoute =
+        next ||
+        (data.user?.role === "SUPER_ADMIN" || data.user?.role === "ADMIN"
+          ? "/admin"
+          : data.user?.role === "COACHING_ADMIN" || data.user?.role === "TEACHER"
+            ? "/coaching/dashboard"
+            : "/student/dashboard");
+
+      window.location.href = targetRoute;
     } catch (err) {
       if (err.name !== "NotAllowedError") {
         setError(err.message || "Biometric login was cancelled or failed.");

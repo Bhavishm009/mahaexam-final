@@ -133,30 +133,129 @@ export async function deleteUserSafely(userId) {
     select: { id: true },
   });
 
-  if (fallbackAdmin && fallbackAdmin.id !== userId) {
-    // Re-assign all questions to super admin so question bank is 100% preserved
-    await prisma.question.updateMany({
-      where: { createdBy: userId },
-      data: { createdBy: fallbackAdmin.id },
+  return await prisma.$transaction(async (tx) => {
+    if (fallbackAdmin && fallbackAdmin.id !== userId) {
+      // Re-assign all questions to super admin so question bank is 100% preserved
+      await tx.question.updateMany({
+        where: { createdBy: userId },
+        data: { createdBy: fallbackAdmin.id },
+      });
+
+      // Re-assign all exams to super admin
+      await tx.exam.updateMany({
+        where: { createdBy: userId },
+        data: { createdBy: fallbackAdmin.id },
+      });
+
+      // Re-assign audit logs and created imports
+      await tx.coachingAuditLog.updateMany({
+        where: { actorId: userId },
+        data: { actorId: fallbackAdmin.id },
+      });
+      await tx.examPublishAudit.updateMany({
+        where: { actorId: userId },
+        data: { actorId: fallbackAdmin.id },
+      });
+      await tx.questionImportBatch.updateMany({
+        where: { createdById: userId },
+        data: { createdById: fallbackAdmin.id },
+      });
+    }
+
+    // 1. Find all exam attempts belonging to this user
+    const attempts = await tx.examAttempt.findMany({
+      where: { studentId: userId },
+      select: { id: true },
     });
+    const attemptIds = attempts.map((a) => a.id);
 
-    // Re-assign all exams to super admin
-    await prisma.exam.updateMany({
-      where: { createdBy: userId },
-      data: { createdBy: fallbackAdmin.id },
+    if (attemptIds.length > 0) {
+      // Delete answers, events and violations
+      await tx.examAttemptAnswer.deleteMany({ where: { attemptId: { in: attemptIds } } });
+      await tx.attemptAnswer.deleteMany({ where: { attemptId: { in: attemptIds } } });
+      await tx.attemptQuestion.deleteMany({ where: { attemptId: { in: attemptIds } } });
+      await tx.examAttemptEvent.deleteMany({ where: { attemptId: { in: attemptIds } } });
+      await tx.examViolation.deleteMany({ where: { attemptId: { in: attemptIds } } });
+
+      // Delete results and subject breakdowns
+      const results = await tx.result.findMany({
+        where: { attemptId: { in: attemptIds } },
+        select: { id: true },
+      });
+      if (results.length > 0) {
+        await tx.resultSubject.deleteMany({ where: { resultId: { in: results.map((r) => r.id) } } });
+        await tx.result.deleteMany({ where: { id: { in: results.map((r) => r.id) } } });
+      }
+
+      const examResults = await tx.examResult.findMany({
+        where: { attemptId: { in: attemptIds } },
+        select: { id: true },
+      });
+      if (examResults.length > 0) {
+        await tx.subjectResult.deleteMany({ where: { resultId: { in: examResults.map((r) => r.id) } } });
+        await tx.examResult.deleteMany({ where: { id: { in: examResults.map((r) => r.id) } } });
+      }
+
+      // Delete result summaries and chapter breakdowns
+      const summaries = await tx.examResultSummary.findMany({
+        where: { OR: [{ studentId: userId }, { attemptId: { in: attemptIds } }] },
+        select: { id: true },
+      });
+      if (summaries.length > 0) {
+        const summaryIds = summaries.map((s) => s.id);
+        await tx.examResultSubject.deleteMany({ where: { resultId: { in: summaryIds } } });
+        await tx.examResultChapter.deleteMany({ where: { resultId: { in: summaryIds } } });
+        await tx.examResultSummary.deleteMany({ where: { id: { in: summaryIds } } });
+      }
+
+      // Delete exam attempts
+      await tx.examAttempt.deleteMany({ where: { id: { in: attemptIds } } });
+    }
+
+    // 2. Clean up any remaining student performance snapshot, leaderboard, or entitlement
+    await tx.examLeaderboard.deleteMany({ where: { studentId: userId } });
+    await tx.studentPerformanceSnapshot.deleteMany({ where: { studentId: userId } });
+    await tx.examEntitlement.deleteMany({ where: { studentId: userId } });
+
+    // 3. Clean up payments & purchases
+    const paymentOrders = await tx.paymentOrder.findMany({
+      where: { userId },
+      select: { id: true },
     });
-  }
+    if (paymentOrders.length > 0) {
+      await tx.paymentEvent.deleteMany({
+        where: { paymentOrderId: { in: paymentOrders.map((p) => p.id) } },
+      });
+      await tx.paymentOrder.deleteMany({ where: { id: { in: paymentOrders.map((p) => p.id) } } });
+    }
 
-  // Clean up user-specific student/teacher profiles and dependencies
-  await prisma.studentProfile.deleteMany({ where: { userId } });
-  await prisma.teacherProfile.deleteMany({ where: { userId } });
-  await prisma.authSession.deleteMany({ where: { userId } });
-  await prisma.batchMembership.deleteMany({ where: { studentId: userId } });
-  await prisma.passkeyCredential.deleteMany({ where: { userId } });
-  await prisma.pushSubscription.deleteMany({ where: { userId } });
+    await tx.examPurchase.deleteMany({ where: { userId } });
+    await tx.purchase.deleteMany({ where: { userId } });
+    await tx.payment.deleteMany({ where: { OR: [{ userId }, { studentId: userId }] } });
 
-  // Delete the user record
-  return prisma.user.delete({ where: { id: userId } });
+    // 4. Clean up notifications
+    await tx.notification.deleteMany({ where: { OR: [{ userId }, { studentId: userId }] } });
+    await tx.studentNotification.deleteMany({ where: { userId } });
+    await tx.examNotification.deleteMany({ where: { userId } });
+
+    // 5. Clean up exam assignments & draft associations
+    await tx.examStudent.deleteMany({ where: { studentId: userId } });
+    await tx.examDraftStudent.deleteMany({ where: { studentId: userId } });
+
+    // 6. Clean up profile, auth & memberships
+    await tx.batchStudent.deleteMany({ where: { student: { userId } } });
+    await tx.studentProfile.deleteMany({ where: { userId } });
+    await tx.teacherProfile.deleteMany({ where: { userId } });
+    await tx.authSession.deleteMany({ where: { userId } });
+    await tx.batchMembership.deleteMany({ where: { studentId: userId } });
+    await tx.passkeyCredential.deleteMany({ where: { userId } });
+    await tx.pushSubscription.deleteMany({ where: { userId } });
+    await tx.emailDelivery.deleteMany({ where: { userId } });
+    await tx.auditLog.deleteMany({ where: { userId } });
+
+    // 7. Finally delete the user record
+    return await tx.user.delete({ where: { id: userId } });
+  });
 }
 
 export async function deleteOrganizationSafely(orgId) {

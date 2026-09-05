@@ -8,8 +8,9 @@ const secret = new TextEncoder().encode(
 const COOKIE = process.env.AUTH_COOKIE_NAME || "maha_exam_session";
 
 export async function createSessionToken(user) {
+  const userId = user.id || user.sub;
   return new SignJWT({
-    sub: user.id,
+    sub: userId,
     role: user.role,
     organizationId: user.organizationId || null,
     name: user.name,
