@@ -50,6 +50,7 @@ export const GET = withApiLogger(async function GET(request) {
         studentProfile: {
           select: {
             id: true,
+            profilePhoto: true,
             targetExam: true,
             education: true,
             district: true,
@@ -122,7 +123,7 @@ export const PATCH = withApiLogger(async function PATCH(request) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const { name, phone, targetExam, education, district, taluka, preferredLanguage, newPassword } =
+    const { name, phone, targetExam, education, district, taluka, preferredLanguage, newPassword, profilePhoto } =
       body;
 
     const updateUserData = {};
@@ -172,6 +173,9 @@ export const PATCH = withApiLogger(async function PATCH(request) {
     }
     if (typeof taluka === "string") {
       updateProfileData.taluka = taluka.trim();
+    }
+    if (typeof profilePhoto === "string") {
+      updateProfileData.profilePhoto = profilePhoto.trim();
     }
 
     await prisma.studentProfile.upsert({

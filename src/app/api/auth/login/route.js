@@ -36,6 +36,7 @@ export async function POST(request) {
     }
 
     const token = await createSessionToken(user);
+    prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
 
     const response = NextResponse.json({
       success: true,

@@ -45,9 +45,11 @@ export async function GET(request) {
           slug: true,
         },
       },
+      lastLoginAt: true,
       studentProfile: {
         select: {
           id: true,
+          profilePhoto: true,
           targetExam: true,
           education: true,
           district: true,
@@ -62,8 +64,21 @@ export async function GET(request) {
     return NextResponse.json({ authenticated: false }, { status: 404 });
   }
 
+  // Update lastLoginAt if not updated in the last 5 minutes (for online user tracking)
+  if (!user.lastLoginAt || Date.now() - new Date(user.lastLoginAt).getTime() > 5 * 60 * 1000) {
+    prisma.user
+      .update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      })
+      .catch(() => {});
+  }
+
   return NextResponse.json({
     authenticated: true,
-    user,
+    user: {
+      ...user,
+      profilePhoto: user.studentProfile?.profilePhoto || null,
+    },
   });
 }

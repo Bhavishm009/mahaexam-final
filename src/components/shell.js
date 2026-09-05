@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { getInitials } from "@/lib/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import NotificationCenter from "@/components/notification-center";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -302,9 +303,11 @@ export function Shell({ children, role = "student", user }) {
               className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-slate-200/60 dark:hover:bg-slate-800"
               title="View Profile"
             >
-              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-100 font-black text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                {userInitials}
-              </div>
+              <UserAvatar
+                src={currentUser?.profilePhoto || user?.profilePhoto}
+                name={currentUser?.name || user?.name}
+                size="xs"
+              />
               <div className="min-w-0 truncate">
                 <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
                   {currentUser?.name || user?.name || "User"}
@@ -374,9 +377,11 @@ export function Shell({ children, role = "student", user }) {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 pr-2.5 text-xs font-bold text-slate-800 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               >
-                <div className="grid h-7 w-7 place-items-center rounded-xl bg-blue-600 font-black text-white">
-                  {userInitials}
-                </div>
+                <UserAvatar
+                  src={currentUser?.profilePhoto || user?.profilePhoto}
+                  name={currentUser?.name || user?.name}
+                  size="xs"
+                />
                 <span className="hidden sm:inline">
                   {currentUser?.name?.split(" ")[0] || user?.name?.split(" ")[0] || "Account"}
                 </span>

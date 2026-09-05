@@ -17,6 +17,7 @@ import {
   Building2,
 } from "lucide-react";
 import { getInitials } from "@/lib/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import ConfirmModal from "@/components/confirm-modal";
 
 export default function AdminUsersPage() {
@@ -208,47 +209,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Top Header Card */}
-      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-              <Users className="h-3.5 w-3.5" />
-              User Access &amp; Permissions
-            </span>
-          </div>
-          <h1 className="mt-2 text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-            Platform Users Management
-          </h1>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            View, search, filter, suspend, and safely remove students, teachers, and coaching
-            admins.
-          </p>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setShowFilterModal(true)}
-            className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            <SlidersHorizontal className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <span>Filter Options</span>
-            {(roleFilter !== "ALL" || statusFilter !== "ALL") && (
-              <span className="flex h-2 w-2 rounded-full bg-blue-600" />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowAddUserModal(true)}
-            className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-95"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add New User</span>
-          </button>
-        </div>
-      </div>
 
       {/* Add User Modal */}
       {showAddUserModal && (
@@ -517,49 +478,83 @@ export default function AdminUsersPage() {
       )}
 
       {/* Main Table Card */}
-      <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        {/* Search and Role Filter Tabs */}
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          {/* Quick Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by user name, email, phone, or academy..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-            />
+      <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        {/* Header Row: 16px font title, Search, Filter & Add in SAME line */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-base font-bold text-slate-900 dark:text-white">
+              Platform Users
+            </h1>
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              {filteredUsers.length}
+            </span>
           </div>
 
-          {/* Role Filter Tabs */}
-          <div className="flex flex-wrap gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-950">
-            {[
-              { id: "ALL", label: "All Users" },
-              { id: "STUDENT", label: "Students" },
-              { id: "TEACHER", label: "Teachers" },
-              { id: "COACHING_ADMIN", label: "Academies" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setRoleFilter(tab.id);
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Quick Search */}
+            <div className="relative min-w-[200px] flex-1 sm:w-64 sm:flex-none">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search name, email, phone..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                  roleFilter === tab.id
-                    ? "bg-white text-blue-600 shadow-sm dark:bg-slate-800 dark:text-blue-400"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-3 text-xs font-medium text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            </div>
+
+            {/* Filter Button */}
+            <button
+              type="button"
+              onClick={() => setShowFilterModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-100 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Filter Options</span>
+              {(roleFilter !== "ALL" || statusFilter !== "ALL") && (
+                <span className="h-2 w-2 rounded-full bg-blue-600" />
+              )}
+            </button>
+
+            {/* Add User Button */}
+            <button
+              type="button"
+              onClick={() => setShowAddUserModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add New User</span>
+            </button>
           </div>
+        </div>
+
+        {/* Role Filter Tabs */}
+        <div className="flex flex-wrap gap-1 rounded-xl border border-slate-100 bg-slate-50/80 p-1 dark:border-slate-800/80 dark:bg-slate-950/60">
+          {[
+            { id: "ALL", label: "All Users" },
+            { id: "STUDENT", label: "Students" },
+            { id: "TEACHER", label: "Teachers" },
+            { id: "COACHING_ADMIN", label: "Academies" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setRoleFilter(tab.id);
+                setCurrentPage(1);
+              }}
+              className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                roleFilter === tab.id
+                  ? "bg-white text-blue-600 font-bold shadow-xs dark:bg-slate-800 dark:text-blue-400"
+                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Table Content */}
@@ -596,9 +591,11 @@ export default function AdminUsersPage() {
                   >
                     <td className="py-3.5 pl-2">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 font-black text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                          {getInitials(u.name)}
-                        </div>
+                        <UserAvatar
+                          src={u.studentProfile?.profilePhoto}
+                          name={u.name}
+                          size="sm"
+                        />
                         <div>
                           <div className="font-bold text-slate-900 dark:text-white">{u.name}</div>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400">

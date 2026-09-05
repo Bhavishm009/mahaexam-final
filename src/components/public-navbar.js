@@ -20,6 +20,7 @@ import { useLanguage } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";
 import NotificationCenter from "@/components/notification-center";
 import { getInitials } from "@/lib/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 
 export function PublicNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -133,9 +134,7 @@ export function PublicNavbar() {
                   onClick={() => setUserMenuOpen((x) => !x)}
                   className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 pr-3 text-xs font-bold text-slate-800 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  <div className="shadow-xs grid h-7 w-7 place-items-center rounded-xl bg-blue-600 font-black text-white">
-                    {userInitials}
-                  </div>
+                  <UserAvatar src={user?.profilePhoto} name={user?.name} size="xs" />
                   <span className="max-w-[110px] truncate font-extrabold text-slate-900 dark:text-white">
                     {user?.name?.split(" ")[0] || "Account"}
                   </span>

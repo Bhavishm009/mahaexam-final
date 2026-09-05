@@ -1,7 +1,19 @@
 import { prisma } from "@/lib/db";
 
 export async function adminStats() {
-  const [organizations, users, students, exams, results, purchases, payments] = await Promise.all([
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  const [
+    organizations,
+    users,
+    students,
+    exams,
+    results,
+    purchases,
+    payments,
+    activeExamAttempts,
+    recentLogins,
+  ] = await Promise.all([
     prisma.organization.count(),
     prisma.user.count(),
     prisma.user.count({ where: { role: "STUDENT" } }),
@@ -9,7 +21,24 @@ export async function adminStats() {
     prisma.examResult.count(),
     prisma.examPurchase.count({ where: { status: "PAID" } }),
     prisma.payment.aggregate({ where: { status: "PAID" }, _sum: { amount: true } }),
+    // Live exam takers: Only count active attempts where student had heartbeat/activity in the last 10 minutes
+    prisma.examAttempt.count({
+      where: {
+        status: "IN_PROGRESS",
+        lastActivityAt: { gte: tenMinutesAgo },
+      },
+    }).catch(() => 0),
+    // Currently online: Count real users with last login within the last 15 minutes
+    prisma.user.count({
+      where: {
+        lastLoginAt: { gte: fifteenMinutesAgo },
+      },
+    }).catch(() => 0),
   ]);
+
+  // Online count is strictly the real active users from DB, bounded between 0 and total users
+  const onlineCount = Math.min(users, Math.max(0, recentLogins));
+
   return {
     organizations,
     users,
@@ -18,6 +47,8 @@ export async function adminStats() {
     results,
     paidPurchases: purchases,
     revenue: payments._sum.amount || 0,
+    activeExamAttempts,
+    onlineUsers: onlineCount,
   };
 }
 
@@ -51,6 +82,7 @@ export async function listUsers() {
       organizationId: true,
       createdAt: true,
       organization: { select: { name: true } },
+      studentProfile: { select: { profilePhoto: true } },
     },
     orderBy: { createdAt: "desc" },
     take: 500,

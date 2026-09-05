@@ -86,6 +86,7 @@ export async function POST(request) {
 
     // Issue full session token & cookie
     const token = await createSessionToken(user);
+    prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
     const response = NextResponse.json({
       success: true,
       token,

@@ -50,15 +50,24 @@ export function AdminDashboardClient({ initialStats }) {
   });
 
   useEffect(() => {
-    if (!initialStats) {
+    function fetchLatestStats() {
       fetch("/api/admin/stats")
         .then((r) => (r.ok ? r.json() : null))
-        .then(setStats)
-        .catch(() => { });
+        .then((d) => {
+          if (d) setStats(d);
+        })
+        .catch(() => {});
     }
+
+    if (!initialStats) {
+      fetchLatestStats();
+    }
+    const interval = setInterval(fetchLatestStats, 20000);
 
     loadPushStats();
     checkDeviceSubscription();
+
+    return () => clearInterval(interval);
   }, [initialStats]);
 
   async function loadPushStats() {
@@ -356,8 +365,28 @@ export function AdminDashboardClient({ initialStats }) {
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {[
+            {
+              label: "Live Exam Takers",
+              val: stats.activeExamAttempts ?? 0,
+              desc: "Students taking exams right now",
+              icon: Radio,
+              color: "text-emerald-600 dark:text-emerald-400",
+              bg: "bg-emerald-50 dark:bg-emerald-950/40",
+              href: "/admin/analytics",
+              isLive: true,
+            },
+            {
+              label: "Currently Online",
+              val: stats.onlineUsers ?? 0,
+              desc: "Active users on platform",
+              icon: Activity,
+              color: "text-cyan-600 dark:text-cyan-400",
+              bg: "bg-cyan-50 dark:bg-cyan-950/40",
+              href: "/admin/users",
+              isLive: true,
+            },
             {
               label: "Partner Academies",
               val: stats.organizations,
@@ -437,9 +466,17 @@ export function AdminDashboardClient({ initialStats }) {
               <>
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      {item.label}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {item.isLive && (
+                        <span className="relative flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                        </span>
+                      )}
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {item.label}
+                      </span>
+                    </div>
                     <div
                       className={`flex h-9 w-9 items-center justify-center rounded-2xl ${item.bg} ${item.color}`}
                     >
