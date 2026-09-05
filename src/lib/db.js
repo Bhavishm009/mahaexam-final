@@ -188,6 +188,98 @@ export async function activateFailover(err) {
 }
 
 /**
+ * Handle Primary Database recovery: switch traffic back to Primary and notify Super Admin
+ */
+export async function handlePrimaryRecovery() {
+  const state = globalForPrisma.__mahaDbFailover;
+  if (!state.isFailoverActive) return;
+
+  const outageStartedAt = state.failoverStartedAt;
+  const restoredAt = new Date().toISOString();
+
+  state.isFailoverActive = false;
+  state.failoverStartedAt = null;
+  state.failoverReason = null;
+  state.activeDb = "PRIMARY (Aiven)";
+  state.lastNotifiedAt = 0; // Reset failover throttle so any future failover triggers immediate notification
+  state.lastRecoveredAt = restoredAt;
+
+  console.log(
+    "✅ [DB Failover Recovery] Primary Database restored! Switched back to Primary Master DB."
+  );
+
+  // Invalidate cache immediately so DB Sync page shows Primary is back online
+  try {
+    invalidateDbSyncCache();
+  } catch (_) {}
+
+  // Instant notification to Super Admin that Primary Database has recovered
+  (async () => {
+    try {
+      const superAdmin = await primaryPrisma.user.findFirst({
+        where: { role: "SUPER_ADMIN" },
+        select: { id: true, email: true, name: true },
+      }).catch(async () => {
+        if (secondaryPrisma) {
+          return await secondaryPrisma.user.findFirst({
+            where: { role: "SUPER_ADMIN" },
+            select: { id: true, email: true, name: true },
+          });
+        }
+        return null;
+      });
+
+      if (superAdmin) {
+        // 1. In-App Notification (write to both primary and secondary)
+        const notifData = {
+          userId: superAdmin.id,
+          title: "✅ RESTORED: Primary Database Online",
+          message: `Primary Database (Aiven) connection has been successfully restored! All live queries and writes have been routed back to the Primary Master DB. System is operating normally.`,
+          type: "SYSTEM",
+          data: {
+            event: "PRIMARY_DB_RECOVERED",
+            timestamp: restoredAt,
+            downtimeStartedAt: outageStartedAt,
+            targetDb: "exam-kids.i.aivencloud.com:20770",
+          },
+        };
+
+        await primaryPrisma.notification.create({ data: notifData }).catch(() => {});
+        if (secondaryPrisma) {
+          await secondaryPrisma.notification.create({ data: notifData }).catch(() => {});
+        }
+        console.log(
+          `✅ [DB Recovery Alert] Created in-app recovery alert for Super Admin (${superAdmin.email})`
+        );
+
+        // 2. Emergency Recovery Email Alert via Google SMTP
+        if (superAdmin.email) {
+          try {
+            const { sendRecoveryAlertEmail } = await import("./email-service.js");
+            await sendRecoveryAlertEmail({
+              to: superAdmin.email,
+              adminName: superAdmin.name || "Super Admin",
+              downtimeStartedAt: outageStartedAt
+                ? new Date(outageStartedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+                : null,
+              restoredAt: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+              host: "exam-kids.i.aivencloud.com",
+            });
+            console.log(
+              `✅ [DB Recovery Alert] Sent recovery alert email to ${superAdmin.email}`
+            );
+          } catch (mailErr) {
+            console.warn("[DB Recovery Alert] Email dispatch failed:", mailErr?.message);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("[DB Recovery Alert] Error alerting Super Admin of recovery:", err?.message);
+    }
+  })();
+}
+
+/**
  * Background check if Primary Database has recovered
  */
 async function checkPrimaryRecovery() {
@@ -199,14 +291,7 @@ async function checkPrimaryRecovery() {
     state.lastPrimaryProbeAt = now;
     try {
       await primaryPrisma.$queryRaw`SELECT 1`;
-      console.log(
-        "✅ [DB Failover Recovery] Primary DB is back online! Restoring Primary as Master DB."
-      );
-      state.isFailoverActive = false;
-      state.failoverStartedAt = null;
-      state.failoverReason = null;
-      state.activeDb = "PRIMARY (Aiven)";
-      invalidateDbSyncCache();
+      await handlePrimaryRecovery();
     } catch (_) {
       // Primary is still unreachable; remain in failover mode
     }

@@ -154,6 +154,14 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
     }
   }
 
+  // If Primary has reconnected while failover was active, trigger recovery workflow
+  if (primaryStatus.connected && globalThis.__mahaDbFailover?.isFailoverActive) {
+    try {
+      const { handlePrimaryRecovery } = await import("./db.js");
+      await handlePrimaryRecovery();
+    } catch (_) {}
+  }
+
   const activeDb = primaryStatus.connected
     ? "PRIMARY (Aiven)"
     : secondaryStatus.connected
@@ -171,6 +179,7 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
     targetHost: secondaryStatus.host || "aws-0-ap-south-1.pooler.supabase.com",
     adminNotified: !!failoverState.adminNotified,
     lastNotifiedAt: failoverState.lastNotifiedAt ? new Date(failoverState.lastNotifiedAt).toISOString() : null,
+    lastRecoveredAt: failoverState.lastRecoveredAt || null,
   };
 
   const result = {

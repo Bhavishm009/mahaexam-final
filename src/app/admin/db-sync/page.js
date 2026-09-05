@@ -356,6 +356,18 @@ export default function DatabaseSyncPage() {
             </div>
           </div>
         </div>
+      ) : failover?.lastRecoveredAt ? (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <div>
+              <p className="font-extrabold">Primary Database Restored & Operational 🟢</p>
+              <p className="font-medium text-emerald-800 dark:text-emerald-300">
+                Primary Database (Aiven) connection recovered at {new Date(failover.lastRecoveredAt).toLocaleTimeString()} ({formatTimeAgo(failover.lastRecoveredAt)}). All queries have safely returned to Primary Master DB.
+              </p>
+            </div>
+          </div>
+        </div>
       ) : !data?.isSynced ? (
         <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs font-bold text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
           <div className="flex items-center gap-2.5">

@@ -357,3 +357,77 @@ export async function sendFailoverAlertEmail({ to, adminName = "Super Admin", re
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Send recovery alert email to Super Admin when Primary Database is back online
+ */
+export async function sendRecoveryAlertEmail({
+  to,
+  adminName = "Super Admin",
+  downtimeStartedAt,
+  restoredAt,
+  host = "exam-kids.i.aivencloud.com",
+}) {
+  const from =
+    process.env.SMTP_FROM || '"MahaExam Security & Infrastructure" <noreply@mahaexam.org.in>';
+  const mailer = getEmailTransporter();
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0fdf4; margin: 0; padding: 20px; color: #1e293b; }
+        .card { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #bbf7d0; overflow: hidden; box-shadow: 0 4px 25px rgba(22, 101, 52, 0.08); }
+        .header { background: linear-gradient(135deg, #059669, #047857); color: #ffffff; padding: 28px 32px; text-align: center; }
+        .header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .body { padding: 32px; text-align: left; }
+        .badge { display: inline-block; background: #dcfce7; color: #15803d; padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; margin-bottom: 16px; }
+        .details-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 20px 0; font-family: monospace; font-size: 13px; }
+        .footer { background: #f8fafc; padding: 16px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <h1>✅ Database Restored: Primary Online</h1>
+        </div>
+        <div class="body">
+          <div class="badge">SYSTEM RESOLVED & OPERATIONAL</div>
+          <p>Hello <strong>${adminName}</strong>,</p>
+          <p>Good news! The <strong>Primary Database (${host})</strong> has successfully recovered and is back online.</p>
+          <p>The system has <strong>automatically routed all live user queries and writes back to the Primary Master Database</strong>. The Secondary Failover Database (Supabase) has safely reverted to Standby status.</p>
+          
+          <div class="details-box">
+            <p style="margin: 4px 0;"><strong>Recovery Time:</strong> ${restoredAt}</p>
+            ${downtimeStartedAt ? `<p style="margin: 4px 0;"><strong>Outage Began:</strong> ${downtimeStartedAt}</p>` : ""}
+            <p style="margin: 4px 0;"><strong>Active Master Host:</strong> ${host}</p>
+            <p style="margin: 4px 0;"><strong>Failover Status:</strong> Standby (Deactivated)</p>
+            <p style="margin: 4px 0;"><strong>Operational Health:</strong> 100% Normal 🟢</p>
+          </div>
+
+          <p style="font-size: 13px; color: #475569;">You can inspect live latency and table record counts from your Admin DB Sync dashboard.</p>
+        </div>
+        <div class="footer">
+          MahaExam Auto-Failover Monitor • Automated Recovery Notice
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const info = await mailer.sendMail({
+      from,
+      to,
+      subject: `✅ [RESOLVED] Primary Database Restored & Back Online | MahaExam`,
+      text: `RESOLVED: Primary Database (${host}) is back online at ${restoredAt}. Live traffic routed back to Primary Master DB.`,
+      html: htmlContent,
+    });
+    return { success: true, messageId: info?.messageId };
+  } catch (error) {
+    console.warn(`[EmailService] Recovery alert email error: ${error.message}`);
+    return { success: false, error: error.message };
+  }
+}
