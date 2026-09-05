@@ -56,13 +56,41 @@ const baseUrl = getBaseUrl();
 
 export const metadata = {
   metadataBase: new URL(baseUrl),
-  title: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल",
+  title: {
+    default: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल",
+    template: "%s | MahaExam",
+  },
   description:
     "पोलीस भरती, MPSC, तलाठी, जिल्हा परिषद आणि सर्व सरकारी स्पर्धा परीक्षांसाठी TCS/IBPS पॅटर्न ऑनलाइन मॉक टेस्ट पोर्टल.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon-192.svg",
     apple: "/icon-192.svg",
+  },
+  openGraph: {
+    type: "website",
+    locale: "mr_IN",
+    siteName: "MahaExam",
+    title: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल",
+    description:
+      "पोलीस भरती, MPSC, तलाठी, जिल्हा परिषद आणि सर्व सरकारी स्पर्धा परीक्षांसाठी TCS/IBPS पॅटर्न ऑनलाइन मॉक टेस्ट पोर्टल.",
+    url: baseUrl,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल",
+        type: "image/png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MahaExam — महाराष्ट्र स्पर्धा परीक्षा पोर्टल",
+    description:
+      "पोलीस भरती, MPSC, तलाठी, जिल्हा परिषद आणि सर्व सरकारी स्पर्धा परीक्षांसाठी TCS/IBPS पॅटर्न ऑनलाइन मॉक टेस्ट पोर्टल.",
+    images: ["/twitter-image"],
   },
 };
 

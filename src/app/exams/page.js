@@ -5,27 +5,25 @@ import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
 import { Sparkles } from "lucide-react";
 import { getBaseUrl } from "@/lib/base-url";
 
-export const metadata = {
-  title: "महाराष्ट्र स्पर्धा परीक्षा सराव टेस्ट्स २०२६ | Police, MPSC, Talathi, ZP Mock Tests",
-  description:
-    "महाराष्ट्र पोलीस भरती, तलाठी, MPSC राज्यसेवा, संयुक्त गट ब व क, जिल्हा परिषद आणि वनरक्षक भरतीसाठी TCS/IBPS पॅटर्न मोफत ऑनलाइन मॉक टेस्ट व अधिकृत PYQ प्रश्नपत्रिका.",
-  keywords: [
-    "Police Bharti Mock Test",
-    "MPSC Test Series Marathi",
-    "Talathi Bharti TCS Exam",
-    "ZP Arogya Sevak Mock Test",
-    "Vanrakshak Bharti Exam",
-    "Maharashtra Online Mock Test",
-    "पोलीस भरती सराव पेपर",
-    "तलाठी भरती प्रश्नपत्रिका",
-  ],
-  openGraph: {
-    title: "MahaExam — सर्व महाराष्ट्र स्पर्धा परीक्षा ऑनलाइन टेस्ट सिरीज",
+import { getSeoForRoute } from "@/lib/seo-service";
+
+export async function generateMetadata() {
+  return await getSeoForRoute("/exams", {
+    title: "महाराष्ट्र स्पर्धा परीक्षा सराव टेस्ट्स २०२६ | Police, MPSC, Talathi Mock Tests",
     description:
       "TCS/IBPS पॅटर्नवर आधारित १०० गुणांचे परिपूर्ण सराव पेपर्स. मोफत सोडवा आणि त्वरित निकाल व रँक पहा.",
-    type: "website",
-  },
-};
+    keywords: [
+      "Police Bharti Mock Test",
+      "MPSC Test Series Marathi",
+      "Talathi Bharti TCS Exam",
+      "ZP Arogya Sevak Mock Test",
+      "Vanrakshak Bharti Exam",
+      "Maharashtra Online Mock Test",
+      "पोलीस भरती सराव पेपर",
+      "तलाठी भरती प्रश्नपत्रिका",
+    ],
+  });
+}
 
 export default async function ExamsDirectoryPage() {
   const exams = await getCachedPublicExams();

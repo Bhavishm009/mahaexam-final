@@ -24,14 +24,37 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const siteBase = getBaseUrl();
+  const title = `${cat.titleMr} | MahaExam Mock Tests`;
+  const description = cat.descriptionMr;
+
   return {
-    title: `${cat.titleMr} | MahaExam Mock Tests`,
-    description: cat.descriptionMr,
+    metadataBase: new URL(siteBase),
+    title,
+    description,
     keywords: cat.keywords,
     openGraph: {
       title: `${cat.titleMr} — MahaExam`,
-      description: cat.descriptionMr,
+      description,
       type: "website",
+      url: `${siteBase}/exams/${cat.slug}`,
+      siteName: "MahaExam",
+      locale: "mr_IN",
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: cat.titleMr,
+          type: "image/png",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${cat.titleMr} — MahaExam`,
+      description,
+      images: ["/twitter-image"],
     },
   };
 }

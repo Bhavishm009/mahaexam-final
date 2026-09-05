@@ -36,9 +36,13 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const title = `${job.titleMr || job.title} — संपूर्ण माहिती व सराव | MahaExam`;
+  const description = `महाराष्ट्र ${job.department} भरती जाहिरात २०२६. एकूण पदे: ${job.vacancies}, पात्रता: ${job.qualification}, अर्ज अंतिम तारीख: ${job.lastDate}.`;
+  const ogImageUrl = `/jobs/${id}/opengraph-image`;
+
   return {
-    title: `${job.titleMr || job.title} — संपूर्ण माहिती व सराव | MahaExam`,
-    description: `महाराष्ट्र ${job.department} भरती जाहिरात २०२६. एकूण पदे: ${job.vacancies}, पात्रता: ${job.qualification}, अर्ज अंतिम तारीख: ${job.lastDate}.`,
+    title,
+    description,
     keywords: [
       job.title,
       job.department,
@@ -47,8 +51,26 @@ export async function generateMetadata({ params }) {
     ],
     openGraph: {
       title: `${job.titleMr || job.title} — MahaExam Alert`,
-      description: `रिक्त पदे: ${job.vacancies} | पात्रता: ${job.qualification}`,
+      description,
       type: "article",
+      url: `/jobs/${id}`,
+      siteName: "MahaExam",
+      locale: "mr_IN",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: job.title,
+          type: "image/png",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${job.titleMr || job.title} — MahaExam Alert`,
+      description,
+      images: [ogImageUrl],
     },
   };
 }

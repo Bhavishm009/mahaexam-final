@@ -152,13 +152,65 @@ async function fetchSeoForRouteInternal(routePath) {
 /**
  * High-performance cached fetch for route SEO metadata
  */
-export async function getSeoForRoute(routePath) {
+export async function getSeoForRoute(routePath, overrides = {}) {
   const cleanPath = routePath?.toLowerCase() || "/";
-  return cache(
+  const seoData = await cache(
     () => fetchSeoForRouteInternal(cleanPath),
     [`seo-route-${cleanPath}`],
     { revalidate: 120, tags: ["seo-settings"] }
   )();
+
+  const title = overrides.title || seoData.title;
+  const description = overrides.description || seoData.description;
+  const rawKeywords = overrides.keywords || seoData.keywords;
+  const keywords = Array.isArray(rawKeywords)
+    ? rawKeywords
+    : typeof rawKeywords === "string" && rawKeywords.trim()
+    ? rawKeywords.split(",").map((k) => k.trim())
+    : [];
+
+  const canonicalUrl = overrides.canonicalUrl || seoData.canonicalUrl || `${siteBase}${cleanPath}`;
+
+  const rawOgImg = overrides.ogImage || seoData.ogImage;
+  const ogImageUrl =
+    rawOgImg && rawOgImg !== "/og-image.png" && rawOgImg !== "/og-exams.png" && rawOgImg !== "/og-jobs.png" && rawOgImg !== "/og-pricing.png" && rawOgImg !== "/og-faq.png" && rawOgImg !== "/og-features.png" && rawOgImg !== "/og-coaching.png"
+      ? rawOgImg
+      : "/opengraph-image";
+
+  const twitterImageUrl = ogImageUrl === "/opengraph-image" ? "/twitter-image" : ogImageUrl;
+
+  return {
+    metadataBase: new URL(siteBase),
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "MahaExam",
+      locale: "mr_IN",
+      type: "website",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+          type: "image/png",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [twitterImageUrl],
+    },
+  };
 }
 
 /**

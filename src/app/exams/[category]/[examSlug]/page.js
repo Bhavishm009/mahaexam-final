@@ -34,13 +34,35 @@ export async function generateMetadata({ params }) {
     if (dbExam?.title) examTitle = dbExam.title;
   } catch {}
 
+  const title = `${examTitle} | ${cat?.titleMr || "ऑनलाइन सराव परीक्षा"} — MahaExam`;
+  const description = `महाराष्ट्र ${cat?.titleMr || "स्पर्धा परीक्षा"} TCS/IBPS पॅटर्न ऑनलाईन मॉक टेस्ट. १०० गुणांचे सराव पेपर्स, वेळ व अचूकता विश्लेषण.`;
+  const ogImageUrl = `/exam/${examSlug}/opengraph-image`;
+
   return {
-    title: `${examTitle} | ${cat?.titleMr || "ऑनलाइन सराव परीक्षा"} — MahaExam`,
-    description: `महाराष्ट्र ${cat?.titleMr || "स्पर्धा परीक्षा"} TCS/IBPS पॅटर्न ऑनलाईन मॉक टेस्ट. १०० गुणांचे सराव पेपर्स, वेळ व अचूकता विश्लेषण.`,
+    title,
+    description,
     openGraph: {
       title: `${examTitle} — MahaExam`,
-      description: `TCS/IBPS पॅटर्न सराव परीक्षा. त्वरित निकाल व रँक.`,
+      description,
       type: "article",
+      url: `/exams/${category}/${examSlug}`,
+      siteName: "MahaExam",
+      locale: "mr_IN",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: examTitle,
+          type: "image/png",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${examTitle} — MahaExam`,
+      description,
+      images: [ogImageUrl],
     },
   };
 }
