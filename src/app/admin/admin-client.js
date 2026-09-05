@@ -25,10 +25,12 @@ import {
   Loader2,
   Flame,
 } from "lucide-react";
+import ConfirmModal from "@/components/confirm-modal";
 
 export function AdminDashboardClient({ initialStats }) {
   const [stats, setStats] = useState(initialStats || null);
   const [seeding, setSeeding] = useState(false);
+  const [showSeedModal, setShowSeedModal] = useState(false);
   const [activeTab, setActiveTab] = useState("seeding"); // "seeding" | "push"
 
   // Push notification state
@@ -250,20 +252,18 @@ export function AdminDashboardClient({ initialStats }) {
     }
   }
 
-  async function triggerSeed() {
-    if (
-      !confirm(
-        "Do you want to populate / verify all 27 Mock Exams with 2,700 questions in the database?",
-      )
-    ) {
-      return;
-    }
+  function triggerSeed() {
+    setShowSeedModal(true);
+  }
+
+  async function confirmTriggerSeed() {
     try {
       setSeeding(true);
       const res = await fetch("/api/admin/seed", { method: "POST" });
       const data = await res.json();
       if (data.success) {
         toast.success("✅ " + data.message);
+        setShowSeedModal(false);
         setTimeout(() => window.location.reload(), 1500);
       } else {
         toast.error("❌ Seeding error: " + (data.error || "Unknown error"));
@@ -1016,6 +1016,18 @@ export function AdminDashboardClient({ initialStats }) {
           })}
         </div>
       </div>
+
+      {/* Database Seed Modal */}
+      <ConfirmModal
+        isOpen={showSeedModal}
+        title="Populate Mock Exam Database"
+        description="Do you want to populate and verify all 27 Mock Exams with 2,700 questions in the database?"
+        confirmText="Start Seeding"
+        variant="warning"
+        isLoading={seeding}
+        onConfirm={confirmTriggerSeed}
+        onClose={() => setShowSeedModal(false)}
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import ConfirmModal from "@/components/confirm-modal";
 
 const maharashtraDistricts = [
   "Pune",
@@ -31,37 +32,27 @@ const maharashtraDistricts = [
   "Solapur",
   "Amravati",
   "Nanded",
-  "Satara",
   "Sangli",
-  "Ahmednagar",
   "Jalgaon",
+  "Ahilyanagar (Ahmednagar)",
+  "Satara",
   "Latur",
   "Dhule",
-  "Parbhani",
-  "Jalna",
-  "Raigad",
-  "Ratnagiri",
-  "Sindhudurg",
-  "Beed",
-  "Buldhana",
-  "Yavatmal",
-  "Washim",
-  "Akola",
-  "Bhandara",
-  "Gondia",
   "Chandrapur",
-  "Gadchiroli",
-  "Wardha",
-  "Hingoli",
-  "Osmanabad (Dharashiv)",
-  "Nandurbar",
-  "Palghar",
+  "Parbhani",
+  "Ichalkaranji",
+  "Jalna",
+  "Bhusawal",
+  "Navi Mumbai",
+  "Panvel",
 ];
 
-export default function OrganizationsPage() {
+export default function AdminOrganizationsPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [districtFilter, setDistrictFilter] = useState("ALL");
   const [planFilter, setPlanFilter] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,6 +61,10 @@ export default function OrganizationsPage() {
 
   const [showModal, setShowModal] = useState(false);
   const [creating, setCreating] = useState(false);
+
+  // Custom Delete Modal State
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -83,46 +78,53 @@ export default function OrganizationsPage() {
   function load() {
     setLoading(true);
     fetch("/api/admin/organizations")
-      .then((r) => r.json())
+      .then((res) => res.json())
       .then((d) => {
         setItems(d.organizations || []);
+        setLoading(false);
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(() => setLoading(false));
   }
 
   useEffect(() => {
     load();
   }, []);
 
+  async function handleToggleStatus(o) {
+    const nextStatus = o.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+    try {
+      const res = await fetch("/api/admin/organizations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: o.id, status: nextStatus }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(`Academy status set to ${nextStatus}`);
+        load();
+      } else {
+        toast.error(d.error || "Failed to update status");
+      }
+    } catch {
+      toast.error("Network error");
+    }
+  }
+
   async function handleCreate(e) {
     e.preventDefault();
-
-    if (!form.name?.trim()) {
-      toast.error("Academy / Coaching Institute name is required.");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!form.email?.trim() || !emailRegex.test(form.email.trim())) {
-      toast.error("Please enter a valid Admin email address.");
-      return;
-    }
-
     setCreating(true);
-
     try {
       const res = await fetch("/api/admin/organizations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Failed to create academy");
+      const d = await res.json();
+      if (!d.success) {
+        toast.error("❌ " + (d.error || "Failed to create academy"));
       } else {
-        toast.success(`Academy '${data.organization?.name}' onboarded successfully! Login details emailed to ${data.credentials?.email}`);
+        toast.success("✅ Academy registered successfully!");
+        setShowModal(false);
         setForm({
           name: "",
           adminName: "",
@@ -131,7 +133,6 @@ export default function OrganizationsPage() {
           district: "Pune",
           subscriptionPlan: "PROFESSIONAL",
         });
-        setShowModal(false);
         load();
       }
     } catch {
@@ -141,25 +142,27 @@ export default function OrganizationsPage() {
     }
   }
 
-  async function handleDelete(o) {
-    const conf = confirm(
-      `Are you sure you want to delete academy "${o.name}"?\n\n🛡️ SAFETY GUARANTEE: All questions and tests created by this institute will NOT be deleted. They will remain permanently accessible in the Question Bank & Platform Archives!`,
-    );
-    if (!conf) {
-      return;
-    }
+  function handleDelete(o) {
+    setDeleteTarget(o);
+  }
 
+  async function confirmDeleteOrganization() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/admin/organizations?id=${o.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/organizations?id=${deleteTarget.id}`, { method: "DELETE" });
       const d = await res.json();
       if (d.success) {
         toast.success("✅ " + d.message);
+        setDeleteTarget(null);
         load();
       } else {
         toast.error("❌ Delete error: " + (d.error || "Failed to delete"));
       }
     } catch (err) {
       toast.error("❌ " + err.message);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -620,6 +623,18 @@ export default function OrganizationsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Organization Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Coaching Academy"
+        description={`Are you sure you want to delete academy "${deleteTarget?.name}"?`}
+        safetyNote="All questions and tests created by this institute will NOT be deleted. They will remain permanently accessible in the Question Bank & Platform Archives!"
+        confirmText="Delete Academy"
+        isLoading={isDeleting}
+        onConfirm={confirmDeleteOrganization}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

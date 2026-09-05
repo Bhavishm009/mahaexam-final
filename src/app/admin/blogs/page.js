@@ -18,11 +18,13 @@ import {
   Calendar,
   Sparkles,
 } from "lucide-react";
+import ConfirmModal from "@/components/confirm-modal";
 
 export default function AdminBlogsPage() {
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [mounted, setMounted] = useState(false);
 
@@ -222,7 +224,13 @@ export default function AdminBlogsPage() {
   }
 
   function handleDelete(id, title) {
-    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+    setDeleteTarget({ id, title });
+  }
+
+  function confirmDeleteBlog() {
+    if (!deleteTarget) return;
+    const { id, title } = deleteTarget;
+    setDeleteTarget(null);
 
     toast.promise(deleteBlogMutation.mutateAsync(id), {
       loading: `Deleting "${title}"...`,
@@ -562,6 +570,17 @@ export default function AdminBlogsPage() {
         </div>,
         document.body
       )}
+
+      {/* Delete Blog Post Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Blog Post"
+        description={`Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`}
+        confirmText="Delete Post"
+        isLoading={deleteBlogMutation.isPending}
+        onConfirm={confirmDeleteBlog}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

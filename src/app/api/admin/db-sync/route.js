@@ -1,132 +1,18 @@
 import { NextResponse } from "next/server";
 import { primaryPrisma, secondaryPrisma } from "@/lib/db.js";
-
-// List of all database models to track and sync
-const SYNC_MODELS = [
-  { key: "organization", label: "Organizations" },
-  { key: "user", label: "Users" },
-  { key: "studentProfile", label: "Student Profiles" },
-  { key: "teacherProfile", label: "Teacher Profiles" },
-  { key: "subscriptionPlan", label: "Subscription Plans" },
-  { key: "coachingSubscription", label: "Coaching Subscriptions" },
-  { key: "batch", label: "Batches" },
-  { key: "coachingBatch", label: "Coaching Batches" },
-  { key: "batchMembership", label: "Batch Memberships" },
-  { key: "subject", label: "Subjects" },
-  { key: "chapter", label: "Chapters" },
-  { key: "topic", label: "Topics" },
-  { key: "question", label: "Questions" },
-  { key: "questionOption", label: "Question Options" },
-  { key: "questionTag", label: "Question Tags" },
-  { key: "exam", label: "Exams" },
-  { key: "examQuestion", label: "Exam Questions" },
-  { key: "examBatch", label: "Exam Batches" },
-  { key: "examAttempt", label: "Exam Attempts" },
-  { key: "attemptQuestion", label: "Attempt Questions" },
-  { key: "attemptAnswer", label: "Attempt Answers" },
-  { key: "examResult", label: "Exam Results" },
-  { key: "jobAlert", label: "Job Notifications & Alerts" },
-  { key: "blogPost", label: "Blog Posts" },
-  { key: "seoSetting", label: "SEO Settings" },
-  { key: "auditLog", label: "Audit Logs" },
-  { key: "notification", label: "Notifications" },
-  { key: "payment", label: "Payments" },
-  { key: "paymentOrder", label: "Payment Orders" },
-  { key: "job", label: "Background Queue Jobs" },
-  { key: "passkeyCredential", label: "Passkey Credentials" },
-];
-
-/**
- * Sequential table counting to guarantee exactly 1 connection is used
- * and eliminate connection pool starvation (connection_limit=3)
- */
-async function fetchCountsBatched(client) {
-  const counts = {};
-  if (!client) return counts;
-
-  for (const { key } of SYNC_MODELS) {
-    if (!client[key]) {
-      counts[key] = 0;
-      continue;
-    }
-    try {
-      counts[key] = await client[key].count();
-    } catch (err) {
-      console.error(`[DB Count Warning] ${key} failed:`, err?.message || err);
-      counts[key] = null;
-    }
-  }
-  return counts;
-}
+import { getOrComputeSyncStatus, SYNC_MODELS } from "@/lib/db-sync-cache.js";
 
 /**
  * GET /api/admin/db-sync
- * Fetch live health, active database, and record counts for ALL database tables
+ * Fetch cached health, active database, and record counts (Hourly Cache)
+ * Use ?refresh=true to force a fresh re-check
  */
-export async function GET() {
-  const startTime = Date.now();
+export async function GET(req) {
+  const url = new URL(req.url);
+  const forceRefresh = url.searchParams.get("refresh") === "true";
 
-  let primaryStatus = { connected: false, latencyMs: 0, host: "exam-kids.i.aivencloud.com" };
-  let secondaryStatus = { connected: false, latencyMs: 0, host: "aws-0-ap-south-1.pooler.supabase.com" };
-
-  let primaryCounts = {};
-  let secondaryCounts = {};
-
-  // 1. Check Primary DB
-  try {
-    const pStart = Date.now();
-    primaryCounts = await fetchCountsBatched(primaryPrisma);
-    primaryStatus.connected = true;
-    primaryStatus.latencyMs = Date.now() - pStart;
-  } catch (err) {
-    primaryStatus.error = err?.message || "Primary DB Unreachable";
-  }
-
-  // 2. Check Secondary DB
-  if (secondaryPrisma) {
-    try {
-      const sStart = Date.now();
-      secondaryCounts = await fetchCountsBatched(secondaryPrisma);
-      secondaryStatus.connected = true;
-      secondaryStatus.latencyMs = Date.now() - sStart;
-    } catch (err) {
-      secondaryStatus.error = err?.message || "Secondary DB Unreachable";
-    }
-  } else {
-    secondaryStatus.error = "SECONDARY_DATABASE_URL environment variable not configured";
-  }
-
-  // 3. Calculate sync status
-  let allTablesSynced = primaryStatus.connected && secondaryStatus.connected;
-  if (allTablesSynced) {
-    for (const { key } of SYNC_MODELS) {
-      const p = primaryCounts[key];
-      const s = secondaryCounts[key];
-      if (p !== null && s !== null && p !== s) {
-        allTablesSynced = false;
-        break;
-      }
-    }
-  }
-
-  const activeDb = primaryStatus.connected
-    ? "PRIMARY (Aiven)"
-    : secondaryStatus.connected
-    ? "SECONDARY (Supabase Failover Active)"
-    : "NONE (Offline)";
-
-  return NextResponse.json({
-    success: true,
-    timestamp: new Date().toISOString(),
-    responseDurationMs: Date.now() - startTime,
-    activeDb,
-    isSynced: allTablesSynced,
-    primaryStatus,
-    secondaryStatus,
-    primaryCounts,
-    secondaryCounts,
-    tables: SYNC_MODELS,
-  });
+  const data = await getOrComputeSyncStatus(forceRefresh);
+  return NextResponse.json(data);
 }
 
 /**
@@ -220,11 +106,14 @@ export async function POST() {
       }
     }
 
+    const freshStatus = await getOrComputeSyncStatus(true);
+
     return NextResponse.json({
       success: true,
       message: "Full Database Synchronization Completed Successfully!",
       syncLog,
       stats,
+      status: freshStatus,
     });
   } catch (error) {
     return NextResponse.json(

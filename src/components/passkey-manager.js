@@ -11,12 +11,14 @@ import {
 import { toast } from "sonner";
 
 import { fetchJson } from "@/lib/api-client";
+import ConfirmModal from "@/components/confirm-modal";
 
 export function PasskeyManager() {
   const [credentials, setCredentials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   async function loadCredentials() {
     try {
@@ -101,15 +103,13 @@ export function PasskeyManager() {
     }
   }
 
-  async function handleDeletePasskey(id) {
-    if (
-      !confirm(
-        "Are you sure you want to remove this passkey / biometric credential? You will no longer be able to log in with this device.",
-      )
-    ) {
-      return;
-    }
+  function handleDeletePasskey(id) {
+    setDeleteTargetId(id);
+  }
 
+  async function confirmDeletePasskey() {
+    if (!deleteTargetId) return;
+    const id = deleteTargetId;
     setDeletingId(id);
 
     try {
@@ -120,6 +120,7 @@ export function PasskeyManager() {
       if (ok && data.success) {
         toast.success("Passkey removed successfully.");
         setCredentials((prev) => prev.filter((c) => c.id !== id));
+        setDeleteTargetId(null);
       } else {
         toast.error(data.error || "Failed to delete passkey.");
       }
@@ -239,6 +240,17 @@ export function PasskeyManager() {
           </div>
         )}
       </div>
+
+      {/* Delete Passkey Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTargetId}
+        title="Remove Biometric Credential"
+        description="Are you sure you want to remove this passkey / biometric credential? You will no longer be able to log in with this device."
+        confirmText="Remove Passkey"
+        isLoading={!!deletingId}
+        onConfirm={confirmDeletePasskey}
+        onClose={() => setDeleteTargetId(null)}
+      />
     </div>
   );
 }

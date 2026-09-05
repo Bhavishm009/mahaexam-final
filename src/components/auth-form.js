@@ -53,19 +53,15 @@ export function LoginForm() {
       }
 
       const next = params.get("next");
-      if (next) {
-        router.push(next);
-      } else {
-        const role = data.user?.role;
-        if (role === "SUPER_ADMIN" || role === "ADMIN") {
-          router.push("/admin");
-        } else if (role === "COACHING_ADMIN" || role === "TEACHER") {
-          router.push("/coaching/dashboard");
-        } else {
-          router.push("/student/dashboard");
-        }
-      }
-      router.refresh();
+      const targetRoute =
+        next ||
+        (data.user?.role === "SUPER_ADMIN" || data.user?.role === "ADMIN"
+          ? "/admin"
+          : data.user?.role === "COACHING_ADMIN" || data.user?.role === "TEACHER"
+            ? "/coaching/dashboard"
+            : "/student/dashboard");
+
+      window.location.href = targetRoute;
     } catch {
       setError("नेटवर्क त्रुटी. कृपया पुन्हा प्रयत्न करा.");
       setLoading(false);

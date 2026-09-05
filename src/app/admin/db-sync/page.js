@@ -21,16 +21,34 @@ export default function DatabaseSyncPage() {
   const queryClient = useQueryClient();
   const [realtimeStatus, setRealtimeStatus] = useState("Connecting...");
 
-  // 1. Fetch DB Status using TanStack React Query
-  const { data, isLoading, isFetching, isRefetching, refetch, error } = useQuery({
+  // 1. Fetch DB Status using TanStack React Query (Loads INSTANTLY from hourly cache)
+  const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["db-sync-status"],
     queryFn: async () => {
       const res = await fetch("/api/admin/db-sync");
       if (!res.ok) throw new Error("Failed to fetch database health status");
       return await res.json();
     },
-    refetchInterval: 15000, // Background refresh every 15s
+    staleTime: 60 * 60 * 1000, // 1 hour stale time for instant loads
+    refetchOnWindowFocus: false,
   });
+
+  // Force a fresh live re-check from Primary & Secondary DBs
+  const [rechecking, setRechecking] = useState(false);
+  async function handleForceRecheck() {
+    setRechecking(true);
+    try {
+      const res = await fetch("/api/admin/db-sync?refresh=true");
+      if (!res.ok) throw new Error("Re-check failed");
+      const json = await res.json();
+      queryClient.setQueryData(["db-sync-status"], json);
+      toast.success("Database status re-checked & cache updated!");
+    } catch (err) {
+      toast.error(`Re-check failed: ${err.message}`);
+    } finally {
+      setRechecking(false);
+    }
+  }
 
   // 2. Setup Realtime SSE Listener
   useEffect(() => {
@@ -86,8 +104,12 @@ export default function DatabaseSyncPage() {
         queryClient.setQueryData(["db-sync-status"], context.previousData);
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["db-sync-status"] });
+    onSettled: (data) => {
+      if (data?.status) {
+        queryClient.setQueryData(["db-sync-status"], data.status);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["db-sync-status"] });
+      }
     },
   });
 
@@ -97,6 +119,18 @@ export default function DatabaseSyncPage() {
       success: (data) => data.message || "Database synchronization completed!",
       error: (err) => `Sync failed: ${err.message}`,
     });
+  }
+
+  function formatTimeAgo(isoString) {
+    if (!isoString) return "Just now";
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return "Just now";
+    if (mins === 1) return "1 minute ago";
+    if (mins < 60) return `${mins} minutes ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours === 1) return "1 hour ago";
+    return `${hours} hours ago`;
   }
 
   const primary = data?.primaryStatus;
@@ -157,17 +191,20 @@ export default function DatabaseSyncPage() {
               <Database className="h-5 w-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl font-black text-slate-900 dark:text-white sm:text-2xl">
                   Database Sync & Live Health Monitor 🗄️
                 </h1>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Live SSE Active 🟢
+                  <Zap className="h-3 w-3 text-amber-500" />
+                  Instant Cache (1h)
                 </span>
               </div>
               <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Primary (Aiven) & Secondary Failover (Supabase Shadow DB) synchronization & failover status
+                Primary (Aiven) & Secondary Failover (Supabase Shadow DB) status •{" "}
+                <span className="font-bold text-slate-700 dark:text-slate-200">
+                  Last Checked: {formatTimeAgo(data?.cachedAt || data?.timestamp)}
+                </span>
               </p>
             </div>
           </div>
@@ -175,12 +212,12 @@ export default function DatabaseSyncPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => refetch()}
-            disabled={isFetching}
+            onClick={handleForceRecheck}
+            disabled={rechecking || isFetching}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/60"
           >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin text-blue-600" : ""}`} />
-            Refresh Status
+            <RefreshCw className={`h-4 w-4 ${rechecking || isFetching ? "animate-spin text-blue-600" : ""}`} />
+            Re-check Status Now
           </button>
 
           <button
@@ -206,7 +243,7 @@ export default function DatabaseSyncPage() {
             <div>
               <p className="font-extrabold">Data Sync Required</p>
               <p className="font-medium text-amber-800 dark:text-amber-300">
-                Some records in Secondary Shadow DB are out of sync. Click 'Sync Now' above.
+                Some records in Secondary Shadow DB are out of sync. Click &apos;Sync Now&apos; above.
               </p>
             </div>
           </div>

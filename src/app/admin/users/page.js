@@ -17,6 +17,7 @@ import {
   Building2,
 } from "lucide-react";
 import { getInitials } from "@/lib/avatar";
+import ConfirmModal from "@/components/confirm-modal";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -29,6 +30,10 @@ export default function AdminUsersPage() {
   const [pageSize, setPageSize] = useState(10);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+
+  // Custom Delete Modal State
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Add User Form State
   const [newUser, setNewUser] = useState({
@@ -91,31 +96,32 @@ export default function AdminUsersPage() {
     }
   }
 
-  // Safe delete
-  async function deleteUser(u) {
+  // Safe delete modal trigger
+  function handleDeleteClick(u) {
     if (u.email === "bhavishm009@gmail.com") {
       toast.error("⚠️ Primary Super Admin account cannot be deleted.");
       return;
     }
+    setDeleteTarget(u);
+  }
 
-    const conf = confirm(
-      `Delete user "${u.name}" (${u.email})?\n\n🛡️ SAFETY GUARANTEE: All questions and exams created by this user will NOT be deleted. They are automatically preserved in the Question Bank!`,
-    );
-    if (!conf) {
-      return;
-    }
-
+  async function confirmDeleteUser() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/admin/users?id=${u.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/users?id=${deleteTarget.id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         toast.success("✅ " + data.message);
-        setUsers((prev) => prev.filter((item) => item.id !== u.id));
+        setUsers((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+        setDeleteTarget(null);
       } else {
         toast.error("❌ Error: " + (data.error || "Failed to delete"));
       }
     } catch (err) {
       toast.error("❌ " + err.message);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -662,7 +668,7 @@ export default function AdminUsersPage() {
 
                         <button
                           type="button"
-                          onClick={() => deleteUser(u)}
+                          onClick={() => handleDeleteClick(u)}
                           className="rounded-lg p-1 text-rose-500 transition hover:bg-rose-50 dark:hover:bg-rose-950/50"
                           title="Delete User"
                         >
@@ -731,6 +737,18 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      {/* Delete User Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete User Account"
+        description={`Are you sure you want to delete user "${deleteTarget?.name}" (${deleteTarget?.email})?`}
+        safetyNote="All questions and exams created by this user will NOT be deleted. They are automatically preserved in the Question Bank!"
+        confirmText="Delete User"
+        isLoading={isDeleting}
+        onConfirm={confirmDeleteUser}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

@@ -19,11 +19,13 @@ import {
   Layers,
 } from "lucide-react";
 import { fetchJson } from "@/lib/api-client";
+import ConfirmModal from "@/components/confirm-modal";
 
 export default function AdminLogsPage() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
   const [filter, setFilter] = useState("ALL");
   const [query, setQuery] = useState("");
   const [stats, setStats] = useState({
@@ -67,21 +69,18 @@ export default function AdminLogsPage() {
     loadLogs();
   }, [filter, loadLogs]);
 
-  async function handleClearLogs() {
-    if (
-      !confirm(
-        "Are you sure you want to clear ALL application and API logs? This action cannot be undone.",
-      )
-    ) {
-      return;
-    }
+  function handleClearLogs() {
+    setShowClearModal(true);
+  }
 
+  async function confirmClearLogs() {
     setClearing(true);
 
     try {
       const { ok, data } = await fetchJson("/api/admin/logs", { method: "DELETE" });
       if (ok && data.success) {
         toast.success(data.message || "Logs cleared successfully.");
+        setShowClearModal(false);
         await loadLogs();
       } else {
         toast.error(data.error || "Failed to clear logs.");
@@ -399,6 +398,17 @@ export default function AdminLogsPage() {
           )}
         </div>
       </div>
+
+      {/* Clear Logs Modal */}
+      <ConfirmModal
+        isOpen={showClearModal}
+        title="Clear System Logs"
+        description="Are you sure you want to clear ALL application and API audit logs? This action cannot be undone."
+        confirmText="Clear All Logs"
+        isLoading={clearing}
+        onConfirm={confirmClearLogs}
+        onClose={() => setShowClearModal(false)}
+      />
     </main>
   );
 }

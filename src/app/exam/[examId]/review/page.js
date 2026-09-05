@@ -18,6 +18,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import ConfirmModal from "@/components/confirm-modal";
 
 export default function ExamReviewPage({ params }) {
   const resolvedParams = use(params);
@@ -29,6 +30,7 @@ export default function ExamReviewPage({ params }) {
   const [userRole, setUserRole] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showLiveConfirm, setShowLiveConfirm] = useState(false);
   const [scheduleStart, setScheduleStart] = useState("");
   const [scheduleEnd, setScheduleEnd] = useState("");
 
@@ -189,14 +191,7 @@ export default function ExamReviewPage({ params }) {
             <button
               type="button"
               disabled={actionLoading}
-              onClick={() => {
-                const conf = confirm(
-                  `🚀 Make "${exam.title}" Live immediately?\n\nAll target students will receive an instant push notification and access will open immediately.`,
-                );
-                if (conf) {
-                  handleAction("MAKE_LIVE");
-                }
-              }}
+              onClick={() => setShowLiveConfirm(true)}
               className="inline-flex items-center gap-1.5 rounded-2xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-500 active:scale-95 disabled:opacity-50"
             >
               <Zap className="h-4 w-4" />
@@ -452,13 +447,24 @@ export default function ExamReviewPage({ params }) {
             </div>
           ))}
 
-          {questionItems.length === 0 && (
-            <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center text-slate-400 dark:border-slate-800 dark:bg-slate-900">
-              No questions found for this examination.
-            </div>
-          )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showLiveConfirm}
+        title="Make Exam Live Now"
+        description={`Are you sure you want to make "${exam?.title}" live immediately?`}
+        safetyNote="All target students will receive access immediately along with any push notifications."
+        confirmText="Make Live Now"
+        cancelText="Cancel"
+        variant="info"
+        isLoading={actionLoading}
+        onConfirm={async () => {
+          await handleAction("MAKE_LIVE");
+          setShowLiveConfirm(false);
+        }}
+        onClose={() => setShowLiveConfirm(false)}
+      />
     </div>
   );
 }

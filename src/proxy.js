@@ -40,7 +40,12 @@ export async function proxy(request) {
     return NextResponse.redirect(url);
   }
 
-  if (pathname.startsWith("/student") && session.role !== "STUDENT") {
+  if (
+    pathname.startsWith("/student") &&
+    session.role !== "STUDENT" &&
+    session.role !== "SUPER_ADMIN" &&
+    session.role !== "ADMIN"
+  ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

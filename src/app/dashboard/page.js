@@ -1,21 +1,33 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
+import { auth } from "@/auth";
 
 export default async function DashboardRedirect() {
   const token = (await cookies()).get(COOKIE)?.value;
-  const session = await verifySessionToken(token);
+  let session = await verifySessionToken(token);
+
+  if (!session) {
+    try {
+      const nextAuthSession = await auth();
+      if (nextAuthSession?.user) {
+        session = {
+          sub: nextAuthSession.user.id,
+          role: nextAuthSession.user.role || "STUDENT",
+        };
+      }
+    } catch {}
+  }
+
   if (!session) {
     redirect("/login");
   }
-  if (session.role === "STUDENT") {
-    redirect("/student/dashboard");
+
+  if (session.role === "SUPER_ADMIN" || session.role === "ADMIN") {
+    redirect("/admin");
   }
   if (session.role === "COACHING_ADMIN" || session.role === "TEACHER") {
     redirect("/coaching/dashboard");
   }
-  if (session.role === "SUPER_ADMIN" || session.role === "ADMIN") {
-    redirect("/admin");
-  }
-  redirect("/login");
+  redirect("/student/dashboard");
 }

@@ -23,11 +23,14 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES, EXAM_STATUSES } from "@/lib/exam-types";
+import ConfirmModal from "@/components/confirm-modal";
 
-export default function GlobalExamsPage() {
+export default function GlobalExamsManagementPage() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [hasNegativeMarking, setHasNegativeMarking] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
@@ -224,25 +227,32 @@ export default function GlobalExamsPage() {
     );
   }
 
-  async function deleteExam(id, title) {
-    if (
-      !confirm(
-        `Are you sure you want to delete "${title}"?\n\n🛡️ NOTE: Created questions and question bank items will NOT be lost. They remain safely preserved in the global repository.`,
-      )
-    ) {
-      return;
-    }
+  function deleteExam(id, title) {
+    setDeleteTarget({ id, title });
+  }
+
+  async function confirmDeleteExam() {
+    if (!deleteTarget) return;
+    const { id, title } = deleteTarget;
+    setIsDeleting(true);
     setUpdatingId(id);
-    const r = await fetch(`/api/admin/global-exams?id=${id}`, {
-      method: "DELETE",
-    });
-    setUpdatingId(null);
-    if (!r.ok) {
-      toast.error("Failed to delete exam");
-      return;
+    try {
+      const r = await fetch(`/api/admin/global-exams?id=${id}`, {
+        method: "DELETE",
+      });
+      if (!r.ok) {
+        toast.error("Failed to delete exam");
+        return;
+      }
+      toast.success(`Exam "${title}" deleted successfully.`);
+      setExams((prev) => prev.filter((x) => x.id !== id));
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(`Error deleting exam: ${err.message}`);
+    } finally {
+      setUpdatingId(null);
+      setIsDeleting(false);
     }
-    toast.success(`Exam "${title}" deleted successfully.`);
-    setExams((prev) => prev.filter((x) => x.id !== id));
   }
 
   return (
@@ -862,6 +872,18 @@ export default function GlobalExamsPage() {
           )}
         </section>
       </div>
+
+      {/* Delete Exam Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Examination"
+        description={`Are you sure you want to delete "${deleteTarget?.title}"?`}
+        safetyNote="Created questions and question bank items will NOT be lost. They remain safely preserved in the global repository."
+        confirmText="Delete Exam"
+        isLoading={isDeleting}
+        onConfirm={confirmDeleteExam}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
