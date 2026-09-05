@@ -359,7 +359,7 @@ export function LoginForm() {
                   autoCapitalize="none"
                   autoCorrect="off"
                   required
-                  placeholder="bhavishm009@gmail.com किंवा 7721841331"
+                  placeholder="Email किंवा Mobile"
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                 />
               </div>
@@ -495,7 +495,7 @@ export function SignupForm() {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               type="text"
               required
-              placeholder="उदा. राहुल शिंदे"
+              placeholder="उदा. Full Name"
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
             />
           </div>
@@ -513,7 +513,7 @@ export function SignupForm() {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 type="email"
                 required
-                placeholder="rahul@example.com"
+                placeholder="xxxxx@example.com"
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
               />
             </div>
