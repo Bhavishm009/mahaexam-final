@@ -37,28 +37,24 @@ const SYNC_MODELS = [
 ];
 
 /**
- * Batched table counting to prevent connection pool starvation (connection_limit=3)
+ * Sequential table counting to guarantee exactly 1 connection is used
+ * and eliminate connection pool starvation (connection_limit=3)
  */
 async function fetchCountsBatched(client) {
   const counts = {};
   if (!client) return counts;
 
-  const BATCH_SIZE = 3;
-  for (let i = 0; i < SYNC_MODELS.length; i += BATCH_SIZE) {
-    const batch = SYNC_MODELS.slice(i, i + BATCH_SIZE);
-    await Promise.all(
-      batch.map(async ({ key }) => {
-        if (!client[key]) {
-          counts[key] = 0;
-          return;
-        }
-        try {
-          counts[key] = await client[key].count();
-        } catch (_) {
-          counts[key] = null;
-        }
-      })
-    );
+  for (const { key } of SYNC_MODELS) {
+    if (!client[key]) {
+      counts[key] = 0;
+      continue;
+    }
+    try {
+      counts[key] = await client[key].count();
+    } catch (err) {
+      console.error(`[DB Count Warning] ${key} failed:`, err?.message || err);
+      counts[key] = null;
+    }
   }
   return counts;
 }
