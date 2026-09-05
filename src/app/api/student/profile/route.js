@@ -5,14 +5,34 @@ import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { withApiLogger } from "@/lib/logger";
 
-export const GET = withApiLogger(async function GET() {
+import { auth } from "@/auth";
+
+export const GET = withApiLogger(async function GET(request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE)?.value;
-    const session = await verifySessionToken(token);
+    let token =
+      cookieStore.get(COOKIE)?.value ||
+      cookieStore.get("mahaexam_session")?.value ||
+      cookieStore.get("maha_exam_session")?.value;
 
-    const userId = session?.sub || session?.id || session?.userId;
-    if (!session || !userId || session.role !== "STUDENT") {
+    if (!token && request) {
+      const authHeader = request.headers.get("authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
+    }
+
+    let session = await verifySessionToken(token);
+    let userId = session?.sub || session?.id || session?.userId;
+
+    if (!userId) {
+      try {
+        const nextAuthSession = await auth();
+        userId = nextAuthSession?.user?.id;
+      } catch {}
+    }
+
+    if (!userId) {
       return NextResponse.json({ error: "Student login required" }, { status: 401 });
     }
 
@@ -74,11 +94,29 @@ export const GET = withApiLogger(async function GET() {
 
 export const PATCH = withApiLogger(async function PATCH(request) {
   const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE)?.value;
-  const session = await verifySessionToken(token);
+  let token =
+    cookieStore.get(COOKIE)?.value ||
+    cookieStore.get("mahaexam_session")?.value ||
+    cookieStore.get("maha_exam_session")?.value;
 
-  const userId = session?.sub || session?.id || session?.userId;
-  if (!session || !userId || session.role !== "STUDENT") {
+  if (!token && request) {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      token = authHeader.substring(7);
+    }
+  }
+
+  let session = await verifySessionToken(token);
+  let userId = session?.sub || session?.id || session?.userId;
+
+  if (!userId) {
+    try {
+      const nextAuthSession = await auth();
+      userId = nextAuthSession?.user?.id;
+    } catch {}
+  }
+
+  if (!userId) {
     return NextResponse.json({ error: "Student login required" }, { status: 401 });
   }
 

@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 
 const secret = new TextEncoder().encode(process.env.AUTH_SECRET || "development-only-change-me");
-const COOKIE = "maha_exam_session";
+const COOKIE = process.env.AUTH_COOKIE_NAME || "maha_exam_session";
 
 export async function createSessionToken(user) {
   return new SignJWT({

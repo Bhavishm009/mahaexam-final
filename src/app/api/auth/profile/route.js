@@ -4,18 +4,39 @@ import bcrypt from "bcryptjs";
 import { COOKIE, verifySessionToken, createSessionToken, sessionCookieOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-export async function GET() {
+import { auth } from "@/auth";
+
+export async function GET(request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE)?.value;
-    const session = await verifySessionToken(token);
+    let token =
+      cookieStore.get(COOKIE)?.value ||
+      cookieStore.get("mahaexam_session")?.value ||
+      cookieStore.get("maha_exam_session")?.value;
 
-    if (!session?.sub) {
+    if (!token && request) {
+      const authHeader = request.headers.get("authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
+    }
+
+    let session = await verifySessionToken(token);
+    let userId = session?.sub || session?.id || session?.userId;
+
+    if (!userId) {
+      try {
+        const nextAuthSession = await auth();
+        userId = nextAuthSession?.user?.id;
+      } catch {}
+    }
+
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Login required" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.sub },
+      where: { id: userId },
       select: {
         id: true,
         name: true,
@@ -87,10 +108,29 @@ export async function GET() {
 export async function PATCH(request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE)?.value;
-    const session = await verifySessionToken(token);
+    let token =
+      cookieStore.get(COOKIE)?.value ||
+      cookieStore.get("mahaexam_session")?.value ||
+      cookieStore.get("maha_exam_session")?.value;
 
-    if (!session?.sub) {
+    if (!token && request) {
+      const authHeader = request.headers.get("authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
+    }
+
+    let session = await verifySessionToken(token);
+    let userId = session?.sub || session?.id || session?.userId;
+
+    if (!userId) {
+      try {
+        const nextAuthSession = await auth();
+        userId = nextAuthSession?.user?.id;
+      } catch {}
+    }
+
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized: Login required" }, { status: 401 });
     }
 
@@ -113,14 +153,14 @@ export async function PATCH(request) {
 
     if (typeof profilePhoto === "string") {
       await prisma.studentProfile.upsert({
-        where: { userId: session.sub },
-        create: { userId: session.sub, profilePhoto },
+        where: { userId: userId },
+        create: { userId: userId, profilePhoto },
         update: { profilePhoto },
       });
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: session.sub },
+      where: { id: userId },
       data: updateUserData,
       select: {
         id: true,
