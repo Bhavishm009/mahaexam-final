@@ -11,7 +11,20 @@ export async function queueEmail({ userId, email, template, subject, metadata = 
 }
 
 export async function sendEmailWithProvider({ email, subject, html }) {
-  // Production provider hook. Set EMAIL_PROVIDER=RESEND and RESEND_API_KEY to send.
+  // 1. SMTP Provider (Gmail, Custom SMTP, etc.)
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      const { sendRawEmail } = await import("./email-service.js");
+      const res = await sendRawEmail({ to: email, subject, html });
+      if (res.success) {
+        return { delivered: true, messageId: res.messageId, to: email, subject };
+      }
+    } catch (e) {
+      console.warn("[Email] SMTP provider error:", e.message);
+    }
+  }
+
+  // 2. Resend Provider Hook. Set EMAIL_PROVIDER=RESEND and RESEND_API_KEY to send.
   if (process.env.EMAIL_PROVIDER === "RESEND" && process.env.RESEND_API_KEY) {
     try {
       const r = await fetch("https://api.resend.com/emails", {

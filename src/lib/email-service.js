@@ -37,6 +37,26 @@ function getEmailTransporter() {
   return transporter;
 }
 
+export async function sendRawEmail({ to, subject, html, text }) {
+  const from =
+    process.env.SMTP_FROM || '"MahaExam महाराष्ट्र स्पर्धा परीक्षा" <noreply@mahaexam.org.in>';
+  const mailer = getEmailTransporter();
+
+  try {
+    const info = await mailer.sendMail({
+      from,
+      to,
+      subject,
+      text: text || html?.replace(/<[^>]*>?/gm, ""),
+      html,
+    });
+    return { success: true, messageId: info?.messageId };
+  } catch (error) {
+    console.warn(`[EmailService] Raw email error: ${error.message}`);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function sendOtpEmail({ to, otp, userName = "Student" }) {
   const from =
     process.env.SMTP_FROM || '"MahaExam महाराष्ट्र स्पर्धा परीक्षा" <noreply@mahaexam.org.in>';
