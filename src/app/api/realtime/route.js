@@ -21,26 +21,22 @@ export async function GET(req) {
       // Send initial connection ACK
       sendEvent("connected", { message: "Realtime Live Feed Connected", timestamp: new Date().toISOString() });
 
-      // Poll every 5 seconds for live status
-      const interval = setInterval(async () => {
+      // Poll every 30 seconds for live status keep-alive heartbeat
+      const interval = setInterval(() => {
         if (!isAlive) {
           clearInterval(interval);
           return;
         }
 
         try {
-          const userCount = await primaryPrisma.user.count().catch(() => 0);
-          const jobCount = await primaryPrisma.job.count().catch(() => 0);
-          const blogCount = await primaryPrisma.blogPost.count().catch(() => 0);
-
           sendEvent("heartbeat", {
             timestamp: new Date().toISOString(),
-            metrics: { userCount, jobCount, blogCount },
+            status: "online",
           });
         } catch (err) {
           sendEvent("error", { message: err.message });
         }
-      }, 5000);
+      }, 30000);
 
       req.signal.addEventListener("abort", () => {
         isAlive = false;
