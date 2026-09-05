@@ -12,6 +12,9 @@ import {
   Zap,
   Layers,
   Radio,
+  ArrowLeftRight,
+  XCircle,
+  Activity,
 } from "lucide-react";
 
 export default function DatabaseSyncPage() {
@@ -19,7 +22,7 @@ export default function DatabaseSyncPage() {
   const [realtimeStatus, setRealtimeStatus] = useState("Connecting...");
 
   // 1. Fetch DB Status using TanStack React Query
-  const { data, isLoading, isRefetching, refetch, error } = useQuery({
+  const { data, isLoading, isFetching, isRefetching, refetch, error } = useQuery({
     queryKey: ["db-sync-status"],
     queryFn: async () => {
       const res = await fetch("/api/admin/db-sync");
