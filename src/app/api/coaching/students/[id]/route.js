@@ -173,12 +173,14 @@ export async function DELETE(request, { params }) {
   });
 
   // Also clean up any classic batch assignments if present
-  await prisma.batchStudent.deleteMany({
-    where: {
-      student: { userId: id },
-      batch: { organizationId: orgId },
-    },
-  }).catch(() => {});
+  await prisma.batchStudent
+    .deleteMany({
+      where: {
+        student: { userId: id },
+        batch: { organizationId: orgId },
+      },
+    })
+    .catch(() => {});
 
   // 2. Unlink direct organizationId if it matches this academy
   if (existing.organizationId === orgId) {
@@ -207,6 +209,7 @@ export async function DELETE(request, { params }) {
   // Only the relationship with this academy has been deleted.
   return NextResponse.json({
     success: true,
-    message: "Student successfully removed from academy. Their MahaExam platform account remains active.",
+    message:
+      "Student successfully removed from academy. Their MahaExam platform account remains active.",
   });
 }

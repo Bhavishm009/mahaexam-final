@@ -40,19 +40,32 @@ export default function Batches() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Batch name"
-            className="rounded-xl border border-slate-300 bg-white p-3 text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white placeholder:text-slate-400"
+            className="rounded-xl border border-slate-300 bg-white p-3 text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           />
-          <button onClick={add} className="rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-500 transition-colors">
+          <button
+            onClick={add}
+            className="rounded-xl bg-blue-600 px-5 py-3 font-bold text-white transition-colors hover:bg-blue-500"
+          >
             Create
           </button>
         </div>
         {msg && <p className="mt-2 text-red-600 dark:text-red-400">{msg}</p>}
         <div className="mt-6 grid gap-3">
           {batches.map((b) => (
-            <div key={b.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div
+              key={b.id}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
               <b className="text-lg font-bold text-slate-900 dark:text-white">{b.name}</b>
               <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Code: <span className="font-mono font-medium text-slate-700 dark:text-slate-300">{b.code}</span> · Students: <span className="font-semibold text-slate-700 dark:text-slate-300">{b._count?.memberships || 0}</span>
+                Code:{" "}
+                <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
+                  {b.code}
+                </span>{" "}
+                · Students:{" "}
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                  {b._count?.memberships || 0}
+                </span>
               </div>
             </div>
           ))}

@@ -251,10 +251,7 @@ export async function POST(request) {
     if (!invite) {
       const org = await prisma.organization.findFirst({
         where: {
-          OR: [
-            { slug: code.trim().toLowerCase() },
-            { id: code.trim() },
-          ],
+          OR: [{ slug: code.trim().toLowerCase() }, { id: code.trim() }],
           status: "ACTIVE",
         },
         include: { coachingBatches: { where: { isActive: true }, take: 1 } },

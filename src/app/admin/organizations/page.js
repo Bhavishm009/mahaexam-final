@@ -150,7 +150,9 @@ export default function AdminOrganizationsPage() {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/admin/organizations?id=${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/organizations?id=${deleteTarget.id}`, {
+        method: "DELETE",
+      });
       const d = await res.json();
       if (d.success) {
         toast.success("✅ " + d.message);
@@ -197,10 +199,6 @@ export default function AdminOrganizationsPage() {
 
   return (
     <div className="space-y-6">
-
-
-
-
       {/* Filter Modal */}
       {showFilterModal && (
         <div
@@ -430,7 +428,7 @@ export default function AdminOrganizationsPage() {
       )}
 
       {/* Compact 16px Header Row: Title, Search, Filter Options & Add Academy in SAME line */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-3.5">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-3.5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2.5">
           <h1 className="text-base font-bold text-slate-900 dark:text-white">
             Coaching Institutes & Academies

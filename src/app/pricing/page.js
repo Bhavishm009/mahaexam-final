@@ -137,7 +137,10 @@ export default function PricingPage() {
 
                   <ul className="mt-8 space-y-3">
                     {p.features.map((f, fIdx) => (
-                      <li key={fIdx} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300">
+                      <li
+                        key={fIdx}
+                        className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300"
+                      >
                         <div className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                           <Check className="h-2.5 w-2.5" />
                         </div>
@@ -200,7 +203,10 @@ export default function PricingPage() {
 
                   <ul className="mt-8 space-y-3">
                     {p.features.map((f, fIdx) => (
-                      <li key={fIdx} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300">
+                      <li
+                        key={fIdx}
+                        className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300"
+                      >
                         <div className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
                           <Check className="h-2.5 w-2.5" />
                         </div>

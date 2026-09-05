@@ -20,7 +20,7 @@ export async function POST(request) {
     if (!code || !setupTicket) {
       return NextResponse.json(
         { error: "Verification code and setup ticket are required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -28,7 +28,7 @@ export async function POST(request) {
     if (!setupPayload || setupPayload.userId !== session.sub) {
       return NextResponse.json(
         { error: "MFA setup session expired. Please scan the QR code again." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function POST(request) {
     if (!isValid) {
       return NextResponse.json(
         { error: "Invalid 6-digit code. Please verify the code on your authenticator app." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

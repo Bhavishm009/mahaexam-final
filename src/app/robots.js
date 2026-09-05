@@ -6,15 +6,7 @@ export default function robots() {
       {
         userAgent: "*",
         allow: "/",
-        disallow: [
-          "/admin/",
-          "/api/",
-          "/coaching/",
-          "/student/",
-          "/auth/",
-          "/_next/",
-          "/private/",
-        ],
+        disallow: ["/admin/", "/api/", "/coaching/", "/student/", "/auth/", "/_next/", "/private/"],
       },
       // Explicitly allow all prominent AI crawlers & search assistants
       // This enables ChatGPT, Claude, Perplexity, Gemini, and Copilot to index and cite MahaExam pages
@@ -39,15 +31,7 @@ export default function robots() {
           "DuckAssistBot",
         ],
         allow: "/",
-        disallow: [
-          "/admin/",
-          "/api/",
-          "/coaching/",
-          "/student/",
-          "/auth/",
-          "/_next/",
-          "/private/",
-        ],
+        disallow: ["/admin/", "/api/", "/coaching/", "/student/", "/auth/", "/_next/", "/private/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

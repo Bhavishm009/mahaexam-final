@@ -122,8 +122,17 @@ export async function PATCH(request) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const { name, phone, targetExam, education, district, taluka, preferredLanguage, newPassword, profilePhoto } =
-      body;
+    const {
+      name,
+      phone,
+      targetExam,
+      education,
+      district,
+      taluka,
+      preferredLanguage,
+      newPassword,
+      profilePhoto,
+    } = body;
 
     const updateUserData = {};
     if (typeof name === "string" && name.trim()) {

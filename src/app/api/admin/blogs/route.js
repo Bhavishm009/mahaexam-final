@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
-import { getAllBlogPosts, createBlogPost, deleteBlogPost, updateBlogPost } from "@/lib/blog-service";
+import {
+  getAllBlogPosts,
+  createBlogPost,
+  deleteBlogPost,
+  updateBlogPost,
+} from "@/lib/blog-service";
 
 export async function GET() {
   try {
@@ -21,19 +26,30 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { id, title, titleMr, content, contentMr, excerpt, imageUrl, category, published, authorName } = body;
+    const {
+      id,
+      title,
+      titleMr,
+      content,
+      contentMr,
+      excerpt,
+      imageUrl,
+      category,
+      published,
+      authorName,
+    } = body;
 
     if (!title?.trim()) {
       return NextResponse.json(
         { error: "Validation Error: Blog Title is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!content?.trim()) {
       return NextResponse.json(
         { error: "Validation Error: Blog Content is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,7 +89,7 @@ export async function POST(req) {
     console.error("Error saving blog post:", error);
     return NextResponse.json(
       { error: error.message || "Failed to save blog post." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -98,7 +114,7 @@ export async function DELETE(req) {
     console.error("Error deleting blog post:", error);
     return NextResponse.json(
       { error: error.message || "Failed to delete blog post." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

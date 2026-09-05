@@ -83,4 +83,3 @@ export function FaqAccordion() {
     </section>
   );
 }
-

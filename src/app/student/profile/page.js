@@ -315,18 +315,18 @@ export default function StudentProfilePage() {
           {/* Highlights */}
           <div className="flex flex-wrap gap-2.5 text-xs">
             <div className="rounded-2xl border border-white/15 bg-white/10 px-3.5 py-2 backdrop-blur-md">
-              <div className="text-blue-200 font-medium">टार्गेट परीक्षा</div>
-              <div className="mt-0.5 font-bold text-white max-w-[150px] truncate">
+              <div className="font-medium text-blue-200">टार्गेट परीक्षा</div>
+              <div className="mt-0.5 max-w-[150px] truncate font-bold text-white">
                 {form.targetExam || "निवडलेली नाही"}
               </div>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/10 px-3.5 py-2 backdrop-blur-md">
-              <div className="text-blue-200 font-medium">जिल्हा</div>
+              <div className="font-medium text-blue-200">जिल्हा</div>
               <div className="mt-0.5 font-bold text-white">{form.district || "महाराष्ट्र"}</div>
             </div>
             {profileMeta?.createdAt && (
               <div className="rounded-2xl border border-white/15 bg-white/10 px-3.5 py-2 backdrop-blur-md">
-                <div className="text-blue-200 font-medium">सदस्य नोंदणी</div>
+                <div className="font-medium text-blue-200">सदस्य नोंदणी</div>
                 <div className="mt-0.5 font-bold text-white">
                   {new Date(profileMeta.createdAt).toLocaleDateString("en-IN", {
                     month: "short",
@@ -340,7 +340,7 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -366,9 +366,7 @@ export default function StudentProfilePage() {
           >
             <ShieldCheck className="h-4 w-4" />
             <span>सुरक्षा व २FA (Security & 2FA)</span>
-            {profileMeta?.mfaEnabled && (
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            )}
+            {profileMeta?.mfaEnabled && <span className="h-2 w-2 rounded-full bg-emerald-500" />}
           </button>
         </div>
 
@@ -464,7 +462,9 @@ export default function StudentProfilePage() {
                         शिक्षण पात्रता (Education)
                       </div>
                       <div className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">
-                        {form.education || <span className="italic text-slate-400">निवडलेली नाही</span>}
+                        {form.education || (
+                          <span className="italic text-slate-400">निवडलेली नाही</span>
+                        )}
                       </div>
                     </div>
 
@@ -473,7 +473,9 @@ export default function StudentProfilePage() {
                         जिल्हा व तालुका
                       </div>
                       <div className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">
-                        {form.district ? `${form.taluka ? `${form.taluka}, ` : ""}${form.district}` : (
+                        {form.district ? (
+                          `${form.taluka ? `${form.taluka}, ` : ""}${form.district}`
+                        ) : (
                           <span className="italic text-slate-400">जिल्हा नोंदवला नाही</span>
                         )}
                       </div>
@@ -483,9 +485,9 @@ export default function StudentProfilePage() {
               </div>
 
               {/* Photo & Edit Action Card */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex flex-col items-center justify-between gap-4 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row">
                 <div className="flex items-center gap-3.5">
-                  <div className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 shrink-0">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
                     <Sparkles className="h-6 w-6" />
                   </div>
                   <div>
@@ -493,22 +495,23 @@ export default function StudentProfilePage() {
                       माहितीमध्ये बदल करायचा आहे का?
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      आपले नाव, परीक्षा, जिल्हा किंवा इतर तपशील अपडेट करण्यासाठी खालील बटणावर क्लिक करा.
+                      आपले नाव, परीक्षा, जिल्हा किंवा इतर तपशील अपडेट करण्यासाठी खालील बटणावर क्लिक
+                      करा.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="flex w-full items-center gap-3 sm:w-auto">
                   <label
                     htmlFor="profile-avatar-input"
-                    className="flex-1 sm:flex-none text-center cursor-pointer rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                    className="flex-1 cursor-pointer rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:flex-none"
                   >
                     फोटो बदला
                   </label>
                   <button
                     type="button"
                     onClick={() => setIsEditing(true)}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-95"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-95 sm:flex-none"
                   >
                     <Edit3 className="h-4 w-4" />
                     <span>प्रोफाइल एडिट करा</span>
@@ -518,7 +521,7 @@ export default function StudentProfilePage() {
             </div>
           ) : (
             /* EDIT MODE: Displays only when 'Edit' is triggered */
-            <form onSubmit={handleSave} className="space-y-6 animate-in fade-in-50 duration-200">
+            <form onSubmit={handleSave} className="animate-in fade-in-50 space-y-6 duration-200">
               {/* Personal Details */}
               <div className="rounded-3xl border border-blue-200 bg-white p-6 shadow-sm dark:border-blue-900/50 dark:bg-slate-900 sm:p-8">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
@@ -700,7 +703,7 @@ export default function StudentProfilePage() {
 
       {/* TAB 2: Security, 2FA, Passkeys & Password */}
       {activeTab === "security" && (
-        <div className="space-y-6 animate-in fade-in-50 duration-200">
+        <div className="animate-in fade-in-50 space-y-6 duration-200">
           {/* Two-Factor Authentication (MFA) */}
           <MfaManager />
 

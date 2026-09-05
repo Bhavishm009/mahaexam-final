@@ -2,11 +2,26 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCachedPublicExams } from "@/lib/cached-exams";
-import { EXAM_CATEGORIES, getCategoryBySlug, getCategorySlugFromExam } from "@/lib/exam-category-helper";
+import {
+  EXAM_CATEGORIES,
+  getCategoryBySlug,
+  getCategorySlugFromExam,
+} from "@/lib/exam-category-helper";
 import { getBaseUrl } from "@/lib/base-url";
 import { ExamsDirectoryClient } from "../exams-directory-client";
 import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
-import { ChevronRight, Sparkles, BookOpen, Shield, Award, FileText, Building, Trees, Layers, ArrowLeft } from "lucide-react";
+import {
+  ChevronRight,
+  Sparkles,
+  BookOpen,
+  Shield,
+  Award,
+  FileText,
+  Building,
+  Trees,
+  Layers,
+  ArrowLeft,
+} from "lucide-react";
 
 export async function generateStaticParams() {
   return EXAM_CATEGORIES.map((c) => ({
@@ -94,12 +109,23 @@ export default async function ExamCategoryPage({ params }) {
       <main className="flex-1 py-8 sm:py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb Navigation */}
-          <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            <Link href="/" prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
+          >
+            <Link
+              href="/"
+              prefetch={true}
+              className="transition hover:text-blue-600 dark:hover:text-white"
+            >
               मुख्यपृष्ठ
             </Link>
             <ChevronRight className="h-3.5 w-3.5" />
-            <Link href="/exams" prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+            <Link
+              href="/exams"
+              prefetch={true}
+              className="transition hover:text-blue-600 dark:hover:text-white"
+            >
               सर्व परीक्षा
             </Link>
             <ChevronRight className="h-3.5 w-3.5" />
@@ -111,16 +137,16 @@ export default async function ExamCategoryPage({ params }) {
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${cat.badgeColor}`}>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${cat.badgeColor}`}
+                  >
                     {cat.badgeMr}
                   </span>
                   <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-blue-200">
                     {categoryExams.length} उपलब्ध पेपर्स
                   </span>
                 </div>
-                <h1 className="mt-4 text-2xl font-black sm:text-3xl lg:text-4xl">
-                  {cat.titleMr}
-                </h1>
+                <h1 className="mt-4 text-2xl font-black sm:text-3xl lg:text-4xl">{cat.titleMr}</h1>
                 <p className="mt-3 text-xs leading-relaxed text-slate-300 sm:text-sm">
                   {cat.descriptionMr}
                 </p>

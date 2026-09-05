@@ -2,7 +2,10 @@ import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 
-import { RETENTION_HOURS, pruneExpiredApiLogs as pruneExpiredLogs } from "@/lib/api-logger-interceptor.js";
+import {
+  RETENTION_HOURS,
+  pruneExpiredApiLogs as pruneExpiredLogs,
+} from "@/lib/api-logger-interceptor.js";
 
 export { RETENTION_HOURS, pruneExpiredLogs };
 

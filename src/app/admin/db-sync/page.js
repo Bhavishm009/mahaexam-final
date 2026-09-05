@@ -261,12 +261,12 @@ export default function DatabaseSyncPage() {
               <Database className="h-5 w-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl font-black text-slate-900 dark:text-white sm:text-2xl">
                   Database Sync & Live Health Monitor 🗄️
                 </h1>
                 {isFailoverActive ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-bold text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 animate-pulse">
+                  <span className="inline-flex animate-pulse items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-bold text-rose-800 dark:bg-rose-950/80 dark:text-rose-300">
                     <Activity className="h-3 w-3 text-rose-600" />
                     Failover Active (Supabase)
                   </span>
@@ -281,7 +281,7 @@ export default function DatabaseSyncPage() {
                 Primary (Aiven) & Secondary Failover (Supabase Shadow DB) status •{" "}
                 <span className="font-bold text-slate-700 dark:text-slate-200">
                   {isBusy ? (
-                    <span className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold">
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400">
                       <RefreshCw className="h-3 w-3 animate-spin" />
                       Checking database status...
                     </span>
@@ -307,8 +307,10 @@ export default function DatabaseSyncPage() {
           <button
             onClick={handleTriggerSync}
             disabled={isBusy || isFailoverActive}
-            title={isFailoverActive ? "Cannot sync while Primary DB is offline" : "Synchronize databases"}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={
+              isFailoverActive ? "Cannot sync while Primary DB is offline" : "Synchronize databases"
+            }
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {syncing ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -323,13 +325,13 @@ export default function DatabaseSyncPage() {
       {/* Critical Failover Incident Banner (Rendered when Primary DB is Down) */}
       {isFailoverActive && (
         <div className="relative overflow-hidden rounded-3xl border-2 border-rose-500/80 bg-gradient-to-br from-rose-500/15 via-rose-500/5 to-amber-500/10 p-6 shadow-xl shadow-rose-500/10 dark:from-rose-950/50 dark:via-slate-900 dark:to-amber-950/20">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-rose-200/80 pb-5 dark:border-rose-900/60">
+          <div className="flex flex-col gap-4 border-b border-rose-200/80 pb-5 dark:border-rose-900/60 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3.5">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-600/30 animate-pulse">
+              <div className="grid h-12 w-12 shrink-0 animate-pulse place-items-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-600/30">
                 <AlertOctagon className="h-6 w-6" />
               </div>
               <div>
-                <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <h2 className="text-base font-black text-rose-950 dark:text-rose-200 sm:text-lg">
                     🚨 CRITICAL INCIDENT: PRIMARY DATABASE OFFLINE
                   </h2>
@@ -339,24 +341,27 @@ export default function DatabaseSyncPage() {
                   </span>
                 </div>
                 <p className="mt-1 text-xs font-semibold text-rose-800 dark:text-rose-300">
-                  Primary Aiven Database is unreachable. All read & write operations have seamlessly failed over to Secondary Database (Supabase IPv4 Pooler) with zero downtime.
+                  Primary Aiven Database is unreachable. All read & write operations have seamlessly
+                  failed over to Secondary Database (Supabase IPv4 Pooler) with zero downtime.
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-rose-700 shadow-sm border border-rose-200 dark:border-rose-900 dark:bg-slate-900 dark:text-rose-300">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 py-2 text-xs font-bold text-rose-700 shadow-sm dark:border-rose-900 dark:bg-slate-900 dark:text-rose-300">
                 <BellRing className="h-3.5 w-3.5 text-rose-600" />
                 Super Admin Notified Instantly
               </span>
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-xs">
+          <div className="mt-4 grid gap-3 text-xs sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-2xl border border-rose-200/80 bg-white/80 p-3.5 backdrop-blur dark:border-rose-900/50 dark:bg-slate-900/80">
               <span className="text-[11px] font-bold text-slate-400">Incident Detected:</span>
               <p className="mt-1 font-mono font-bold text-slate-800 dark:text-slate-200">
-                {failover?.startedAt ? new Date(failover.startedAt).toLocaleTimeString() : "Just now"}
+                {failover?.startedAt
+                  ? new Date(failover.startedAt).toLocaleTimeString()
+                  : "Just now"}
                 <span className="ml-1 text-[11px] font-normal text-slate-500">
                   ({formatTimeAgo(failover?.startedAt)})
                 </span>
@@ -379,14 +384,14 @@ export default function DatabaseSyncPage() {
 
             <div className="rounded-2xl border border-rose-200/80 bg-white/80 p-3.5 backdrop-blur dark:border-rose-900/50 dark:bg-slate-900/80">
               <span className="text-[11px] font-bold text-slate-400">Super Admin Alert:</span>
-              <p className="mt-1 font-bold text-rose-600 dark:text-rose-400 truncate">
+              <p className="mt-1 truncate font-bold text-rose-600 dark:text-rose-400">
                 bhavishm009@gmail.com
               </p>
             </div>
           </div>
 
           {failover?.reason && (
-            <div className="mt-3 rounded-xl bg-rose-100/80 p-3 text-[11px] font-mono text-rose-900 dark:bg-rose-950/60 dark:text-rose-200">
+            <div className="mt-3 rounded-xl bg-rose-100/80 p-3 font-mono text-[11px] text-rose-900 dark:bg-rose-950/60 dark:text-rose-200">
               <span className="font-bold">Error Detail: </span>
               <span className="break-all">{failover.reason}</span>
             </div>
@@ -414,21 +419,27 @@ export default function DatabaseSyncPage() {
           <div className="flex items-center gap-2.5">
             <AlertOctagon className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
             <div>
-              <p className="font-extrabold">Failover Active: Secondary Database Preserving System Data 🛡️</p>
+              <p className="font-extrabold">
+                Failover Active: Secondary Database Preserving System Data 🛡️
+              </p>
               <p className="font-medium text-rose-800 dark:text-rose-300">
-                All mock tests, exams, student attempts, and user registrations are safely running on Supabase Shadow DB.
+                All mock tests, exams, student attempts, and user registrations are safely running
+                on Supabase Shadow DB.
               </p>
             </div>
           </div>
         </div>
       ) : failover?.lastRecoveredAt ? (
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-sm">
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-950 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <div>
               <p className="font-extrabold">Primary Database Restored & Operational 🟢</p>
               <p className="font-medium text-emerald-800 dark:text-emerald-300">
-                Primary Database (Aiven) connection recovered at {new Date(failover.lastRecoveredAt).toLocaleTimeString()} ({formatTimeAgo(failover.lastRecoveredAt)}). All queries have safely returned to Primary Master DB.
+                Primary Database (Aiven) connection recovered at{" "}
+                {new Date(failover.lastRecoveredAt).toLocaleTimeString()} (
+                {formatTimeAgo(failover.lastRecoveredAt)}). All queries have safely returned to
+                Primary Master DB.
               </p>
             </div>
           </div>
@@ -440,7 +451,8 @@ export default function DatabaseSyncPage() {
             <div>
               <p className="font-extrabold">Data Sync Required</p>
               <p className="font-medium text-amber-800 dark:text-amber-300">
-                Some records in Secondary Shadow DB are out of sync. Click &apos;Sync Now&apos; above.
+                Some records in Secondary Shadow DB are out of sync. Click &apos;Sync Now&apos;
+                above.
               </p>
             </div>
           </div>
@@ -503,13 +515,21 @@ export default function DatabaseSyncPage() {
             </div>
             <div>
               <span className="text-slate-400">Ping Latency:</span>
-              <p className={`mt-0.5 font-mono font-bold ${primary?.connected ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-                {isBusy ? "Checking..." : primary?.connected ? `${primary.latencyMs} ms` : "Unreachable"}
+              <p
+                className={`mt-0.5 font-mono font-bold ${primary?.connected ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
+              >
+                {isBusy
+                  ? "Checking..."
+                  : primary?.connected
+                    ? `${primary.latencyMs} ms`
+                    : "Unreachable"}
               </p>
             </div>
             <div>
               <span className="text-slate-400">Failover Role:</span>
-              <p className={`mt-0.5 font-bold ${primary?.connected ? "text-blue-600 dark:text-blue-400" : "text-rose-600 dark:text-rose-400"}`}>
+              <p
+                className={`mt-0.5 font-bold ${primary?.connected ? "text-blue-600 dark:text-blue-400" : "text-rose-600 dark:text-rose-400"}`}
+              >
                 {primary?.connected ? "Primary Active Master" : "Master Offline (Failed)"}
               </p>
             </div>
@@ -527,7 +547,9 @@ export default function DatabaseSyncPage() {
                 <h3 className="text-sm font-black text-slate-900 dark:text-white">
                   Secondary Shadow DB (Supabase IPv4 Pooler)
                 </h3>
-                <p className="text-[11px] font-semibold text-slate-400">Automatic Failover Target</p>
+                <p className="text-[11px] font-semibold text-slate-400">
+                  Automatic Failover Target
+                </p>
               </div>
             </div>
 
@@ -538,7 +560,7 @@ export default function DatabaseSyncPage() {
               </span>
             ) : secondary?.connected ? (
               isFailoverActive ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-extrabold text-white shadow-sm animate-pulse">
+                <span className="inline-flex animate-pulse items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-extrabold text-white shadow-sm">
                   <CheckCircle2 className="h-3.5 w-3.5 text-white" />
                   Active (Serving Live Traffic)
                 </span>
@@ -566,12 +588,18 @@ export default function DatabaseSyncPage() {
             <div>
               <span className="text-slate-400">Ping Latency:</span>
               <p className="mt-0.5 font-mono font-bold text-purple-600 dark:text-purple-400">
-                {isBusy ? "Checking..." : secondary?.latencyMs ? `${secondary.latencyMs} ms` : "N/A"}
+                {isBusy
+                  ? "Checking..."
+                  : secondary?.latencyMs
+                    ? `${secondary.latencyMs} ms`
+                    : "N/A"}
               </p>
             </div>
             <div>
               <span className="text-slate-400">Failover Role:</span>
-              <p className={`mt-0.5 font-bold ${isFailoverActive ? "text-emerald-600 dark:text-emerald-400 font-extrabold" : "text-purple-600 dark:text-purple-400"}`}>
+              <p
+                className={`mt-0.5 font-bold ${isFailoverActive ? "font-extrabold text-emerald-600 dark:text-emerald-400" : "text-purple-600 dark:text-purple-400"}`}
+              >
                 {isFailoverActive ? "Active Failover Primary ⚡" : "Shadow Mirror Backup"}
               </p>
             </div>
@@ -583,7 +611,9 @@ export default function DatabaseSyncPage() {
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className={`grid h-10 w-10 place-items-center rounded-2xl ${schemaData?.isSchemaAligned ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400" : "bg-amber-100 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400"}`}>
+            <div
+              className={`grid h-10 w-10 place-items-center rounded-2xl ${schemaData?.isSchemaAligned ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400" : "bg-amber-100 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400"}`}
+            >
               <Database className="h-5 w-5" />
             </div>
             <div>
@@ -612,7 +642,7 @@ export default function DatabaseSyncPage() {
               <button
                 onClick={handleAlignSchema}
                 disabled={aligningSchema}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-xs font-black text-white hover:bg-amber-700 disabled:opacity-50 shadow-sm"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-amber-700 disabled:opacity-50"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${aligningSchema ? "animate-spin" : ""}`} />
                 {aligningSchema ? "Aligning..." : "Align Schema Now"}
@@ -633,7 +663,11 @@ export default function DatabaseSyncPage() {
             <ul className="mt-1 list-inside list-disc space-y-0.5 text-[11px]">
               {schemaData.missingColumns.map((c, i) => (
                 <li key={i}>
-                  Table <strong className="font-mono">{c.table}</strong> missing column <strong className="font-mono text-amber-700 dark:text-amber-400">{c.column}</strong> ({c.dataType})
+                  Table <strong className="font-mono">{c.table}</strong> missing column{" "}
+                  <strong className="font-mono text-amber-700 dark:text-amber-400">
+                    {c.column}
+                  </strong>{" "}
+                  ({c.dataType})
                 </li>
               ))}
             </ul>
@@ -684,8 +718,8 @@ export default function DatabaseSyncPage() {
                     key={row.key}
                     className={
                       isRowOutdated
-                        ? "bg-amber-50/70 dark:bg-amber-950/25 border-l-4 border-l-amber-500 hover:bg-amber-100/60 dark:hover:bg-amber-950/40 transition-colors"
-                        : "hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
+                        ? "border-l-4 border-l-amber-500 bg-amber-50/70 transition-colors hover:bg-amber-100/60 dark:bg-amber-950/25 dark:hover:bg-amber-950/40"
+                        : "transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
                     }
                   >
                     <td className="px-6 py-4 font-extrabold text-slate-900 dark:text-white">
@@ -697,7 +731,7 @@ export default function DatabaseSyncPage() {
                           </span>
                         </div>
                         {hasSchemaMismatch && (
-                          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                             <span className="inline-flex items-center gap-1 rounded bg-amber-200/80 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-900/60 dark:text-amber-200">
                               <AlertTriangle className="h-2.5 w-2.5" />
                               Missing {schemaIssue.missingColumns.length} column(s):{" "}
@@ -711,7 +745,9 @@ export default function DatabaseSyncPage() {
                               <RefreshCw
                                 className={`h-2.5 w-2.5 ${aligningTable === schemaIssue.table ? "animate-spin" : ""}`}
                               />
-                              {aligningTable === schemaIssue.table ? "Migrating..." : "Migrate Schema"}
+                              {aligningTable === schemaIssue.table
+                                ? "Migrating..."
+                                : "Migrate Schema"}
                             </button>
                           </div>
                         )}
@@ -719,7 +755,9 @@ export default function DatabaseSyncPage() {
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">
                       {isBusy ? (
-                        <span className="animate-pulse text-slate-400 font-medium">Checking...</span>
+                        <span className="animate-pulse font-medium text-slate-400">
+                          Checking...
+                        </span>
                       ) : hasP ? (
                         <div className="flex items-center gap-2">
                           <span>{row.p.toLocaleString()}</span>
@@ -735,7 +773,9 @@ export default function DatabaseSyncPage() {
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-purple-600 dark:text-purple-400">
                       {isBusy ? (
-                        <span className="animate-pulse text-slate-400 font-medium">Checking...</span>
+                        <span className="animate-pulse font-medium text-slate-400">
+                          Checking...
+                        </span>
                       ) : hasS ? (
                         <div className="flex items-center gap-2">
                           <span>{row.s.toLocaleString()}</span>
@@ -771,9 +811,9 @@ export default function DatabaseSyncPage() {
                       <button
                         onClick={() => handleSyncTable(row.key, row.label)}
                         disabled={isBusy || syncingTable === row.key}
-                        className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition shadow-xs ${
+                        className={`shadow-xs inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
                           isRowOutdated
-                            ? "bg-amber-600 text-white hover:bg-amber-700 shadow-sm"
+                            ? "bg-amber-600 text-white shadow-sm hover:bg-amber-700"
                             : "border border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         } disabled:opacity-50`}
                         title={`Sync records for ${row.label}`}
@@ -784,8 +824,8 @@ export default function DatabaseSyncPage() {
                         {syncingTable === row.key
                           ? "Syncing..."
                           : isRowOutdated
-                          ? "Retry Sync"
-                          : "Sync Table"}
+                            ? "Retry Sync"
+                            : "Sync Table"}
                       </button>
                     </td>
                   </tr>

@@ -15,7 +15,7 @@ export function ReactQueryProvider({ children }) {
             retry: 1,
           },
         },
-      })
+      }),
   );
 
   return (

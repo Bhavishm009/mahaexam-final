@@ -84,7 +84,9 @@ export default function AdminImportQuestionsPage() {
               <ArrowLeft className="h-4 w-4" />
               Back to Question Bank
             </Link>
-            <h1 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">Bulk Question Import</h1>
+            <h1 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">
+              Bulk Question Import
+            </h1>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Upload CSV file with MCQs in Marathi or English to auto-populate the question bank.
             </p>

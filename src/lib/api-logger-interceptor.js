@@ -32,7 +32,9 @@ export async function pruneExpiredApiLogs() {
       },
     });
     if (result.count > 0) {
-      console.log(`[LOGGER_PRUNE] Purged ${result.count} expired API logs older than ${RETENTION_HOURS} hours.`);
+      console.log(
+        `[LOGGER_PRUNE] Purged ${result.count} expired API logs older than ${RETENTION_HOURS} hours.`,
+      );
     }
     return result.count;
   } catch (err) {
@@ -54,12 +56,7 @@ export function initApiLoggerInterceptor() {
 
   http.Server.prototype.emit = function (event, req, res) {
     // Only intercept incoming HTTP requests to /api/ endpoints
-    if (
-      event === "request" &&
-      req &&
-      req.url &&
-      req.url.startsWith("/api/")
-    ) {
+    if (event === "request" && req && req.url && req.url.startsWith("/api/")) {
       const start = performance.now();
       const rawUrl = req.url;
       const parsedUrl = new URL(rawUrl, "http://localhost");
@@ -82,9 +79,7 @@ export function initApiLoggerInterceptor() {
 
             // Extract client IP and user-agent
             const ipAddress =
-              (req.headers["x-forwarded-for"] || "")
-                .split(",")[0]
-                .trim() ||
+              (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
               req.socket?.remoteAddress ||
               null;
             const userAgent = req.headers["user-agent"] || null;
@@ -145,5 +140,7 @@ export function initApiLoggerInterceptor() {
     return originalEmit.apply(this, arguments);
   };
 
-  console.log(`[API_LOGGER] Universal API Interceptor Initialized (Retention: ${RETENTION_HOURS} hours)`);
+  console.log(
+    `[API_LOGGER] Universal API Interceptor Initialized (Retention: ${RETENTION_HOURS} hours)`,
+  );
 }

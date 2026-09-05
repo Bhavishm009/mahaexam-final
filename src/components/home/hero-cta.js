@@ -60,4 +60,3 @@ export function HeroCta({ initialSession }) {
     </div>
   );
 }
-

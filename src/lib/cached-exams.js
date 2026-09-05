@@ -64,7 +64,10 @@ export const getCachedPublicExams = cache(
         };
       });
     } catch (err) {
-      console.warn("⚠️ [Build/Query Notice] getCachedPublicExams fallback triggered:", err?.message || err);
+      console.warn(
+        "⚠️ [Build/Query Notice] getCachedPublicExams fallback triggered:",
+        err?.message || err,
+      );
       return [];
     }
   },
@@ -72,5 +75,5 @@ export const getCachedPublicExams = cache(
   {
     revalidate: 60, // revalidate every 60 seconds (ISR)
     tags: ["exams", "public-exams"],
-  }
+  },
 );

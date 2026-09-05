@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import { loginUser } from "@/lib/auth-repository";
-import {
-  createSessionToken,
-  createMfaTicket,
-  sessionCookieOptions,
-  COOKIE,
-} from "@/lib/auth";
+import { createSessionToken, createMfaTicket, sessionCookieOptions, COOKIE } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function POST(request) {
@@ -37,7 +32,9 @@ export async function POST(request) {
     }
 
     const token = await createSessionToken(user);
-    prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
+    prisma.user
+      .update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
+      .catch(() => {});
 
     const response = NextResponse.json({
       success: true,

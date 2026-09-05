@@ -182,7 +182,7 @@ function NavLinks({ role, close, user }) {
       user?.studentProfile?.coachingStatus === "COACHING" ||
       (user?.batchMembershipsCount || 0) > 0 ||
       (user?._count?.batchMemberships || 0) > 0 ||
-      (user?.studentProfile?._count?.batchStudents || 0) > 0
+      (user?.studentProfile?._count?.batchStudents || 0) > 0,
     );
     if (!hasAcademy) {
       items = items.filter((item) => item.href !== "/student/academies");
@@ -200,7 +200,7 @@ function NavLinks({ role, close, user }) {
           ? pathname === item.href
           : pathname === item.href || pathname.startsWith(item.href + "/");
         const Icon = item.icon;
-        const label = (role === "admin" || language !== "mr") ? item.labelEn : item.labelMr;
+        const label = role === "admin" || language !== "mr" ? item.labelEn : item.labelMr;
 
         return (
           <Link
@@ -252,7 +252,8 @@ export function Shell({ children, role = "student", user }) {
       setCurrentUser((prev) => ({
         ...prev,
         ...authUser,
-        profilePhoto: authUser.profilePhoto || authUser.studentProfile?.profilePhoto || prev?.profilePhoto,
+        profilePhoto:
+          authUser.profilePhoto || authUser.studentProfile?.profilePhoto || prev?.profilePhoto,
       }));
     }
   }, [authUser]);
@@ -347,11 +348,7 @@ export function Shell({ children, role = "student", user }) {
               className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-slate-200/60 dark:hover:bg-slate-800"
               title="View Profile"
             >
-              <UserAvatar
-                src={profilePhotoUrl}
-                name={activeUser?.name || "User"}
-                size="xs"
-              />
+              <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
               <div className="min-w-0 truncate">
                 <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
                   {activeUser?.name || "User"}
@@ -421,11 +418,7 @@ export function Shell({ children, role = "student", user }) {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 pr-2.5 text-xs font-bold text-slate-800 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               >
-                <UserAvatar
-                  src={profilePhotoUrl}
-                  name={activeUser?.name || "User"}
-                  size="xs"
-                />
+                <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
                 <span className="hidden sm:inline">
                   {activeUser?.name?.split(" ")[0] || "Account"}
                 </span>
@@ -451,7 +444,13 @@ export function Shell({ children, role = "student", user }) {
                       className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                     >
                       <UserCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      <span>{role === "admin" ? "My Profile" : language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
+                      <span>
+                        {role === "admin"
+                          ? "My Profile"
+                          : language === "mr"
+                            ? "माझे प्रोफाइल"
+                            : "My Profile"}
+                      </span>
                     </Link>
 
                     <button
@@ -463,7 +462,13 @@ export function Shell({ children, role = "student", user }) {
                       className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
                     >
                       <LogOut className="h-4 w-4" />
-                      <span>{role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
+                      <span>
+                        {role === "admin"
+                          ? "Sign Out"
+                          : language === "mr"
+                            ? "लॉगआउट करा"
+                            : "Sign Out"}
+                      </span>
                     </button>
                   </div>
                 </>
@@ -473,9 +478,7 @@ export function Shell({ children, role = "student", user }) {
         </header>
 
         {/* Page Main Content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
 
       {/* Mobile Drawer */}
@@ -512,18 +515,14 @@ export function Shell({ children, role = "student", user }) {
               </div>
             </div>
 
-            <div className="border-t border-slate-100 pt-4 dark:border-slate-800 space-y-3">
+            <div className="space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
               <Link
                 href={profileUrl}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 rounded-2xl bg-slate-50 p-2 dark:bg-slate-900"
                 title="View Profile"
               >
-                <UserAvatar
-                  src={profilePhotoUrl}
-                  name={activeUser?.name || "User"}
-                  size="xs"
-                />
+                <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
                 <div className="min-w-0 truncate">
                   <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
                     {activeUser?.name || "User"}
@@ -540,7 +539,9 @@ export function Shell({ children, role = "student", user }) {
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 py-3 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
               >
                 <LogOut className="h-4 w-4" />
-                <span>{role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
+                <span>
+                  {role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}
+                </span>
               </button>
             </div>
           </div>

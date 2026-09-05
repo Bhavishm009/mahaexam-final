@@ -39,8 +39,8 @@ export default async function CoachingLoginPage() {
             </h1>
 
             <p className="mt-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300 sm:text-sm">
-              तुमच्या बॅचेसचे विद्यार्थी, प्रश्नसंच, ऑनलाइन परीक्षा आणि शिक्षक टीमचे एकाच
-              ठिकाणाहून व्यवस्थापन करा.
+              तुमच्या बॅचेसचे विद्यार्थी, प्रश्नसंच, ऑनलाइन परीक्षा आणि शिक्षक टीमचे एकाच ठिकाणाहून
+              व्यवस्थापन करा.
             </p>
 
             <div className="mt-8 space-y-3 text-xs font-bold text-slate-700 dark:text-slate-200">

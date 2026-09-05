@@ -6,7 +6,7 @@ const globalForPrisma = globalThis;
 function createClient(url) {
   if (!url) return null;
   let tunedUrl = url;
-  
+
   // Optimize connection limit from 3 to 10 (or configurable via DB_CONNECTION_LIMIT)
   // Aiven max_connections is 20, so 10 provides 3.3x more concurrency headroom while leaving 10 for background jobs/admin.
   const targetLimit = process.env.DB_CONNECTION_LIMIT || "10";
@@ -38,7 +38,7 @@ let secondaryUrl = process.env.SECONDARY_DATABASE_URL || process.env.SHADOW_DATA
 if (secondaryUrl && secondaryUrl.includes("db.mhhmyckndlmylpgciblz.supabase.co:5432")) {
   secondaryUrl = secondaryUrl.replace(
     "db.mhhmyckndlmylpgciblz.supabase.co:5432",
-    "aws-0-ap-south-1.pooler.supabase.com:6543"
+    "aws-0-ap-south-1.pooler.supabase.com:6543",
   );
   if (!secondaryUrl.includes("pgbouncer=true")) {
     secondaryUrl += (secondaryUrl.includes("?") ? "&" : "?") + "pgbouncer=true";
@@ -50,8 +50,7 @@ export const primaryPrisma =
   (primaryUrl ? createClient(primaryUrl) : new PrismaClient());
 
 export const secondaryPrisma =
-  globalForPrisma.__mahaSecondaryPrisma ||
-  (secondaryUrl ? createClient(secondaryUrl) : null);
+  globalForPrisma.__mahaSecondaryPrisma || (secondaryUrl ? createClient(secondaryUrl) : null);
 
 globalForPrisma.__mahaPrimaryPrisma = primaryPrisma;
 if (secondaryPrisma) {
@@ -89,7 +88,7 @@ const WRITE_METHODS = new Set([
 
 export function isConnectionError(err) {
   if (!err) return false;
-  const msg = typeof err === "string" ? err : (err?.message || "");
+  const msg = typeof err === "string" ? err : err?.message || "";
   const code = err?.code || "";
   const metaMsg = typeof err?.meta?.message === "string" ? err.meta.message : "";
   const combined = (msg + " " + metaMsg + " " + code).toLowerCase();
@@ -209,7 +208,7 @@ export async function activateFailover(err) {
             },
           });
           console.log(
-            `🚨 [DB Failover Alert] Created in-app failover alert for Super Admin (${superAdmin.email})`
+            `🚨 [DB Failover Alert] Created in-app failover alert for Super Admin (${superAdmin.email})`,
           );
 
           // 2. Emergency Email Alert
@@ -223,7 +222,7 @@ export async function activateFailover(err) {
                 timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
               });
               console.log(
-                `🚨 [DB Failover Alert] Sent emergency failover alert email to ${superAdmin.email}`
+                `🚨 [DB Failover Alert] Sent emergency failover alert email to ${superAdmin.email}`,
               );
             } catch (mailErr) {
               console.warn("[DB Failover Alert] Email alert dispatch failed:", mailErr?.message);
@@ -231,7 +230,10 @@ export async function activateFailover(err) {
           }
         }
       } catch (notifyErr) {
-        console.warn("[DB Failover Alert] Error creating Super Admin notification:", notifyErr?.message);
+        console.warn(
+          "[DB Failover Alert] Error creating Super Admin notification:",
+          notifyErr?.message,
+        );
       }
     })();
   }
@@ -258,7 +260,7 @@ export async function handlePrimaryRecovery() {
   state.lastRecoveredAt = restoredAt;
 
   console.log(
-    "✅ [DB Failover Recovery] Primary Database restored! Switched back to Primary Master DB."
+    "✅ [DB Failover Recovery] Primary Database restored! Switched back to Primary Master DB.",
   );
 
   // Invalidate cache immediately so DB Sync page shows Primary is back online
@@ -283,30 +285,34 @@ export async function handlePrimaryRecovery() {
     try {
       // Distributed database throttle: Check if any instance already dispatched a recovery alert in the last 15 mins
       const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
-      const recentRecovery = await primaryPrisma.notification.findFirst({
-        where: {
-          title: { contains: "RESTORED: Primary Database Online" },
-          createdAt: { gte: fifteenMinsAgo },
-        },
-        select: { id: true },
-      }).catch(() => null);
+      const recentRecovery = await primaryPrisma.notification
+        .findFirst({
+          where: {
+            title: { contains: "RESTORED: Primary Database Online" },
+            createdAt: { gte: fifteenMinsAgo },
+          },
+          select: { id: true },
+        })
+        .catch(() => null);
 
       if (recentRecovery) {
         return;
       }
 
-      const superAdmin = await primaryPrisma.user.findFirst({
-        where: { role: "SUPER_ADMIN" },
-        select: { id: true, email: true, name: true },
-      }).catch(async () => {
-        if (secondaryPrisma) {
-          return await secondaryPrisma.user.findFirst({
-            where: { role: "SUPER_ADMIN" },
-            select: { id: true, email: true, name: true },
-          });
-        }
-        return null;
-      });
+      const superAdmin = await primaryPrisma.user
+        .findFirst({
+          where: { role: "SUPER_ADMIN" },
+          select: { id: true, email: true, name: true },
+        })
+        .catch(async () => {
+          if (secondaryPrisma) {
+            return await secondaryPrisma.user.findFirst({
+              where: { role: "SUPER_ADMIN" },
+              select: { id: true, email: true, name: true },
+            });
+          }
+          return null;
+        });
 
       if (superAdmin) {
         // 1. In-App Notification (write to both primary and secondary)
@@ -328,7 +334,7 @@ export async function handlePrimaryRecovery() {
           await secondaryPrisma.notification.create({ data: notifData }).catch(() => {});
         }
         console.log(
-          `✅ [DB Recovery Alert] Created in-app recovery alert for Super Admin (${superAdmin.email})`
+          `✅ [DB Recovery Alert] Created in-app recovery alert for Super Admin (${superAdmin.email})`,
         );
 
         // 2. Emergency Recovery Email Alert via Google SMTP
@@ -344,9 +350,7 @@ export async function handlePrimaryRecovery() {
               restoredAt: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
               host: "exam-kids.i.aivencloud.com",
             });
-            console.log(
-              `✅ [DB Recovery Alert] Sent recovery alert email to ${superAdmin.email}`
-            );
+            console.log(`✅ [DB Recovery Alert] Sent recovery alert email to ${superAdmin.email}`);
           } catch (mailErr) {
             console.warn("[DB Recovery Alert] Email dispatch failed:", mailErr?.message);
           }
@@ -394,7 +398,7 @@ export async function executeWithFailover(fn) {
     if (secondaryPrisma && isConnectionError(err)) {
       console.warn(
         "⚠️ [DB Failover Active] Primary DB unreachable. Switching to Secondary Shadow DB...",
-        err?.message
+        err?.message,
       );
       await activateFailover(err);
       return await fn(secondaryPrisma);
@@ -427,7 +431,7 @@ export const prisma = new Proxy(primaryPrisma, {
           if (secondaryPrisma && isConnectionError(err)) {
             console.warn(
               "⚠️ [DB Failover Active] $transaction failed on Primary DB. Retrying on Secondary DB...",
-              err?.message
+              err?.message,
             );
             await activateFailover(err);
             return await secondaryPrisma.$transaction(...args);
@@ -451,7 +455,7 @@ export const prisma = new Proxy(primaryPrisma, {
           if (secondaryPrisma && isConnectionError(err)) {
             console.warn(
               `⚠️ [DB Failover Active] ${String(prop)} failed on Primary DB. Retrying on Secondary DB...`,
-              err?.message
+              err?.message,
             );
             await activateFailover(err);
             return await secondaryPrisma[prop](...args);
@@ -488,7 +492,7 @@ export const prisma = new Proxy(primaryPrisma, {
                         method: String(methodProp),
                         args,
                         resultId: secRes?.id || null,
-                      })
+                      }),
                     )
                     .catch(() => {});
                 }
@@ -497,10 +501,15 @@ export const prisma = new Proxy(primaryPrisma, {
             }
 
             // Pre-populate IDs for createMany so both Primary and Secondary receive identical records
-            if (String(methodProp) === "createMany" && args[0]?.data && Array.isArray(args[0].data)) {
+            if (
+              String(methodProp) === "createMany" &&
+              args[0]?.data &&
+              Array.isArray(args[0].data)
+            ) {
               for (const item of args[0].data) {
                 if (item && typeof item === "object" && !item.id) {
-                  item.id = "cm" + Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
+                  item.id =
+                    "cm" + Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
                 }
               }
             }
@@ -515,7 +524,7 @@ export const prisma = new Proxy(primaryPrisma, {
                 primaryFailed = true;
                 console.warn(
                   `⚠️ [DB Failover Active] ${String(prop)}.${String(methodProp)} failed on Primary DB. Retrying on Secondary DB...`,
-                  err?.message
+                  err?.message,
                 );
                 await activateFailover(err);
                 const secondaryModel = secondaryPrisma[prop];
@@ -530,7 +539,7 @@ export const prisma = new Proxy(primaryPrisma, {
                           method: String(methodProp),
                           args,
                           resultId: secRes?.id || null,
-                        })
+                        }),
                       )
                       .catch(() => {});
                   }
@@ -550,7 +559,7 @@ export const prisma = new Proxy(primaryPrisma, {
                   let secArgs = args;
                   try {
                     secArgs = JSON.parse(
-                      JSON.stringify(args, (k, v) => (typeof v === "bigint" ? Number(v) : v))
+                      JSON.stringify(args, (k, v) => (typeof v === "bigint" ? Number(v) : v)),
                     );
 
                     // Ensure secondary create uses the EXACT id created by Primary
@@ -558,7 +567,11 @@ export const prisma = new Proxy(primaryPrisma, {
                       if (!secArgs[0].data.id) {
                         secArgs[0].data.id = primaryResult.id;
                       }
-                    } else if (String(methodProp) === "upsert" && primaryResult?.id && secArgs[0]?.create) {
+                    } else if (
+                      String(methodProp) === "upsert" &&
+                      primaryResult?.id &&
+                      secArgs[0]?.create
+                    ) {
                       if (!secArgs[0].create.id) {
                         secArgs[0].create.id = primaryResult.id;
                       }
@@ -583,7 +596,7 @@ export const prisma = new Proxy(primaryPrisma, {
                       }
                       console.warn(
                         `⚠️ [Shadow DB Sync Warning] Secondary DB write failed for ${String(prop)}.${String(methodProp)}:`,
-                        secErr?.message
+                        secErr?.message,
                       );
                       invalidateDbSyncCache();
                     });

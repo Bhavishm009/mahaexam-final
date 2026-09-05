@@ -17,7 +17,7 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm transition-all animate-in fade-in duration-200">
+    <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm transition-all duration-200">
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:p-7">
         {/* Close Button */}
         <button
@@ -61,7 +61,7 @@ export default function ConfirmModal({
         {/* Safety Note Badge */}
         {safetyNote && (
           <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-blue-100 bg-blue-50/70 p-3 text-xs font-semibold text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-200">
-            <ShieldCheck className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
             <div>
               <span className="font-extrabold">SAFETY GUARANTEE:</span> {safetyNote}
             </div>

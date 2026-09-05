@@ -262,7 +262,7 @@ export default function AdminProfilePage() {
           <div className="flex flex-wrap gap-2.5 text-xs">
             {profileMeta?.createdAt && (
               <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 backdrop-blur-md">
-                <div className="flex items-center gap-1.5 text-blue-200 font-medium">
+                <div className="flex items-center gap-1.5 font-medium text-blue-200">
                   <Calendar className="h-3 w-3" />
                   <span>Member Since</span>
                 </div>
@@ -275,9 +275,9 @@ export default function AdminProfilePage() {
               </div>
             )}
             <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 backdrop-blur-md">
-              <div className="text-blue-200 font-medium">Account Status</div>
+              <div className="font-medium text-blue-200">Account Status</div>
               <div className="mt-0.5 flex items-center gap-1 font-bold text-emerald-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
                 <span>{profileMeta?.status || "ACTIVE"}</span>
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function AdminProfilePage() {
       </div>
 
       {/* Modern Navigation Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -312,9 +312,7 @@ export default function AdminProfilePage() {
           >
             <ShieldCheck className="h-4 w-4" />
             <span>Security & 2FA</span>
-            {profileMeta?.mfaEnabled && (
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            )}
+            {profileMeta?.mfaEnabled && <span className="h-2 w-2 rounded-full bg-emerald-500" />}
           </button>
         </div>
 
@@ -424,19 +422,20 @@ export default function AdminProfilePage() {
                 {/* Avatar info tip */}
                 <div className="mt-6 flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-xs dark:border-blue-900/40 dark:bg-blue-950/20">
                   <div className="flex items-center gap-3">
-                    <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <Sparkles className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
                     <div>
                       <span className="font-bold text-blue-900 dark:text-blue-200">
                         Profile Photo / Avatar
                       </span>
                       <p className="text-blue-700/80 dark:text-blue-300/80">
-                        Hover over your avatar photo above and click the camera icon to upload a custom photo anytime.
+                        Hover over your avatar photo above and click the camera icon to upload a
+                        custom photo anytime.
                       </p>
                     </div>
                   </div>
                   <label
                     htmlFor="profile-avatar-input"
-                    className="cursor-pointer rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-500"
+                    className="shadow-xs cursor-pointer rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-500"
                   >
                     Change Photo
                   </label>
@@ -445,7 +444,7 @@ export default function AdminProfilePage() {
             </div>
           ) : (
             /* EDIT MODE: Only displayed when the user clicks 'Edit Profile' */
-            <form onSubmit={handleSave} className="space-y-6 animate-in fade-in-50 duration-200">
+            <form onSubmit={handleSave} className="animate-in fade-in-50 space-y-6 duration-200">
               <div className="rounded-3xl border border-blue-200 bg-white p-6 shadow-md dark:border-blue-900/50 dark:bg-slate-900 sm:p-8">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
                   <div>
@@ -563,7 +562,7 @@ export default function AdminProfilePage() {
 
       {/* TAB 2: Security, 2FA, Passkeys & Password */}
       {activeTab === "security" && (
-        <div className="space-y-6 animate-in fade-in-50 duration-200">
+        <div className="animate-in fade-in-50 space-y-6 duration-200">
           {/* Two-Factor Authentication (MFA) - Authenticator Apps */}
           <MfaManager />
 

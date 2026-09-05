@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-const { execSync } = require('child_process');
+const { PrismaClient } = require("@prisma/client");
+const { execSync } = require("child_process");
 
 const primaryUrl = process.env.PRIMARY_DATABASE_URL || process.env.DATABASE_URL;
 const secondaryUrl = process.env.SECONDARY_DATABASE_URL || process.env.SHADOW_DATABASE_URL;
@@ -24,7 +24,7 @@ async function run() {
     console.log("2️⃣ Pushing Prisma Schema to Supabase...");
     execSync(
       `npx cross-env DATABASE_URL="${secondaryUrl}" npx prisma db push --skip-generate --accept-data-loss`,
-      { stdio: 'inherit' }
+      { stdio: "inherit" },
     );
     console.log("✅ Prisma Schema successfully pushed to Supabase!");
 
@@ -134,7 +134,7 @@ async function run() {
     }
 
     console.log("\n🎉 FULL DATABASE SYNC COMPLETED SUCCESSFULLY!");
-    
+
     // Verification Counts
     const pCount = await primary.question.count();
     const sCount = await sec.question.count();

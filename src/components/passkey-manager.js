@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Fingerprint,
-  Trash2,
-  Plus,
-  Smartphone,
-  Loader2,
-} from "lucide-react";
+import { Fingerprint, Trash2, Plus, Smartphone, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { fetchJson } from "@/lib/api-client";
@@ -164,8 +158,6 @@ export function PasskeyManager() {
           )}
         </button>
       </div>
-
-
 
       {/* Credentials List */}
       <div className="space-y-3">

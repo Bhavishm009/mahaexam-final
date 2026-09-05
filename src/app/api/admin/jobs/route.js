@@ -40,21 +40,21 @@ export async function POST(req) {
     if (!title?.trim() && !titleMr?.trim()) {
       return NextResponse.json(
         { error: "Validation Error: Job Title is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!department?.trim() && !departmentMr?.trim()) {
       return NextResponse.json(
         { error: "Validation Error: Department name is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!description?.trim() && !descriptionMr?.trim()) {
       return NextResponse.json(
         { error: "Validation Error: Job Description is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -78,15 +78,19 @@ export async function POST(req) {
         selectionProcess: selectionProcess?.trim() || "",
         imageUrl: imageUrl?.trim() || "",
       },
-      notifyStudents !== false
+      notifyStudents !== false,
     );
 
-    return NextResponse.json({ success: true, jobAlert: newJob, message: "Job notification created successfully!" });
+    return NextResponse.json({
+      success: true,
+      jobAlert: newJob,
+      message: "Job notification created successfully!",
+    });
   } catch (error) {
     console.error("Error creating job alert:", error);
     return NextResponse.json(
       { error: error.message || "Failed to save job notification. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

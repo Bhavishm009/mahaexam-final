@@ -312,7 +312,7 @@ export function MfaManager({ initialEnabled = false }) {
                       )}
                     </button>
                   </div>
-                  <p className="mt-1.5 font-mono text-xs font-bold tracking-wider text-slate-800 dark:text-slate-200 break-all select-all">
+                  <p className="mt-1.5 select-all break-all font-mono text-xs font-bold tracking-wider text-slate-800 dark:text-slate-200">
                     {setupData?.secretKey}
                   </p>
                 </div>
@@ -414,7 +414,7 @@ export function MfaManager({ initialEnabled = false }) {
                     {setupData?.backupCodes?.map((code, idx) => (
                       <div
                         key={idx}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-center font-mono text-xs font-bold text-slate-800 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        className="shadow-2xs rounded-xl border border-slate-200 bg-white px-3 py-2 text-center font-mono text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                       >
                         {code}
                       </div>
@@ -425,7 +425,7 @@ export function MfaManager({ initialEnabled = false }) {
                     <button
                       type="button"
                       onClick={copyBackupCodes}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                      className="shadow-2xs inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                     >
                       {copiedBackup ? (
                         <>
@@ -443,7 +443,7 @@ export function MfaManager({ initialEnabled = false }) {
                     <button
                       type="button"
                       onClick={downloadBackupCodes}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-slate-800 dark:bg-white dark:text-slate-900"
+                      className="shadow-2xs inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900"
                     >
                       <Download className="h-3.5 w-3.5" />
                       <span>Download .txt</span>

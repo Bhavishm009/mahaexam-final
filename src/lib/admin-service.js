@@ -22,18 +22,22 @@ export async function adminStats() {
     prisma.examPurchase.count({ where: { status: "PAID" } }),
     prisma.payment.aggregate({ where: { status: "PAID" }, _sum: { amount: true } }),
     // Live exam takers: Only count active attempts where student had heartbeat/activity in the last 10 minutes
-    prisma.examAttempt.count({
-      where: {
-        status: "IN_PROGRESS",
-        lastActivityAt: { gte: tenMinutesAgo },
-      },
-    }).catch(() => 0),
+    prisma.examAttempt
+      .count({
+        where: {
+          status: "IN_PROGRESS",
+          lastActivityAt: { gte: tenMinutesAgo },
+        },
+      })
+      .catch(() => 0),
     // Currently online: Count real users with last login within the last 15 minutes
-    prisma.user.count({
-      where: {
-        lastLoginAt: { gte: fifteenMinutesAgo },
-      },
-    }).catch(() => 0),
+    prisma.user
+      .count({
+        where: {
+          lastLoginAt: { gte: fifteenMinutesAgo },
+        },
+      })
+      .catch(() => 0),
   ]);
 
   // Online count is strictly the real active users from DB, bounded between 0 and total users
@@ -183,7 +187,9 @@ export async function deleteUserSafely(userId) {
         select: { id: true },
       });
       if (results.length > 0) {
-        await tx.resultSubject.deleteMany({ where: { resultId: { in: results.map((r) => r.id) } } });
+        await tx.resultSubject.deleteMany({
+          where: { resultId: { in: results.map((r) => r.id) } },
+        });
         await tx.result.deleteMany({ where: { id: { in: results.map((r) => r.id) } } });
       }
 
@@ -192,7 +198,9 @@ export async function deleteUserSafely(userId) {
         select: { id: true },
       });
       if (examResults.length > 0) {
-        await tx.subjectResult.deleteMany({ where: { resultId: { in: examResults.map((r) => r.id) } } });
+        await tx.subjectResult.deleteMany({
+          where: { resultId: { in: examResults.map((r) => r.id) } },
+        });
         await tx.examResult.deleteMany({ where: { id: { in: examResults.map((r) => r.id) } } });
       }
 

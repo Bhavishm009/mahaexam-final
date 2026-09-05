@@ -62,12 +62,15 @@ export default function StudentAcademiesPage() {
       const res = await r.json();
       if (!r.ok) {
         setMsg({
-          text: res.error || (isMr ? "अकॅडेमीमध्ये सामील होता आले नाही." : "Failed to join academy."),
+          text:
+            res.error || (isMr ? "अकॅडेमीमध्ये सामील होता आले नाही." : "Failed to join academy."),
           error: true,
         });
       } else {
         setMsg({
-          text: res.message || (isMr ? "अकॅडेमीमध्ये यशस्वीरित्या सामील झालात!" : "Successfully joined academy!"),
+          text:
+            res.message ||
+            (isMr ? "अकॅडेमीमध्ये यशस्वीरित्या सामील झालात!" : "Successfully joined academy!"),
           error: false,
         });
         setInviteCode("");
@@ -76,7 +79,9 @@ export default function StudentAcademiesPage() {
       }
     } catch {
       setMsg({
-        text: isMr ? "नेटवर्क त्रुटी आली. कृपया पुन्हा प्रयत्न करा." : "Network error. Please try again.",
+        text: isMr
+          ? "नेटवर्क त्रुटी आली. कृपया पुन्हा प्रयत्न करा."
+          : "Network error. Please try again.",
         error: true,
       });
     } finally {
@@ -122,9 +127,7 @@ export default function StudentAcademiesPage() {
             <div className="text-xs font-semibold text-blue-200">
               {isMr ? "जोडलेल्या अकॅडेमी" : "Enrolled Academies"}
             </div>
-            <div className="mt-0.5 text-2xl font-black text-white sm:text-3xl">
-              {orgs.length}
-            </div>
+            <div className="mt-0.5 text-2xl font-black text-white sm:text-3xl">{orgs.length}</div>
           </div>
         </div>
       </div>
@@ -183,8 +186,8 @@ export default function StudentAcademiesPage() {
                   ? "सामील होत आहे..."
                   : "Joining..."
                 : isMr
-                ? "सामील व्हा"
-                : "Join Academy"}
+                  ? "सामील व्हा"
+                  : "Join Academy"}
             </span>
           </button>
         </form>

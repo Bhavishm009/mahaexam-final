@@ -53,7 +53,10 @@ export async function POST(request) {
     });
 
     if (existing) {
-      return NextResponse.json({ error: "A user with this email address already exists." }, { status: 409 });
+      return NextResponse.json(
+        { error: "A user with this email address already exists." },
+        { status: 409 },
+      );
     }
 
     const passwordHash = await bcrypt.hash(password, 12);

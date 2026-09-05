@@ -191,7 +191,20 @@ export function PublicExamsSection({ initialExams = [] }) {
               : exam.badgeColor ||
                 "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700";
 
-            const catSlug = exam.examType === "PREVIOUS_YEAR" ? "pyq" : (exam.slug?.includes("police") ? "police-bharti" : exam.slug?.includes("talathi") ? "talathi" : exam.slug?.includes("mpsc") ? "mpsc" : exam.slug?.includes("zp") ? "zp-bharti" : exam.slug?.includes("vanrakshak") ? "vanrakshak" : "saralseva");
+            const catSlug =
+              exam.examType === "PREVIOUS_YEAR"
+                ? "pyq"
+                : exam.slug?.includes("police")
+                  ? "police-bharti"
+                  : exam.slug?.includes("talathi")
+                    ? "talathi"
+                    : exam.slug?.includes("mpsc")
+                      ? "mpsc"
+                      : exam.slug?.includes("zp")
+                        ? "zp-bharti"
+                        : exam.slug?.includes("vanrakshak")
+                          ? "vanrakshak"
+                          : "saralseva";
             const targetHref = `/exams/${catSlug}/${exam.slug || exam.id}`;
 
             return (

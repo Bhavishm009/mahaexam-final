@@ -152,20 +152,35 @@ export default async function ExamSlugDetailPage({ params }) {
         )}
 
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-          <Link href="/" prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
+        >
+          <Link
+            href="/"
+            prefetch={true}
+            className="transition hover:text-blue-600 dark:hover:text-white"
+          >
             मुख्यपृष्ठ
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link href="/exams" prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+          <Link
+            href="/exams"
+            prefetch={true}
+            className="transition hover:text-blue-600 dark:hover:text-white"
+          >
             सर्व परीक्षा
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link href={`/exams/${category}`} prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+          <Link
+            href={`/exams/${category}`}
+            prefetch={true}
+            className="transition hover:text-blue-600 dark:hover:text-white"
+          >
             {cat.badgeMr}
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <span className="font-bold text-blue-600 dark:text-blue-400 truncate max-w-[200px]">
+          <span className="max-w-[200px] truncate font-bold text-blue-600 dark:text-blue-400">
             {exam.titleMr}
           </span>
         </nav>
@@ -175,7 +190,9 @@ export default async function ExamSlugDetailPage({ params }) {
           <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded-full border px-3 py-1 text-xs font-bold ${cat.badgeColor}`}>
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-bold ${cat.badgeColor}`}
+                >
                   {cat.badgeMr}
                 </span>
                 <span className="flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
@@ -315,21 +332,27 @@ export default async function ExamSlugDetailPage({ params }) {
             <div className="mt-6 space-y-3">
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white">मराठी भाषा व व्याकरण</div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    मराठी भाषा व व्याकरण
+                  </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">२५ प्रश्न</div>
                 </div>
                 <div className="text-sm font-black text-blue-600 dark:text-blue-400">२५ गुण</div>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white">अंकगणित व बुद्धिमत्ता चाचणी</div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    अंकगणित व बुद्धिमत्ता चाचणी
+                  </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">५० प्रश्न</div>
                 </div>
                 <div className="text-sm font-black text-blue-600 dark:text-blue-400">५० गुण</div>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white">सामान्य ज्ञान व चालू घडामोडी</div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    सामान्य ज्ञान व चालू घडामोडी
+                  </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">२५ प्रश्न</div>
                 </div>
                 <div className="text-sm font-black text-blue-600 dark:text-blue-400">२५ गुण</div>
@@ -348,7 +371,9 @@ export default async function ExamSlugDetailPage({ params }) {
                 <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-100 text-[10px] font-black text-blue-600 dark:bg-blue-950 dark:text-blue-300">
                   १
                 </span>
-                <span>परीक्षेचा टायमर स्क्रीनवर सुरू राहील. वेळ संपल्यावर टेस्ट आपोआप सबमिट होईल.</span>
+                <span>
+                  परीक्षेचा टायमर स्क्रीनवर सुरू राहील. वेळ संपल्यावर टेस्ट आपोआप सबमिट होईल.
+                </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-100 text-[10px] font-black text-blue-600 dark:bg-blue-950 dark:text-blue-300">

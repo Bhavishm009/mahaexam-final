@@ -21,7 +21,8 @@ export async function POST(req) {
 
     // Check if Supabase storage credentials exist
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (supabaseUrl && supabaseServiceKey) {
       try {
@@ -62,7 +63,7 @@ export async function POST(req) {
     console.error("Upload API Error:", err);
     return NextResponse.json(
       { error: err.message || "Failed to process image upload." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

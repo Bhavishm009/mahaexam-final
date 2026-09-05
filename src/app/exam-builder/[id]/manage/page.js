@@ -39,7 +39,11 @@ export default function Manage({ params }) {
   }
 
   if (!exam) {
-    return <main className="grid min-h-screen place-items-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-300">Loading...</main>;
+    return (
+      <main className="grid min-h-screen place-items-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-300">
+        Loading...
+      </main>
+    );
   }
 
   return (
@@ -53,14 +57,14 @@ export default function Manage({ params }) {
         <div className="mt-6 flex flex-wrap gap-3">
           <a
             href={`/exam-builder/${id}/pools`}
-            className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-800 shadow-sm hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+            className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             Manage Pools
           </a>
           {exam.status === "DRAFT" && (
             <button
               onClick={() => action("publish")}
-              className="rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-500 transition-colors shadow-sm"
+              className="rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow-sm transition-colors hover:bg-blue-500"
             >
               Publish Exam
             </button>
@@ -68,19 +72,29 @@ export default function Manage({ params }) {
           {!exam.frozenAt && exam.status !== "DRAFT" && (
             <button
               onClick={() => action("freeze")}
-              className="rounded-xl bg-slate-800 px-5 py-3 font-bold text-white hover:bg-slate-700 transition-colors shadow-sm"
+              className="rounded-xl bg-slate-800 px-5 py-3 font-bold text-white shadow-sm transition-colors hover:bg-slate-700"
             >
               Freeze Exam
             </button>
           )}
         </div>
-        {msg && <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-slate-800 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">{msg}</div>}
+        {msg && (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-slate-800 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+            {msg}
+          </div>
+        )}
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h2 className="font-black text-slate-900 dark:text-white">Publish Audit</h2>
           {exam.publishAudits?.map((a) => (
-            <div key={a.id} className="border-t border-slate-100 py-3 text-sm dark:border-slate-800 text-slate-800 dark:text-slate-200">
-              <b className="text-slate-900 dark:text-white">{a.action}</b> · {new Date(a.createdAt).toLocaleString()}
-              <div className="break-all text-xs text-slate-500 dark:text-slate-400">{a.snapshotHash}</div>
+            <div
+              key={a.id}
+              className="border-t border-slate-100 py-3 text-sm text-slate-800 dark:border-slate-800 dark:text-slate-200"
+            >
+              <b className="text-slate-900 dark:text-white">{a.action}</b> ·{" "}
+              {new Date(a.createdAt).toLocaleString()}
+              <div className="break-all text-xs text-slate-500 dark:text-slate-400">
+                {a.snapshotHash}
+              </div>
             </div>
           ))}
         </section>

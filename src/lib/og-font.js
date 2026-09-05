@@ -24,7 +24,10 @@ export async function getDevanagariOgFont() {
         const stats = await fs.promises.stat(fontPath);
         if (stats.size > 50000) {
           const buffer = await fs.promises.readFile(fontPath);
-          cachedFontBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+          cachedFontBuffer = buffer.buffer.slice(
+            buffer.byteOffset,
+            buffer.byteOffset + buffer.byteLength,
+          );
           return cachedFontBuffer;
         }
       }
@@ -98,7 +101,7 @@ export function ShapedText({ text = "", fontSize = 32, fill = "#ffffff", style =
           key: i,
           d: svgPath,
           transform: `translate(${gx.toFixed(2)},${gy.toFixed(2)}) scale(${scale},-${scale})`,
-        })
+        }),
       );
     }
     xCursor += pos.xAdvance;
@@ -120,6 +123,6 @@ export function ShapedText({ text = "", fontSize = 32, fill = "#ffffff", style =
         ...style,
       },
     },
-    React.createElement("g", { fill }, paths)
+    React.createElement("g", { fill }, paths),
   );
 }

@@ -81,14 +81,20 @@ export default function CoachingStudentsPage() {
         setAlert({ text: d.error || "Failed to add student", type: "error" });
       } else if (d.alreadyRegistered) {
         setAlert({
-          text: d.messageMr || d.message || `हा विद्यार्थी आधीच MahaExam वर नोंदणीकृत आहे! त्याला यशस्वीरित्या ${d.batch?.name || "बॅच"} मध्ये जोडले गेले आहे.`,
+          text:
+            d.messageMr ||
+            d.message ||
+            `हा विद्यार्थी आधीच MahaExam वर नोंदणीकृत आहे! त्याला यशस्वीरित्या ${d.batch?.name || "बॅच"} मध्ये जोडले गेले आहे.`,
           type: "info",
         });
         setForm({ name: "", email: "", phone: "", batchId: batches[0]?.id || "" });
         load();
       } else {
         setAlert({
-          text: d.messageMr || d.message || `नवीन विद्यार्थी ${d.user?.name} यशस्वीरित्या जोडला गेला! लॉगिन माहिती विद्यार्थ्याला ईमेलवर पाठवली आहे.`,
+          text:
+            d.messageMr ||
+            d.message ||
+            `नवीन विद्यार्थी ${d.user?.name} यशस्वीरित्या जोडला गेला! लॉगिन माहिती विद्यार्थ्याला ईमेलवर पाठवली आहे.`,
           type: "success",
         });
         setForm({ name: "", email: "", phone: "", batchId: batches[0]?.id || "" });
@@ -113,9 +119,10 @@ export default function CoachingStudentsPage() {
       const data = await res.json();
       if (res.ok) {
         setAlert({
-          text: newStatus === "INACTIVE"
-            ? `${student.name} या विद्यार्थ्याला अकॅडेमीसाठी निष्क्रिय (Deactivated) केले आहे. त्याचा MahaExam प्लॅटफॉर्म ॲक्सेस चालू राहील पण खाजगी परीक्षा बंद होतील.`
-            : `${student.name} या विद्यार्थ्याला अकॅडेमीसाठी पुन्हा सक्रिय (Activated) केले आहे.`,
+          text:
+            newStatus === "INACTIVE"
+              ? `${student.name} या विद्यार्थ्याला अकॅडेमीसाठी निष्क्रिय (Deactivated) केले आहे. त्याचा MahaExam प्लॅटफॉर्म ॲक्सेस चालू राहील पण खाजगी परीक्षा बंद होतील.`
+              : `${student.name} या विद्यार्थ्याला अकॅडेमीसाठी पुन्हा सक्रिय (Activated) केले आहे.`,
           type: "info",
         });
         load();
@@ -198,7 +205,7 @@ export default function CoachingStudentsPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-md text-center">
+          <div className="rounded-2xl border border-white/20 bg-white/10 p-3 text-center backdrop-blur-md">
             <div className="text-xs font-semibold text-amber-200">Enrolled Students</div>
             <div className="text-2xl font-black text-white">{students.length} Students</div>
           </div>
@@ -212,16 +219,16 @@ export default function CoachingStudentsPage() {
             alert.type === "error"
               ? "border border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-400"
               : alert.type === "info"
-              ? "border border-blue-500/30 bg-blue-500/10 text-blue-800 dark:text-blue-300"
-              : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                ? "border border-blue-500/30 bg-blue-500/10 text-blue-800 dark:text-blue-300"
+                : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
           }`}
         >
           {alert.type === "error" ? (
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
           ) : alert.type === "info" ? (
-            <Info className="h-4 w-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
           ) : (
-            <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           )}
           <div className="flex-1">{alert.text}</div>
           <button
@@ -330,7 +337,8 @@ export default function CoachingStudentsPage() {
                   Batch Self-Registration Link (विद्यार्थी नोंदणी लिंक)
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
-                  Share this link with students. They will fill their own name, email, password, and details.
+                  Share this link with students. They will fill their own name, email, password, and
+                  details.
                 </p>
               </div>
 
@@ -345,7 +353,7 @@ export default function CoachingStudentsPage() {
               <input
                 readOnly
                 value={inviteLink || "No active invite link"}
-                className="flex-1 truncate rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-mono text-slate-700 outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                className="flex-1 truncate rounded-2xl border border-slate-200 bg-white px-4 py-2.5 font-mono text-xs text-slate-700 outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
               />
               <div className="flex gap-2">
                 <button
@@ -354,7 +362,11 @@ export default function CoachingStudentsPage() {
                   disabled={!inviteLink}
                   className="inline-flex items-center gap-1.5 rounded-2xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-amber-500 active:scale-95 disabled:opacity-50"
                 >
-                  {copied ? <Check className="h-3.5 w-3.5 text-white" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-white" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
                   <span>{copied ? "Copied!" : "Copy Link"}</span>
                 </button>
                 <button
@@ -468,7 +480,11 @@ export default function CoachingStudentsPage() {
                                 ? "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/60 dark:text-emerald-300"
                                 : "border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/60 dark:text-amber-300"
                             }`}
-                            title={s.academyStatus === "INACTIVE" ? "Activate student" : "Deactivate student"}
+                            title={
+                              s.academyStatus === "INACTIVE"
+                                ? "Activate student"
+                                : "Deactivate student"
+                            }
                           >
                             {s.academyStatus === "INACTIVE" ? (
                               <>
@@ -557,7 +573,10 @@ export default function CoachingStudentsPage() {
             <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50/80 p-3.5 text-xs text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/40 dark:text-blue-300">
               <div className="font-bold">महत्त्वाची नोंद (Platform Policy):</div>
               <p className="mt-1 text-[11px] leading-relaxed">
-                हा विद्यार्थी फक्त <strong>तुमच्या अकॅडेमीमधून</strong> काढला जाईल आणि त्याचे अकॅडेमीचे खाजगी पेपर्स बंद होतील. त्याचे <strong>MahaExam वरील खाते चालूच राहील</strong> व तो सर्व मोफत व ग्लोबल सराव परीक्षा देऊ शकेल.
+                हा विद्यार्थी फक्त <strong>तुमच्या अकॅडेमीमधून</strong> काढला जाईल आणि त्याचे
+                अकॅडेमीचे खाजगी पेपर्स बंद होतील. त्याचे{" "}
+                <strong>MahaExam वरील खाते चालूच राहील</strong> व तो सर्व मोफत व ग्लोबल सराव परीक्षा
+                देऊ शकेल.
               </p>
             </div>
 

@@ -2,15 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import {
-  Globe,
-  Save,
-  Search,
-  Plus,
-  CheckCircle2,
-  AlertCircle,
-  X,
-} from "lucide-react";
+import { Globe, Save, Search, Plus, CheckCircle2, AlertCircle, X } from "lucide-react";
 
 export default function AdminSeoManagementPage() {
   const [settings, setSettings] = useState([]);
@@ -110,7 +102,10 @@ export default function AdminSeoManagementPage() {
         route: formData.route,
         title: formData.title,
         description: formData.description,
-        keywords: formData.keywords.split(",").map((k) => k.trim()).filter(Boolean),
+        keywords: formData.keywords
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean),
         canonicalUrl: formData.canonicalUrl || null,
         ogImage: formData.ogImage || null,
       };
@@ -136,12 +131,10 @@ export default function AdminSeoManagementPage() {
   }
 
   const existingRoutesMap = new Map(settings.map((s) => [s.route, s]));
-  const allRoutesList = Array.from(
-    new Set([...defaultRoutes, ...settings.map((s) => s.route)])
-  );
+  const allRoutesList = Array.from(new Set([...defaultRoutes, ...settings.map((s) => s.route)]));
 
   const filteredRoutes = allRoutesList.filter((r) =>
-    r.toLowerCase().includes(search.toLowerCase())
+    r.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -157,7 +150,8 @@ export default function AdminSeoManagementPage() {
             Dynamic SEO Manager (Meta Tags & OpenGraph)
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Manage page titles, meta descriptions, focus keywords, and OpenGraph tags across all platform routes.
+            Manage page titles, meta descriptions, focus keywords, and OpenGraph tags across all
+            platform routes.
           </p>
         </div>
 
@@ -214,17 +208,23 @@ export default function AdminSeoManagementPage() {
                       }`}
                     >
                       <div className="min-w-0 flex-1">
-                        <div className={`truncate text-xs font-black ${isSelected ? "text-white" : "text-slate-900 dark:text-white"}`}>
+                        <div
+                          className={`truncate text-xs font-black ${isSelected ? "text-white" : "text-slate-900 dark:text-white"}`}
+                        >
                           {routePath}
                         </div>
-                        <div className={`truncate text-[10px] ${isSelected ? "text-blue-100" : "text-slate-400"}`}>
+                        <div
+                          className={`truncate text-[10px] ${isSelected ? "text-blue-100" : "text-slate-400"}`}
+                        >
                           {item.title || "Default SEO Applied"}
                         </div>
                       </div>
                       {hasCustomSeo && (
                         <span
                           className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-[9px] font-extrabold ${
-                            isSelected ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                            isSelected
+                              ? "bg-white/20 text-white"
+                              : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
                           }`}
                         >
                           Customized
@@ -241,7 +241,10 @@ export default function AdminSeoManagementPage() {
         {/* Right Panel: SEO Form */}
         <div className="lg:col-span-8">
           {selectedRoute ? (
-            <form onSubmit={handleSubmit} className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
               <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
                 <div>
                   <span className="text-[10px] font-extrabold uppercase text-blue-600 dark:text-blue-400">
@@ -260,8 +263,6 @@ export default function AdminSeoManagementPage() {
                   <span>{saving ? "Saving..." : "Save SEO Settings"}</span>
                 </button>
               </div>
-
-
 
               {/* Form Fields */}
               <div className="space-y-4">
@@ -350,10 +351,10 @@ export default function AdminSeoManagementPage() {
                   <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
                     {formData.canonicalUrl || `https://mahaexam.com${formData.route}`}
                   </div>
-                  <div className="text-sm font-bold text-blue-700 line-clamp-1 dark:text-blue-400">
+                  <div className="line-clamp-1 text-sm font-bold text-blue-700 dark:text-blue-400">
                     {formData.title || "Enter page title"}
                   </div>
-                  <div className="text-xs text-slate-600 line-clamp-2 dark:text-slate-300">
+                  <div className="line-clamp-2 text-xs text-slate-600 dark:text-slate-300">
                     {formData.description || "Enter page meta description"}
                   </div>
                 </div>
@@ -366,7 +367,8 @@ export default function AdminSeoManagementPage() {
                 Select a Route
               </h3>
               <p className="mt-1 text-xs text-slate-400">
-                Select a route from the list on the left to edit its SEO configuration or add a new route.
+                Select a route from the list on the left to edit its SEO configuration or add a new
+                route.
               </p>
             </div>
           )}

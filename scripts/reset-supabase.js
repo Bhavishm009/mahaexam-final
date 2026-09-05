@@ -1,11 +1,11 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 
 const secondaryUrl = process.env.SECONDARY_DATABASE_URL || process.env.SHADOW_DATABASE_URL;
 
 async function main() {
   console.log("Connecting to Supabase...");
   const prisma = new PrismaClient({
-    datasources: { db: { url: secondaryUrl } }
+    datasources: { db: { url: secondaryUrl } },
   });
 
   try {

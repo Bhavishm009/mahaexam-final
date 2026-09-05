@@ -2,7 +2,16 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, Clock, Award, HelpCircle, ArrowRight, BookOpen, Zap, ChevronRight } from "lucide-react";
+import {
+  Search,
+  Clock,
+  Award,
+  HelpCircle,
+  ArrowRight,
+  BookOpen,
+  Zap,
+  ChevronRight,
+} from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
 import { EXAM_CATEGORIES, getCategorySlugFromExam } from "@/lib/exam-category-helper";
 
@@ -17,7 +26,12 @@ export function ExamsDirectoryClient({
 
   const categoriesWithCounts = useMemo(() => {
     return [
-      { id: "ALL", slug: "all", labelMr: `सर्व परीक्षा (${exams.length})`, labelEn: `All Tests (${exams.length})` },
+      {
+        id: "ALL",
+        slug: "all",
+        labelMr: `सर्व परीक्षा (${exams.length})`,
+        labelEn: `All Tests (${exams.length})`,
+      },
       ...EXAM_CATEGORIES.map((c) => {
         const count = exams.filter((e) => getCategorySlugFromExam(e) === c.slug).length;
         return {
@@ -63,7 +77,9 @@ export function ExamsDirectoryClient({
         <div>
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-white sm:text-lg">
-              {language === "mr" ? "परीक्षा प्रवर्ग शोधा (Exam Categories)" : "Explore Exam Categories"}
+              {language === "mr"
+                ? "परीक्षा प्रवर्ग शोधा (Exam Categories)"
+                : "Explore Exam Categories"}
             </h2>
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {EXAM_CATEGORIES.length} प्रमुख प्रवर्गांचे सराव पेपर्स
@@ -82,7 +98,9 @@ export function ExamsDirectoryClient({
                   className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-500 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-500"
                 >
                   <div>
-                    <span className={`inline-block rounded-lg px-2 py-0.5 text-[10px] font-bold ${cat.badgeColor}`}>
+                    <span
+                      className={`inline-block rounded-lg px-2 py-0.5 text-[10px] font-bold ${cat.badgeColor}`}
+                    >
                       {cat.badgeMr}
                     </span>
                     <div className="mt-2 line-clamp-1 text-xs font-bold text-slate-900 transition group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
@@ -156,10 +174,11 @@ export function ExamsDirectoryClient({
                 key={c.id}
                 type="button"
                 onClick={() => setActiveCategory(c.id)}
-                className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition active:scale-95 ${activeCategory === c.id
-                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 dark:bg-blue-600"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-                  }`}
+                className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition active:scale-95 ${
+                  activeCategory === c.id
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 dark:bg-blue-600"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                }`}
               >
                 {language === "mr" ? c.labelMr : c.labelEn}
               </button>
@@ -227,9 +246,7 @@ export function ExamsDirectoryClient({
                       <Award className="h-3.5 w-3.5" />
                       <span className="text-[10px]">गुण</span>
                     </div>
-                    <div className="mt-1 font-bold text-blue-600 dark:text-blue-400">
-                      {marks}
-                    </div>
+                    <div className="mt-1 font-bold text-blue-600 dark:text-blue-400">{marks}</div>
                   </div>
                 </div>
               </div>
@@ -261,9 +278,7 @@ export function ExamsDirectoryClient({
         {!filteredExams.length && (
           <div className="col-span-full rounded-3xl border border-slate-200 bg-white p-12 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
             <p className="text-base font-bold">या प्रवर्गात परीक्षा सापडली नाही.</p>
-            <p className="mt-1 text-xs text-slate-400">
-              कृपया दुसरा सर्च शब्द वापरून पहा.
-            </p>
+            <p className="mt-1 text-xs text-slate-400">कृपया दुसरा सर्च शब्द वापरून पहा.</p>
           </div>
         )}
       </div>

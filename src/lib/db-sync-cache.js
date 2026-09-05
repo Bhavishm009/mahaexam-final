@@ -131,7 +131,11 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
   const startTime = Date.now();
 
   let primaryStatus = { connected: false, latencyMs: 0, host: "exam-kids.i.aivencloud.com" };
-  let secondaryStatus = { connected: false, latencyMs: 0, host: "aws-0-ap-south-1.pooler.supabase.com" };
+  let secondaryStatus = {
+    connected: false,
+    latencyMs: 0,
+    host: "aws-0-ap-south-1.pooler.supabase.com",
+  };
 
   let primaryCounts = {};
   let secondaryCounts = {};
@@ -199,20 +203,27 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
   const activeDb = primaryStatus.connected
     ? "PRIMARY (Aiven)"
     : secondaryStatus.connected
-    ? "SECONDARY (Supabase Failover Active)"
-    : "NONE (Offline)";
+      ? "SECONDARY (Supabase Failover Active)"
+      : "NONE (Offline)";
 
   const failoverState = globalThis.__mahaDbFailover || {};
   const isFailoverActive = !primaryStatus.connected || !!failoverState.isFailoverActive;
 
   const failoverIncident = {
     isFailoverActive,
-    startedAt: failoverState.failoverStartedAt || (!primaryStatus.connected ? new Date().toISOString() : null),
-    reason: primaryStatus.error || failoverState.failoverReason || (isFailoverActive ? "Primary DB is offline" : null),
+    startedAt:
+      failoverState.failoverStartedAt ||
+      (!primaryStatus.connected ? new Date().toISOString() : null),
+    reason:
+      primaryStatus.error ||
+      failoverState.failoverReason ||
+      (isFailoverActive ? "Primary DB is offline" : null),
     activeDb,
     targetHost: secondaryStatus.host || "aws-0-ap-south-1.pooler.supabase.com",
     adminNotified: !!failoverState.adminNotified,
-    lastNotifiedAt: failoverState.lastNotifiedAt ? new Date(failoverState.lastNotifiedAt).toISOString() : null,
+    lastNotifiedAt: failoverState.lastNotifiedAt
+      ? new Date(failoverState.lastNotifiedAt).toISOString()
+      : null,
     lastRecoveredAt: failoverState.lastRecoveredAt || null,
   };
 

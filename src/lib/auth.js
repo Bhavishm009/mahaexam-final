@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 const secret = new TextEncoder().encode(
   process.env.AUTH_SECRET ||
     process.env.NEXTAUTH_SECRET ||
-    "mahaexam-super-secret-jwt-key-for-local-development-2026"
+    "mahaexam-super-secret-jwt-key-for-local-development-2026",
 );
 const COOKIE = process.env.AUTH_COOKIE_NAME || "mahaexam_session";
 

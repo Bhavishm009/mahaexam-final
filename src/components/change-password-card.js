@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Lock,
-  KeyRound,
-  Eye,
-  EyeOff,
-  Loader2,
-} from "lucide-react";
+import { Lock, KeyRound, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { fetchJson } from "@/lib/api-client";
@@ -68,9 +62,7 @@ export function ChangePasswordCard() {
           <KeyRound className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-lg font-black text-slate-900 dark:text-white">
-            Change Password
-          </h2>
+          <h2 className="text-lg font-black text-slate-900 dark:text-white">Change Password</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Set a new strong password to keep your account secure.
           </p>

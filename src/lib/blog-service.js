@@ -5,7 +5,8 @@ const FALLBACK_BLOGS = [
     id: "blog_police_2026",
     slug: "police-bharti-2026-complete-guide",
     title: "Maharashtra Police Bharti 2026: Complete Preparation Guide & Syllabus",
-    titleMr: "महाराष्ट्र पोलीस भरती २०२६: नवीन परीक्षा पद्धती, मैदानी चाचणी व संपूर्ण तयारी मार्गदर्शक",
+    titleMr:
+      "महाराष्ट्र पोलीस भरती २०२६: नवीन परीक्षा पद्धती, मैदानी चाचणी व संपूर्ण तयारी मार्गदर्शक",
     excerpt:
       "पोलीस शिपाई व चालक भरती २०२६ साठी लेखी परीक्षा पॅटर्न, मैदानी चाचणीचे गुण वितरण, वयोमर्यादा आणि अभ्यासाचे अचूक नियोजन.",
     content:
@@ -108,7 +109,7 @@ export async function getAllBlogPosts({ includeDrafts = false } = {}) {
 
   try {
     const rows = await prisma.$queryRawUnsafe(
-      `SELECT * FROM "BlogPost" ${includeDrafts ? "" : 'WHERE "published" = true'} ORDER BY "createdAt" DESC`
+      `SELECT * FROM "BlogPost" ${includeDrafts ? "" : 'WHERE "published" = true'} ORDER BY "createdAt" DESC`,
     );
     if (rows && rows.length > 0) {
       return rows;
@@ -136,7 +137,7 @@ export async function getBlogPostBySlug(slug) {
   try {
     const rows = await prisma.$queryRawUnsafe(
       `SELECT * FROM "BlogPost" WHERE "slug" = $1 LIMIT 1`,
-      slug
+      slug,
     );
     if (rows && rows.length > 0) {
       return rows[0];
@@ -210,7 +211,7 @@ export async function createBlogPost(data) {
     published,
     authorName,
     now,
-    now
+    now,
   );
 
   return {
@@ -267,7 +268,7 @@ export async function updateBlogPost(id, data) {
     data.published,
     data.authorName,
     now,
-    id
+    id,
   );
 
   return (await getBlogPostBySlug(data.slug)) || { id, ...data };

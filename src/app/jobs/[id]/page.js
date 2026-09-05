@@ -93,7 +93,9 @@ export default async function JobDetailPage({ params }) {
       name: job.department,
       value: job.id,
     },
-    datePosted: job.publishedAt ? new Date(job.publishedAt).toISOString() : new Date().toISOString(),
+    datePosted: job.publishedAt
+      ? new Date(job.publishedAt).toISOString()
+      : new Date().toISOString(),
     employmentType: "FULL_TIME",
     hiringOrganization: {
       "@type": "Organization",
@@ -126,16 +128,27 @@ export default async function JobDetailPage({ params }) {
       />
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-          <Link href="/" prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
+        >
+          <Link
+            href="/"
+            prefetch={true}
+            className="transition hover:text-blue-600 dark:hover:text-white"
+          >
             मुख्यपृष्ठ
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link href="/jobs" prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+          <Link
+            href="/jobs"
+            prefetch={true}
+            className="transition hover:text-blue-600 dark:hover:text-white"
+          >
             भरती जाहिराती
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <span className="font-bold text-blue-600 dark:text-blue-400 truncate max-w-[200px]">
+          <span className="max-w-[200px] truncate font-bold text-blue-600 dark:text-blue-400">
             {job.titleMr || job.title}
           </span>
         </nav>
@@ -144,7 +157,9 @@ export default async function JobDetailPage({ params }) {
         <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-10">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-6 dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <span className={`rounded-full px-3 py-1 text-xs font-bold ${job.statusColor || "bg-emerald-100 text-emerald-800"}`}>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-bold ${job.statusColor || "bg-emerald-100 text-emerald-800"}`}
+              >
                 {job.status === "ACTIVE" ? "अर्ज प्रक्रिया सुरू (Active)" : "नवीन भरती (New Alert)"}
               </span>
               <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
@@ -255,14 +270,18 @@ export default async function JobDetailPage({ params }) {
             </div>
 
             <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-              <div className="text-xs font-bold text-slate-900 dark:text-white">आवश्यक पात्रता:</div>
+              <div className="text-xs font-bold text-slate-900 dark:text-white">
+                आवश्यक पात्रता:
+              </div>
               <div className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
                 {job.qualificationMr || job.qualification}
               </div>
             </div>
 
             <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-              <div className="text-xs font-bold text-slate-900 dark:text-white">निवड प्रक्रिया (Selection Process):</div>
+              <div className="text-xs font-bold text-slate-900 dark:text-white">
+                निवड प्रक्रिया (Selection Process):
+              </div>
               <div className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
                 {job.selectionProcess}
               </div>
@@ -276,7 +295,8 @@ export default async function JobDetailPage({ params }) {
             </div>
 
             <p className="mt-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-              MahaExam प्लॅटफॉर्मवर या भरतीसाठी TCS व IBPS नवीन पॅटर्ननुसार परिपूर्ण ऑनलाइन सराव चाचण्या उपलब्ध आहेत.
+              MahaExam प्लॅटफॉर्मवर या भरतीसाठी TCS व IBPS नवीन पॅटर्ननुसार परिपूर्ण ऑनलाइन सराव
+              चाचण्या उपलब्ध आहेत.
             </p>
 
             <ul className="mt-4 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">

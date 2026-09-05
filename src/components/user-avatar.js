@@ -38,9 +38,9 @@ export function UserAvatar({
     (src.startsWith("http") || src.startsWith("data:") || src.startsWith("/"));
 
   return (
-    <div className="relative inline-block shrink-0 group">
+    <div className="group relative inline-block shrink-0">
       <div
-        className={`${sizeClasses[size] || sizeClasses.lg} ${ringClasses[size] || ringClasses.lg} relative overflow-hidden bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700 transition-all dark:border-slate-700 flex items-center justify-center`}
+        className={`${sizeClasses[size] || sizeClasses.lg} ${ringClasses[size] || ringClasses.lg} relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700 transition-all dark:border-slate-700`}
       >
         {hasValidImage ? (
           <>
@@ -61,8 +61,8 @@ export function UserAvatar({
           </>
         ) : (
           /* Clean Initial Letter of User Name — strictly no fake/dummy avatar */
-          <div className="flex h-full w-full items-center justify-center font-bold text-white select-none">
-            <span className="tracking-wide leading-none select-none uppercase">
+          <div className="flex h-full w-full select-none items-center justify-center font-bold text-white">
+            <span className="select-none uppercase leading-none tracking-wide">
               {getInitials(name)}
             </span>
           </div>
@@ -70,7 +70,7 @@ export function UserAvatar({
 
         {/* Loading Spinner during upload */}
         {uploading && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-xs">
+          <div className="backdrop-blur-xs absolute inset-0 flex items-center justify-center bg-black/60">
             <Loader2 className="h-5 w-5 animate-spin text-white" />
           </div>
         )}
@@ -101,7 +101,7 @@ export function UserAvatar({
       {showStatusDot && (
         <span
           title="Active User"
-          className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 shadow-xs dark:border-slate-900"
+          className="shadow-xs absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900"
         />
       )}
     </div>

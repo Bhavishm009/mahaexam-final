@@ -58,7 +58,7 @@ export async function getServerUser() {
     const hasAcademy = Boolean(
       (u._count?.batchMemberships || 0) > 0 ||
       (u.studentProfile?._count?.batchStudents || 0) > 0 ||
-      (u.organizationId && u.studentProfile?.coachingStatus === "COACHING")
+      (u.organizationId && u.studentProfile?.coachingStatus === "COACHING"),
     );
 
     return {

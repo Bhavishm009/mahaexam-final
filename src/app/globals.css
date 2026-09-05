@@ -138,7 +138,14 @@ body {
   -webkit-font-synthesis: none;
   letter-spacing: normal !important;
   font-language-override: "MAR";
-  font-feature-settings: "locl" 1, "MAR " 1, "liga" 1, "rlig" 1, "dlig" 1, "dev2" 1, "deva" 1;
+  font-feature-settings:
+    "locl" 1,
+    "MAR " 1,
+    "liga" 1,
+    "rlig" 1,
+    "dlig" 1,
+    "dev2" 1,
+    "deva" 1;
   font-variant-ligatures: normal;
 }
 
@@ -151,7 +158,12 @@ body {
   font-weight: 700 !important;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-synthesis: none !important;
   -webkit-font-synthesis: none !important;
   letter-spacing: normal !important;
@@ -160,21 +172,21 @@ h1, h2, h3, h4, h5, h6 {
 /* Marathi & Devanagari specific font class */
 .font-marathi {
   font-family:
-    "Noto Sans Devanagari",
-    "Mukta",
-    "Hind",
-    "Baloo 2",
-    "Tiro Devanagari Marathi",
-    "Nirmala UI",
-    "Mangal",
-    "Roboto",
-    sans-serif;
+    "Noto Sans Devanagari", "Mukta", "Hind", "Baloo 2", "Tiro Devanagari Marathi", "Nirmala UI",
+    "Mangal", "Roboto", sans-serif;
   line-height: 1.5;
   letter-spacing: normal !important;
   font-synthesis: none;
   -webkit-font-synthesis: none;
   font-language-override: "MAR";
-  font-feature-settings: "locl" 1, "MAR " 1, "liga" 1, "rlig" 1, "dlig" 1, "dev2" 1, "deva" 1;
+  font-feature-settings:
+    "locl" 1,
+    "MAR " 1,
+    "liga" 1,
+    "rlig" 1,
+    "dlig" 1,
+    "dev2" 1,
+    "deva" 1;
   font-variant-ligatures: normal;
 }
 
@@ -230,19 +242,23 @@ canvas {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg,
-      rgba(241, 245, 249, 0.6) 0%,
-      rgba(226, 232, 240, 0.9) 50%,
-      rgba(241, 245, 249, 0.6) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(241, 245, 249, 0.6) 0%,
+    rgba(226, 232, 240, 0.9) 50%,
+    rgba(241, 245, 249, 0.6) 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite ease-in-out;
 }
 
 .dark .animate-shimmer {
-  background: linear-gradient(90deg,
-      rgba(30, 41, 59, 0.6) 0%,
-      rgba(51, 65, 85, 0.9) 50%,
-      rgba(30, 41, 59, 0.6) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.6) 0%,
+    rgba(51, 65, 85, 0.9) 50%,
+    rgba(30, 41, 59, 0.6) 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite ease-in-out;
 }

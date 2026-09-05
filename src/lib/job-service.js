@@ -18,8 +18,10 @@ export const INITIAL_JOB_ALERTS = [
     statusColor: "bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300",
     officialUrl: "https://policeshipai2024.mahait.org",
     notificationPdf: "https://policeshipai2024.mahait.org/pdf/police-bharti-2026-notice.pdf",
-    description: "महाराष्ट्र राज्य पोलीस दलातील शिपाई, चालक आणि SRPF पदांसाठीची महाभरती. शारीरिक चाचणी व लेखी परीक्षेची परिपूर्ण तयारी आत्ताच सुरू करा.",
-    descriptionMr: "महाराष्ट्र राज्य पोलीस दलातील शिपाई, चालक आणि SRPF पदांसाठीची महाभरती. शारीरिक चाचणी व लेखी परीक्षेची परिपूर्ण तयारी करा.",
+    description:
+      "महाराष्ट्र राज्य पोलीस दलातील शिपाई, चालक आणि SRPF पदांसाठीची महाभरती. शारीरिक चाचणी व लेखी परीक्षेची परिपूर्ण तयारी आत्ताच सुरू करा.",
+    descriptionMr:
+      "महाराष्ट्र राज्य पोलीस दलातील शिपाई, चालक आणि SRPF पदांसाठीची महाभरती. शारीरिक चाचणी व लेखी परीक्षेची परिपूर्ण तयारी करा.",
     examSlug: "police-bharti-mock-01",
     salaryRange: "₹२१,७०० - ₹६९,१०० (S-6 Level) + भत्ते",
     ageLimit: "१८ ते २८ वर्षे (मागासवर्गीय उमेदवारांसाठी ५ वर्षे सूट)",
@@ -40,8 +42,10 @@ export const INITIAL_JOB_ALERTS = [
     statusColor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300",
     officialUrl: "https://mpsc.gov.in",
     notificationPdf: "https://mpsc.gov.in/notifications/mpsc-civil-services-2026.pdf",
-    description: "उपजिल्हाधिकारी, डीवायएसपी, तहसीलदार व वर्ग-१/वर्ग-२ पदांसाठी राज्यसेवा पूर्व परीक्षा. GS पेपर १ व CSAT चा सराव उपलब्ध.",
-    descriptionMr: "उपजिल्हाधिकारी, डीवायएसपी, तहसीलदार व वर्ग-१/वर्ग-२ पदांसाठी राज्यसेवा पूर्व परीक्षा.",
+    description:
+      "उपजिल्हाधिकारी, डीवायएसपी, तहसीलदार व वर्ग-१/वर्ग-२ पदांसाठी राज्यसेवा पूर्व परीक्षा. GS पेपर १ व CSAT चा सराव उपलब्ध.",
+    descriptionMr:
+      "उपजिल्हाधिकारी, डीवायएसपी, तहसीलदार व वर्ग-१/वर्ग-२ पदांसाठी राज्यसेवा पूर्व परीक्षा.",
     examSlug: "mpsc-foundation-mock-test",
     salaryRange: "₹५६,१०० - ₹१,७७,५०० (S-20 Level Class-1)",
     ageLimit: "१९ ते ३८ वर्षे (मागासवर्गीय उमेदवारांसाठी ४३ वर्षे)",
@@ -62,7 +66,8 @@ export const INITIAL_JOB_ALERTS = [
     statusColor: "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300",
     officialUrl: "https://mahabhumi.gov.in",
     notificationPdf: "https://mahabhumi.gov.in/talathi-2026-advertisement.pdf",
-    description: "TCS द्वारे घेतली जाणारी १०० प्रश्नांची २०० गुणांची ऑनलाइन CBT परीक्षा. मागील वर्षांच्या अधिकृत TCS शिफ्ट्सचे पेपर्स सोडवा.",
+    description:
+      "TCS द्वारे घेतली जाणारी १०० प्रश्नांची २०० गुणांची ऑनलाइन CBT परीक्षा. मागील वर्षांच्या अधिकृत TCS शिफ्ट्सचे पेपर्स सोडवा.",
     descriptionMr: "TCS द्वारे घेतली जाणारी १०० प्रश्नांची २०० गुणांची ऑनलाइन CBT परीक्षा.",
     examSlug: "talathi-bharti-special-practice-test-series-2026",
     salaryRange: "₹२५,५०० - ₹८१,१०० (S-8 Level)",
@@ -84,7 +89,8 @@ export const INITIAL_JOB_ALERTS = [
     statusColor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300",
     officialUrl: "https://rdd.maharashtra.gov.in",
     notificationPdf: "https://rdd.maharashtra.gov.in/zp-recruitment-2026.pdf",
-    description: "आरोग्य सेवक (पुरुष/महिला), ग्रामसेवक व औषध निर्माण अधिकारी पदांसाठी IBPS पॅटर्ननुसार होणाऱ्या परीक्षांचे सराव पेपर्स.",
+    description:
+      "आरोग्य सेवक (पुरुष/महिला), ग्रामसेवक व औषध निर्माण अधिकारी पदांसाठी IBPS पॅटर्ननुसार होणाऱ्या परीक्षांचे सराव पेपर्स.",
     descriptionMr: "आरोग्य सेवक (पुरुष/महिला), ग्रामसेवक व औषध निर्माण अधिकारी परीक्षा.",
     examSlug: "zp-arogya-sevak-full-length-test",
     salaryRange: "₹२५,५०० - ₹८१,१०० (S-8 Level)",
@@ -106,7 +112,8 @@ export const INITIAL_JOB_ALERTS = [
     statusColor: "bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300",
     officialUrl: "https://mahaforest.gov.in",
     notificationPdf: "https://mahaforest.gov.in/vanrakshak-2026-pdf.pdf",
-    description: "वनरक्षक CBT परीक्षेमध्ये मराठी, इंग्रजी, सामान्य ज्ञान व बौद्धिक चाचणीचे ६० प्रश्न १२० गुणांसाठी विचारले जातात.",
+    description:
+      "वनरक्षक CBT परीक्षेमध्ये मराठी, इंग्रजी, सामान्य ज्ञान व बौद्धिक चाचणीचे ६० प्रश्न १२० गुणांसाठी विचारले जातात.",
     descriptionMr: "वनरक्षक CBT परीक्षेमध्ये ६० प्रश्न १२० गुणांसाठी विचारले जातात.",
     examSlug: "vanrakshak-forest-guard-cbt-exam-simulator",
     salaryRange: "₹२१,७०० - ₹६९,१०० (S-6 Level)",
@@ -134,7 +141,9 @@ async function fetchAllJobAlertsInternal() {
         qualificationMr: j.qualificationMr || j.qualification,
         lastDate: j.lastDate,
         status: j.status,
-        statusColor: j.statusColor || "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300",
+        statusColor:
+          j.statusColor ||
+          "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300",
         officialUrl: j.officialUrl || "https://maharashtra.gov.in",
         notificationPdf: j.notificationPdf || null,
         description: j.description,
@@ -158,11 +167,10 @@ async function fetchAllJobAlertsInternal() {
  * High-performance cached query for job alerts
  */
 export async function getAllJobAlerts() {
-  return cache(
-    fetchAllJobAlertsInternal,
-    ["all-job-alerts-key"],
-    { revalidate: 120, tags: ["job-alerts"] }
-  )();
+  return cache(fetchAllJobAlertsInternal, ["all-job-alerts-key"], {
+    revalidate: 120,
+    tags: ["job-alerts"],
+  })();
 }
 
 /**
@@ -209,7 +217,7 @@ export async function getJobAlertById(idOrSlug) {
   }
 
   const staticMatch = INITIAL_JOB_ALERTS.find(
-    (j) => j.id.toLowerCase() === target || j.slug.toLowerCase() === target
+    (j) => j.id.toLowerCase() === target || j.slug.toLowerCase() === target,
   );
 
   return staticMatch || INITIAL_JOB_ALERTS[0];
@@ -236,7 +244,9 @@ export async function createJobAlert(data, notifyStudents = true) {
       qualificationMr: data.qualificationMr || data.qualification,
       lastDate: data.lastDate || "लवकरच",
       status: data.status || "ACTIVE",
-      statusColor: data.statusColor || "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300",
+      statusColor:
+        data.statusColor ||
+        "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300",
       officialUrl: data.officialUrl || "https://maharashtra.gov.in",
       notificationPdf: data.notificationPdf || null,
       description: data.description,

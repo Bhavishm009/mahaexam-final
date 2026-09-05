@@ -85,7 +85,9 @@ export async function GET(request) {
       const latestMembership = s.batchMemberships[0];
       const academyStatus = activeMembership
         ? "ACTIVE"
-        : (latestMembership?.status === "SUSPENDED" || latestMembership?.status === "REMOVED" ? "INACTIVE" : "ACTIVE");
+        : latestMembership?.status === "SUSPENDED" || latestMembership?.status === "REMOVED"
+          ? "INACTIVE"
+          : "ACTIVE";
       const batch = activeMembership?.batch || latestMembership?.batch || null;
 
       return {

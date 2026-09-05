@@ -21,14 +21,21 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { route, title, titleMr, description, descriptionMr, keywords, canonicalUrl, ogImage } = body;
+    const { route, title, titleMr, description, descriptionMr, keywords, canonicalUrl, ogImage } =
+      body;
 
     if (!route?.trim()) {
-      return NextResponse.json({ error: "Validation Error: Route path is required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Validation Error: Route path is required." },
+        { status: 400 },
+      );
     }
 
     if (!title?.trim()) {
-      return NextResponse.json({ error: "Validation Error: SEO Title is required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Validation Error: SEO Title is required." },
+        { status: 400 },
+      );
     }
 
     const updated = await updateSeoForRoute(route.trim(), {
@@ -41,9 +48,16 @@ export async function POST(req) {
       ogImage,
     });
 
-    return NextResponse.json({ success: true, seoSetting: updated, message: "SEO configuration saved successfully!" });
+    return NextResponse.json({
+      success: true,
+      seoSetting: updated,
+      message: "SEO configuration saved successfully!",
+    });
   } catch (error) {
     console.error("Error saving SEO settings:", error);
-    return NextResponse.json({ error: error.message || "Failed to save SEO settings." }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to save SEO settings." },
+      { status: 500 },
+    );
   }
 }

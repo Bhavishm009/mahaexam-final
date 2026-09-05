@@ -35,11 +35,8 @@ export function HeroStatsBanner() {
         <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 sm:text-2xl">
           {t.statPrice}
         </div>
-        <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-          {t.statPriceLabel}
-        </div>
+        <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{t.statPriceLabel}</div>
       </div>
     </div>
   );
 }
-

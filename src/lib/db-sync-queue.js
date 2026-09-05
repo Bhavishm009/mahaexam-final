@@ -11,7 +11,7 @@ function sanitizePayload(data) {
     JSON.stringify(data, (key, value) => {
       if (typeof value === "bigint") return Number(value);
       return value;
-    })
+    }),
   );
 }
 
@@ -41,12 +41,12 @@ export async function enqueueFailoverMutation({ model, method, args, resultId })
     });
 
     console.log(
-      `📦 [Failover Outbox] Enqueued mutation: ${model}.${method} (id=${resultId || "n/a"}) for replay to Primary.`
+      `📦 [Failover Outbox] Enqueued mutation: ${model}.${method} (id=${resultId || "n/a"}) for replay to Primary.`,
     );
   } catch (err) {
     console.warn(
       `⚠️ [Failover Outbox Warning] Failed to log mutation to Secondary outbox:`,
-      err?.message
+      err?.message,
     );
   }
 }
@@ -115,7 +115,7 @@ export async function replayFailoverQueue() {
     }
 
     console.log(
-      `🚀 [Failover Replay] Replaying ${pendingJobs.length} mutations from Secondary Outbox to Primary Master DB...`
+      `🚀 [Failover Replay] Replaying ${pendingJobs.length} mutations from Secondary Outbox to Primary Master DB...`,
     );
 
     for (const job of pendingJobs) {
@@ -125,7 +125,11 @@ export async function replayFailoverQueue() {
         console.warn(`[Failover Replay] Invalid model/method in job ${job.id}: ${model}.${method}`);
         await secondaryPrisma.job.update({
           where: { id: job.id },
-          data: { status: "COMPLETED", lastError: "Model/method does not exist", completedAt: new Date() },
+          data: {
+            status: "COMPLETED",
+            lastError: "Model/method does not exist",
+            completedAt: new Date(),
+          },
         });
         skipped++;
         continue;
@@ -141,7 +145,9 @@ export async function replayFailoverQueue() {
         });
 
         replayed++;
-        console.log(`✅ [Failover Replay] Successfully synced ${model}.${method} (id=${resultId}) to Primary.`);
+        console.log(
+          `✅ [Failover Replay] Successfully synced ${model}.${method} (id=${resultId}) to Primary.`,
+        );
       } catch (mutationErr) {
         const errMsg = mutationErr?.message || "";
 
@@ -162,7 +168,9 @@ export async function replayFailoverQueue() {
 
         // If error is unique constraint or already exists, it's already in sync
         if (mutationErr?.code === "P2002" || errMsg.includes("Unique constraint failed")) {
-          console.log(`ℹ️ [Failover Replay] ${model}.${method} already exists on Primary. Marking completed.`);
+          console.log(
+            `ℹ️ [Failover Replay] ${model}.${method} already exists on Primary. Marking completed.`,
+          );
           await secondaryPrisma.job.update({
             where: { id: job.id },
             data: { status: "COMPLETED", completedAt: new Date() },
@@ -180,7 +188,10 @@ export async function replayFailoverQueue() {
         });
 
         failed++;
-        console.warn(`⚠️ [Failover Replay Warning] Error replaying ${model}.${method} to Primary:`, errMsg);
+        console.warn(
+          `⚠️ [Failover Replay Warning] Error replaying ${model}.${method} to Primary:`,
+          errMsg,
+        );
       }
     }
 

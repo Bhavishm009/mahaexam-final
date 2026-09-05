@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { questions } from "@/lib/demo-data";
 
 export default function ExamClient({ examId }) {
@@ -36,6 +36,9 @@ export default function ExamClient({ examId }) {
     setStarting(false);
   };
 
+  const submitRef = useRef();
+  const reportViolationRef = useRef();
+
   useEffect(() => {
     if (!started || submitted || !expiresAt) {
       return;
@@ -44,7 +47,7 @@ export default function ExamClient({ examId }) {
       const remaining = Math.max(0, Math.floor((new Date(expiresAt) - new Date()) / 1000));
       setSeconds(remaining);
       if (remaining <= 0) {
-        submit(true);
+        submitRef.current?.(true);
       }
     }, 500);
     return () => clearInterval(timer);
@@ -67,6 +70,7 @@ export default function ExamClient({ examId }) {
       await loadAttemptResult();
     }
   };
+  reportViolationRef.current = reportViolation;
 
   useEffect(() => {
     if (!started || submitted) {
@@ -74,25 +78,25 @@ export default function ExamClient({ examId }) {
     }
     const onVisibility = () => {
       if (document.hidden) {
-        reportViolation("TAB_SWITCH");
+        reportViolationRef.current?.("TAB_SWITCH");
       }
     };
     const onFullscreen = () => {
       if (!document.fullscreenElement) {
-        reportViolation("FULLSCREEN_EXIT");
+        reportViolationRef.current?.("FULLSCREEN_EXIT");
       }
     };
     const onContext = (e) => {
       e.preventDefault();
-      reportViolation("RIGHT_CLICK");
+      reportViolationRef.current?.("RIGHT_CLICK");
     };
     const onCopy = (e) => {
       e.preventDefault();
-      reportViolation("COPY_ATTEMPT");
+      reportViolationRef.current?.("COPY_ATTEMPT");
     };
     const onPaste = (e) => {
       e.preventDefault();
-      reportViolation("PASTE_ATTEMPT");
+      reportViolationRef.current?.("PASTE_ATTEMPT");
     };
 
     document.addEventListener("visibilitychange", onVisibility);
@@ -107,7 +111,7 @@ export default function ExamClient({ examId }) {
       document.removeEventListener("copy", onCopy);
       document.removeEventListener("paste", onPaste);
     };
-  }, [started, submitted, attemptId]);
+  }, [started, submitted]);
 
   const loadAttemptResult = async () => {
     if (!attemptId) {
@@ -136,6 +140,7 @@ export default function ExamClient({ examId }) {
       setSubmitted(true);
     }
   };
+  submitRef.current = submit;
 
   const choose = async (index) => {
     const q = examQuestions[current];
@@ -166,8 +171,12 @@ export default function ExamClient({ examId }) {
     return (
       <main className="min-h-screen bg-slate-50 p-6 text-slate-900 dark:bg-slate-950 dark:text-white">
         <div className="mx-auto mt-16 max-w-2xl rounded-3xl border border-slate-200 bg-white p-8 text-slate-900 shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:text-white">
-          <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">POLICE BHARTI • DEMO EXAM</div>
-          <h1 className="mt-3 text-3xl font-black text-slate-900 dark:text-white">Police Bharti Mock Test 01</h1>
+          <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+            POLICE BHARTI • DEMO EXAM
+          </div>
+          <h1 className="mt-3 text-3xl font-black text-slate-900 dark:text-white">
+            Police Bharti Mock Test 01
+          </h1>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
               <b className="text-slate-900 dark:text-white">50</b>
@@ -189,7 +198,7 @@ export default function ExamClient({ examId }) {
           <button
             disabled={starting}
             onClick={start}
-            className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-500 disabled:opacity-60 transition-colors shadow-sm"
+            className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow-sm transition-colors hover:bg-blue-500 disabled:opacity-60"
           >
             {starting ? "Starting..." : "Start Examination"}
           </button>
@@ -203,27 +212,37 @@ export default function ExamClient({ examId }) {
       <main className="min-h-screen bg-slate-50 p-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">EXAM SUBMITTED</div>
+            <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+              EXAM SUBMITTED
+            </div>
             <h1 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">Your Result</h1>
             <div className="mt-6 grid gap-4 sm:grid-cols-4">
               <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-blue-900/40 dark:bg-blue-950/40">
-                <div className="text-3xl font-black text-blue-700 dark:text-blue-300">{result.score.toFixed(2)}</div>
+                <div className="text-3xl font-black text-blue-700 dark:text-blue-300">
+                  {result.score.toFixed(2)}
+                </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">Score</div>
               </div>
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5 dark:border-emerald-900/40 dark:bg-emerald-950/40">
-                <div className="text-3xl font-black text-emerald-700 dark:text-emerald-300">{result.correctCount}</div>
+                <div className="text-3xl font-black text-emerald-700 dark:text-emerald-300">
+                  {result.correctCount}
+                </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">Correct</div>
               </div>
               <div className="rounded-2xl border border-rose-100 bg-rose-50 p-5 dark:border-rose-900/40 dark:bg-rose-950/40">
-                <div className="text-3xl font-black text-rose-700 dark:text-rose-300">{result.wrongCount}</div>
+                <div className="text-3xl font-black text-rose-700 dark:text-rose-300">
+                  {result.wrongCount}
+                </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">Wrong</div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-100 p-5 dark:border-slate-800 dark:bg-slate-800/80">
-                <div className="text-3xl font-black text-slate-900 dark:text-white">{result.unansweredCount}</div>
+                <div className="text-3xl font-black text-slate-900 dark:text-white">
+                  {result.unansweredCount}
+                </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">Unanswered</div>
               </div>
             </div>
-            <div className="mt-6 rounded-2xl border border-slate-200 p-5 text-sm dark:border-slate-800 text-slate-800 dark:text-slate-200">
+            <div className="mt-6 rounded-2xl border border-slate-200 p-5 text-sm text-slate-800 dark:border-slate-800 dark:text-slate-200">
               <div className="flex justify-between">
                 <span>Percentage</span>
                 <b className="text-slate-900 dark:text-white">{result.percentage}%</b>
@@ -250,7 +269,9 @@ export default function ExamClient({ examId }) {
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div>
-            <div className="font-bold text-slate-900 dark:text-white">Police Bharti Mock Test 01</div>
+            <div className="font-bold text-slate-900 dark:text-white">
+              Police Bharti Mock Test 01
+            </div>
             <div className="text-xs text-slate-500 dark:text-slate-400">
               Question {current + 1} of {examQuestions.length} {saving ? "· Saving..." : "· Saved"}
             </div>
@@ -263,16 +284,20 @@ export default function ExamClient({ examId }) {
         </div>
       </header>
       <div className="mx-auto grid max-w-7xl gap-5 p-4 lg:grid-cols-[1fr_300px]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-8 dark:border-slate-800 dark:bg-slate-900">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-8">
           <div className="flex items-center justify-between">
             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
               {q.subject}
             </span>
             {violations > 0 && (
-              <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">Violations: {violations}/3</span>
+              <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+                Violations: {violations}/3
+              </span>
             )}
           </div>
-          <h2 className="mt-6 text-xl font-bold leading-relaxed text-slate-900 dark:text-white">{q.text}</h2>
+          <h2 className="mt-6 text-xl font-bold leading-relaxed text-slate-900 dark:text-white">
+            {q.text}
+          </h2>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{q.textMr}</p>
           <div className="mt-7 space-y-3">
             {q.options.map((option, i) => (
@@ -281,7 +306,7 @@ export default function ExamClient({ examId }) {
                 onClick={() => choose(i)}
                 className={`w-full rounded-xl border p-4 text-left transition ${
                   answers[q.id] === i
-                    ? "border-blue-600 bg-blue-50/80 ring-2 ring-blue-100 dark:border-blue-500 dark:bg-blue-950/50 dark:ring-blue-900/40 text-slate-900 dark:text-white"
+                    ? "border-blue-600 bg-blue-50/80 text-slate-900 ring-2 ring-blue-100 dark:border-blue-500 dark:bg-blue-950/50 dark:text-white dark:ring-blue-900/40"
                     : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
                 }`}
               >
@@ -296,14 +321,14 @@ export default function ExamClient({ examId }) {
             <button
               disabled={current === 0}
               onClick={() => setCurrent((c) => c - 1)}
-              className="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-700 disabled:opacity-40 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-40 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               Previous
             </button>
             <div className="flex gap-2">
               <button
                 onClick={() => setMarked((m) => ({ ...m, [q.id]: !m[q.id] }))}
-                className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
+                className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 {marked[q.id] ? "Unmark" : "Mark for review"}
               </button>
@@ -311,7 +336,7 @@ export default function ExamClient({ examId }) {
                 onClick={() =>
                   current === examQuestions.length - 1 ? submit(false) : setCurrent((c) => c + 1)
                 }
-                className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-500 transition-colors shadow-sm"
+                className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-blue-500"
               >
                 {current === examQuestions.length - 1 ? "Submit" : "Next"}
               </button>
@@ -340,13 +365,26 @@ export default function ExamClient({ examId }) {
             ))}
           </div>
           <div className="mt-5 space-y-2 text-xs text-slate-500 dark:text-slate-400">
-            <div>Answered: <span className="font-semibold text-slate-800 dark:text-slate-200">{answered}</span></div>
-            <div>Unanswered: <span className="font-semibold text-slate-800 dark:text-slate-200">{examQuestions.length - answered}</span></div>
-            <div>Marked: <span className="font-semibold text-slate-800 dark:text-slate-200">{Object.values(marked).filter(Boolean).length}</span></div>
+            <div>
+              Answered:{" "}
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{answered}</span>
+            </div>
+            <div>
+              Unanswered:{" "}
+              <span className="font-semibold text-slate-800 dark:text-slate-200">
+                {examQuestions.length - answered}
+              </span>
+            </div>
+            <div>
+              Marked:{" "}
+              <span className="font-semibold text-slate-800 dark:text-slate-200">
+                {Object.values(marked).filter(Boolean).length}
+              </span>
+            </div>
           </div>
           <button
             onClick={() => submit(false)}
-            className="mt-6 w-full rounded-xl bg-rose-600 px-4 py-3 font-bold text-white hover:bg-rose-500 transition-colors shadow-sm"
+            className="mt-6 w-full rounded-xl bg-rose-600 px-4 py-3 font-bold text-white shadow-sm transition-colors hover:bg-rose-500"
           >
             Submit Exam
           </button>

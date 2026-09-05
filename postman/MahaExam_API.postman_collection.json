@@ -511,9 +511,7 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.environment.set(\"authToken\", \"\");"
-                ],
+                "exec": ["pm.environment.set(\"authToken\", \"\");"],
                 "type": "text/javascript"
               }
             }
@@ -1618,4 +1616,3 @@
     }
   ]
 }
-

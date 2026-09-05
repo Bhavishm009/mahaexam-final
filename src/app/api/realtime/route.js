@@ -19,7 +19,10 @@ export async function GET(req) {
       };
 
       // Send initial connection ACK
-      sendEvent("connected", { message: "Realtime Live Feed Connected", timestamp: new Date().toISOString() });
+      sendEvent("connected", {
+        message: "Realtime Live Feed Connected",
+        timestamp: new Date().toISOString(),
+      });
 
       // Poll every 30 seconds for live status keep-alive heartbeat
       const interval = setInterval(() => {

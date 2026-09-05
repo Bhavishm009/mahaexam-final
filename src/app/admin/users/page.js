@@ -209,8 +209,6 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6 font-sans">
-
-
       {/* Add User Modal */}
       {showAddUserModal && (
         <div
@@ -482,9 +480,7 @@ export default function AdminUsersPage() {
         {/* Header Row: 16px font title, Search, Filter & Add in SAME line */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2.5">
-            <h1 className="text-base font-bold text-slate-900 dark:text-white">
-              Platform Users
-            </h1>
+            <h1 className="text-base font-bold text-slate-900 dark:text-white">Platform Users</h1>
             <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
               {filteredUsers.length}
             </span>
@@ -548,7 +544,7 @@ export default function AdminUsersPage() {
               }}
               className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
                 roleFilter === tab.id
-                  ? "bg-white text-blue-600 font-bold shadow-xs dark:bg-slate-800 dark:text-blue-400"
+                  ? "shadow-xs bg-white font-bold text-blue-600 dark:bg-slate-800 dark:text-blue-400"
                   : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
               }`}
             >
@@ -591,11 +587,7 @@ export default function AdminUsersPage() {
                   >
                     <td className="py-3.5 pl-2">
                       <div className="flex items-center gap-3">
-                        <UserAvatar
-                          src={u.studentProfile?.profilePhoto}
-                          name={u.name}
-                          size="sm"
-                        />
+                        <UserAvatar src={u.studentProfile?.profilePhoto} name={u.name} size="sm" />
                         <div>
                           <div className="font-bold text-slate-900 dark:text-white">{u.name}</div>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400">

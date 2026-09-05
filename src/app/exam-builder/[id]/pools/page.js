@@ -59,7 +59,10 @@ export default function Pools({ params }) {
         <p className="mt-1 text-slate-500 dark:text-slate-400">
           Choose random questions from a larger authorized pool.
         </p>
-        <form onSubmit={add} className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <form
+          onSubmit={add}
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        >
           <div className="grid gap-3 md:grid-cols-2">
             {[
               ["name", "Pool name"],
@@ -72,7 +75,7 @@ export default function Pools({ params }) {
                 <input
                   value={form[k]}
                   onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white placeholder:text-slate-400"
+                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   required={k === "name"}
                 />
               </label>
@@ -90,17 +93,22 @@ export default function Pools({ params }) {
               </select>
             </label>
           </div>
-          <button className="mt-5 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-500 transition-colors shadow-sm">
+          <button className="mt-5 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow-sm transition-colors hover:bg-blue-500">
             Add Pool
           </button>
           {msg && <span className="ml-3 text-sm text-slate-600 dark:text-slate-400">{msg}</span>}
         </form>
         <div className="mt-6 space-y-3">
           {pools.map((p) => (
-            <div key={p.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="flex justify-between items-center">
+            <div
+              key={p.id}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
+              <div className="flex items-center justify-between">
                 <b className="text-lg font-bold text-slate-900 dark:text-white">{p.name}</b>
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">{p.selectionMode}</span>
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  {p.selectionMode}
+                </span>
               </div>
               <div className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 Select {p.questionCount} · {p.sectionName || "No section"} ·{" "}

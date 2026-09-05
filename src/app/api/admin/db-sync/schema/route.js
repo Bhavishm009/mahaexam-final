@@ -8,10 +8,13 @@ import { primaryPrisma, secondaryPrisma } from "@/lib/db.js";
  */
 export async function GET() {
   if (!secondaryPrisma) {
-    return NextResponse.json({
-      success: false,
-      error: "SECONDARY_DATABASE_URL is not configured",
-    }, { status: 400 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "SECONDARY_DATABASE_URL is not configured",
+      },
+      { status: 400 },
+    );
   }
 
   let primaryColumns = [];
@@ -26,10 +29,13 @@ export async function GET() {
       ORDER BY table_name, column_name;
     `;
   } catch (err) {
-    return NextResponse.json({
-      success: false,
-      error: "Failed to inspect Primary Database schema: " + err.message,
-    }, { status: 503 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to inspect Primary Database schema: " + err.message,
+      },
+      { status: 503 },
+    );
   }
 
   try {
@@ -41,10 +47,13 @@ export async function GET() {
       ORDER BY table_name, column_name;
     `;
   } catch (err) {
-    return NextResponse.json({
-      success: false,
-      error: "Failed to inspect Secondary Database schema: " + err.message,
-    }, { status: 503 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to inspect Secondary Database schema: " + err.message,
+      },
+      { status: 503 },
+    );
   }
 
   // 3. Build lookup sets
@@ -114,7 +123,10 @@ export async function GET() {
  */
 export async function POST(req) {
   if (!secondaryPrisma) {
-    return NextResponse.json({ success: false, error: "SECONDARY_DATABASE_URL is not configured" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: "SECONDARY_DATABASE_URL is not configured" },
+      { status: 400 },
+    );
   }
 
   let targetTable = null;
@@ -163,24 +175,30 @@ export async function POST(req) {
 
         const sql = `ALTER TABLE "${col.table_name}" ADD COLUMN IF NOT EXISTS "${col.column_name}" ${colType};`;
         await secondaryPrisma.$executeRawUnsafe(sql);
-        alignedLog.push(`Added column "${col.column_name}" (${colType}) to table "${col.table_name}" on Secondary DB.`);
+        alignedLog.push(
+          `Added column "${col.column_name}" (${colType}) to table "${col.table_name}" on Secondary DB.`,
+        );
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: alignedLog.length > 0
-        ? targetTable
-          ? `Successfully aligned schema for '${targetTable}': ${alignedLog.length} columns added without data loss.`
-          : `Successfully aligned schema: ${alignedLog.length} columns synchronized.`
-        : "Schema is already 100% aligned.",
+      message:
+        alignedLog.length > 0
+          ? targetTable
+            ? `Successfully aligned schema for '${targetTable}': ${alignedLog.length} columns added without data loss.`
+            : `Successfully aligned schema: ${alignedLog.length} columns synchronized.`
+          : "Schema is already 100% aligned.",
       targetTable: targetTable || null,
       alignedLog,
     });
   } catch (err) {
-    return NextResponse.json({
-      success: false,
-      error: "Schema alignment failed: " + err.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Schema alignment failed: " + err.message,
+      },
+      { status: 500 },
+    );
   }
 }

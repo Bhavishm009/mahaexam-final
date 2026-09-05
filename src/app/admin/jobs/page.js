@@ -79,7 +79,10 @@ export default function AdminJobsManagementPage() {
       : { ...formData, title: val };
 
     const baseTitle = isMarathi ? formData.title || val : val;
-    if (!formData.examSlug || formData.examSlug === generateSlug(formData.title || formData.titleMr) + "-mock-test") {
+    if (
+      !formData.examSlug ||
+      formData.examSlug === generateSlug(formData.title || formData.titleMr) + "-mock-test"
+    ) {
       updated.examSlug = generateSlug(baseTitle) ? `${generateSlug(baseTitle)}-mock-test` : "";
     }
 
@@ -167,7 +170,8 @@ export default function AdminJobsManagementPage() {
 
     const payload = {
       ...formData,
-      examSlug: formData.examSlug || generateSlug(formData.title || formData.titleMr) + "-mock-test",
+      examSlug:
+        formData.examSlug || generateSlug(formData.title || formData.titleMr) + "-mock-test",
       notifyStudents,
     };
 
@@ -198,7 +202,8 @@ export default function AdminJobsManagementPage() {
             Government Job Recruitment Alerts
           </h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Post new recruitment alerts and broadcast in-app & web push notifications to candidates simultaneously.
+            Post new recruitment alerts and broadcast in-app & web push notifications to candidates
+            simultaneously.
           </p>
         </div>
 
@@ -225,22 +230,20 @@ export default function AdminJobsManagementPage() {
             Loading job alerts...
           </div>
         ) : jobs.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-400">
-            No job notifications found.
-          </div>
+          <div className="p-8 text-center text-xs text-slate-400">No job notifications found.</div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition"
+                className="flex flex-col justify-between gap-4 p-5 transition hover:bg-slate-50/50 dark:hover:bg-slate-800/30 sm:flex-row sm:items-center"
               >
                 <div className="flex items-start gap-4">
                   {job.imageUrl && (
                     <img
                       src={job.imageUrl}
                       alt={job.title}
-                      className="h-14 w-14 rounded-2xl object-cover border border-slate-200 dark:border-slate-800 shrink-0"
+                      className="h-14 w-14 shrink-0 rounded-2xl border border-slate-200 object-cover dark:border-slate-800"
                     />
                   )}
                   <div className="space-y-1">
@@ -291,287 +294,300 @@ export default function AdminJobsManagementPage() {
       </div>
 
       {/* Modal for Creating New Job */}
-      {showCreateModal && mounted && createPortal(
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowCreateModal(false);
-          }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md overflow-hidden"
-        >
-          <div className="max-h-[90vh] w-full max-w-2xl flex flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden dark:border-slate-800 dark:bg-slate-900 animate-in fade-in zoom-in-95 duration-150">
-            {/* Fixed Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800 shrink-0 bg-slate-50/80 dark:bg-slate-900/80">
-              <div className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                  Add New Job Recruitment Alert
-                </h3>
+      {showCreateModal &&
+        mounted &&
+        createPortal(
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowCreateModal(false);
+            }}
+            className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black/75 p-4 backdrop-blur-md"
+          >
+            <div className="animate-in fade-in zoom-in-95 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl duration-150 dark:border-slate-800 dark:bg-slate-900">
+              {/* Fixed Header */}
+              <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-slate-50/80 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/80">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    Add New Job Recruitment Alert
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-xl p-1 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  ✕
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+
+              {/* Scrollable Form Body */}
+              <form
+                id="job-form"
+                onSubmit={handleCreateJob}
+                className="flex-1 space-y-4 overflow-y-auto p-6"
               >
-                ✕
-              </button>
-            </div>
+                {/* Job Image Upload Section */}
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+                  <label className="mb-2 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Job / Banner Image (Supabase Storage / Upload)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {formData.imageUrl ? (
+                      <div className="relative h-16 w-20 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+                        <img
+                          src={formData.imageUrl}
+                          alt="Uploaded Banner"
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, imageUrl: "" })}
+                          className="absolute right-1 top-1 rounded-full bg-rose-600 p-0.5 text-white"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid h-16 w-20 place-items-center rounded-xl bg-slate-200/60 text-xs font-bold text-slate-400 dark:bg-slate-800">
+                        No Image
+                      </div>
+                    )}
 
-            {/* Scrollable Form Body */}
-            <form id="job-form" onSubmit={handleCreateJob} className="flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Job Image Upload Section */}
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Job / Banner Image (Supabase Storage / Upload)
-                </label>
-                <div className="flex items-center gap-4">
-                  {formData.imageUrl ? (
-                    <div className="relative h-16 w-20 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-                      <img src={formData.imageUrl} alt="Uploaded Banner" className="h-full w-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, imageUrl: "" })}
-                        className="absolute right-1 top-1 rounded-full bg-rose-600 p-0.5 text-white"
-                      >
-                        ✕
-                      </button>
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="block w-full text-xs text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-blue-500"
+                      />
+                      <input
+                        type="url"
+                        placeholder="Or paste Image URL (e.g. https://...)"
+                        value={formData.imageUrl}
+                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                      />
                     </div>
-                  ) : (
-                    <div className="grid h-16 w-20 place-items-center rounded-xl bg-slate-200/60 text-xs font-bold text-slate-400 dark:bg-slate-800">
-                      No Image
-                    </div>
-                  )}
+                  </div>
+                </div>
 
-                  <div className="flex-1 space-y-2">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Job Title (Marathi) *
+                    </label>
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploadingImage}
-                      className="block w-full text-xs text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-blue-500"
+                      type="text"
+                      required
+                      placeholder="e.g. Maharashtra Police Bharti 2026"
+                      value={formData.titleMr}
+                      onChange={(e) => handleTitleChange(e.target.value, true)}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Title in English
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Maharashtra Police Constable Recruitment 2026"
+                      value={formData.title}
+                      onChange={(e) => handleTitleChange(e.target.value, false)}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Department *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Maharashtra Police Department"
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Vacancies *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 17,471+ Posts"
+                      value={formData.vacancies}
+                      onChange={(e) => setFormData({ ...formData, vacancies: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Qualification *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 12th Pass (HSC) & Physical Qualification"
+                      value={formData.qualification}
+                      onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Last Date / Status *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 31st March 2026 / Opening Soon"
+                      value={formData.lastDate}
+                      onChange={(e) => setFormData({ ...formData, lastDate: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Job Description *
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="e.g. Complete details, age limits, and physical requirements for Police Constable recruitment..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Official Website URL
+                    </label>
                     <input
                       type="url"
-                      placeholder="Or paste Image URL (e.g. https://...)"
-                      value={formData.imageUrl}
-                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                      placeholder="https://policeshipai2024.mahait.org"
+                      value={formData.officialUrl}
+                      onChange={(e) => setFormData({ ...formData, officialUrl: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Notification PDF Link
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://example.com/notice.pdf"
+                      value={formData.pdfUrl}
+                      onChange={(e) => setFormData({ ...formData, pdfUrl: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                     />
                   </div>
                 </div>
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Job Title (Marathi) *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Maharashtra Police Bharti 2026"
-                    value={formData.titleMr}
-                    onChange={(e) => handleTitleChange(e.target.value, true)}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Title in English
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Maharashtra Police Constable Recruitment 2026"
-                    value={formData.title}
-                    onChange={(e) => handleTitleChange(e.target.value, false)}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Department *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Maharashtra Police Department"
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Vacancies *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 17,471+ Posts"
-                    value={formData.vacancies}
-                    onChange={(e) => setFormData({ ...formData, vacancies: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Qualification *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 12th Pass (HSC) & Physical Qualification"
-                    value={formData.qualification}
-                    onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Last Date / Status *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 31st March 2026 / Opening Soon"
-                    value={formData.lastDate}
-                    onChange={(e) => setFormData({ ...formData, lastDate: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Job Description *
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  placeholder="e.g. Complete details, age limits, and physical requirements for Police Constable recruitment..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Official Website URL
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://policeshipai2024.mahait.org"
-                    value={formData.officialUrl}
-                    onChange={(e) => setFormData({ ...formData, officialUrl: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Notification PDF Link
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://example.com/notice.pdf"
-                    value={formData.pdfUrl}
-                    onChange={(e) => setFormData({ ...formData, pdfUrl: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Salary Range
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="₹21,700 - ₹69,100 (S-6 Level)"
-                    value={formData.salaryRange}
-                    onChange={(e) => setFormData({ ...formData, salaryRange: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Related Mock Exam Slug
+                      Salary Range
                     </label>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData({
-                          ...formData,
-                          examSlug: `${generateSlug(formData.title || formData.titleMr || "mock-exam")}-mock-test`,
-                        })
-                      }
-                      className="text-[10px] font-bold text-blue-600 hover:underline dark:text-blue-400"
-                    >
-                      ⚡ Auto-Generate
-                    </button>
+                    <input
+                      type="text"
+                      placeholder="₹21,700 - ₹69,100 (S-6 Level)"
+                      value={formData.salaryRange}
+                      onChange={(e) => setFormData({ ...formData, salaryRange: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
                   </div>
-                  <input
-                    type="text"
-                    placeholder="e.g. police-bharti-mock-01 (Autogenerated)"
-                    value={formData.examSlug}
-                    onChange={(e) => setFormData({ ...formData, examSlug: e.target.value })}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-mono font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-                  />
+
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Related Mock Exam Slug
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            examSlug: `${generateSlug(formData.title || formData.titleMr || "mock-exam")}-mock-test`,
+                          })
+                        }
+                        className="text-[10px] font-bold text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        ⚡ Auto-Generate
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="e.g. police-bharti-mock-01 (Autogenerated)"
+                      value={formData.examSlug}
+                      onChange={(e) => setFormData({ ...formData, examSlug: e.target.value })}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                    />
+                  </div>
                 </div>
+
+                {/* Broadcast Checkbox */}
+                <div className="mt-4 flex items-center gap-3 rounded-2xl bg-blue-50 p-4 dark:bg-blue-950/50">
+                  <input
+                    type="checkbox"
+                    id="notifyCheck"
+                    checked={notifyStudents}
+                    onChange={(e) => setNotifyStudents(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="notifyCheck"
+                    className="cursor-pointer text-xs font-bold text-blue-950 dark:text-blue-200"
+                  >
+                    🔔 Broadcast In-App & Web Push notifications to all students
+                  </label>
+                </div>
+              </form>
+
+              {/* Fixed Footer */}
+              <div className="flex shrink-0 justify-end gap-3 border-t border-slate-100 bg-slate-50/80 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/80">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-2xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  form="job-form"
+                  disabled={submitting}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-50"
+                >
+                  <Send className="h-4 w-4" />
+                  <span>{submitting ? "Publishing..." : "Publish & Broadcast"}</span>
+                </button>
               </div>
-
-              {/* Broadcast Checkbox */}
-              <div className="mt-4 flex items-center gap-3 rounded-2xl bg-blue-50 p-4 dark:bg-blue-950/50">
-                <input
-                  type="checkbox"
-                  id="notifyCheck"
-                  checked={notifyStudents}
-                  onChange={(e) => setNotifyStudents(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="notifyCheck" className="text-xs font-bold text-blue-950 dark:text-blue-200 cursor-pointer">
-                  🔔 Broadcast In-App & Web Push notifications to all students
-                </label>
-              </div>
-            </form>
-
-            {/* Fixed Footer */}
-            <div className="flex justify-end gap-3 border-t border-slate-100 px-6 py-4 dark:border-slate-800 shrink-0 bg-slate-50/80 dark:bg-slate-900/80">
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="rounded-2xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 transition"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                form="job-form"
-                disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-50"
-              >
-                <Send className="h-4 w-4" />
-                <span>{submitting ? "Publishing..." : "Publish & Broadcast"}</span>
-              </button>
             </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

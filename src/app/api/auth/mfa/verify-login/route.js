@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import {
-  verifyMfaTicket,
-  createSessionToken,
-  sessionCookieOptions,
-  COOKIE,
-} from "@/lib/auth";
+import { verifyMfaTicket, createSessionToken, sessionCookieOptions, COOKIE } from "@/lib/auth";
 import { verifyTotpToken, verifyBackupCode } from "@/lib/totp";
 
 export async function POST(request) {
@@ -16,7 +11,7 @@ export async function POST(request) {
     if (!mfaTicket || !code) {
       return NextResponse.json(
         { error: "MFA session ticket and verification code are required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -24,7 +19,7 @@ export async function POST(request) {
     if (!payload || !payload.sub) {
       return NextResponse.json(
         { error: "Authentication session expired. Please enter your email and password again." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -45,7 +40,7 @@ export async function POST(request) {
     if (!user || !user.mfaEnabled || !user.mfaSecret) {
       return NextResponse.json(
         { error: "Two-factor authentication is not active for this account." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,7 +65,7 @@ export async function POST(request) {
     if (!verified) {
       return NextResponse.json(
         { error: "Invalid verification code. Please check your authenticator app or backup code." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -86,7 +81,9 @@ export async function POST(request) {
 
     // Issue full session token & cookie
     const token = await createSessionToken(user);
-    prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
+    prisma.user
+      .update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
+      .catch(() => {});
     const response = NextResponse.json({
       success: true,
       token,

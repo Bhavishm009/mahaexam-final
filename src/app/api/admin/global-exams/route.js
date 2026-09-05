@@ -35,7 +35,7 @@ export async function POST(request) {
     if (!b.title || !b.title.trim()) {
       return NextResponse.json(
         { error: "Validation Error: Exam Title is required." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const duration = Number(b.durationMinutes);
@@ -44,20 +44,20 @@ export async function POST(request) {
     if (isNaN(duration) || duration <= 0) {
       return NextResponse.json(
         { error: "Validation Error: Duration must be a positive number of minutes." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (isNaN(questionsCount) || questionsCount <= 0) {
       return NextResponse.json(
         { error: "Validation Error: Total Questions must be at least 1." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (b.startAt && b.endAt && new Date(b.endAt) <= new Date(b.startAt)) {
       return NextResponse.json(
         { error: "Validation Error: End time must be after the Start time." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -116,10 +116,16 @@ export async function POST(request) {
     if (b.sendNotification !== false) {
       await scheduleExamNotifications(exam, { isReschedule: false });
     }
-    return NextResponse.json({ exam, success: true, message: "Global examination published successfully!" }, { status: 201 });
+    return NextResponse.json(
+      { exam, success: true, message: "Global examination published successfully!" },
+      { status: 201 },
+    );
   } catch (e) {
     console.error("Global exam creation error:", e);
-    return NextResponse.json({ error: e.message || "Failed to create examination." }, { status: 500 });
+    return NextResponse.json(
+      { error: e.message || "Failed to create examination." },
+      { status: 500 },
+    );
   }
 }
 
@@ -149,7 +155,7 @@ export async function PATCH(request) {
     if (startAt && endAt && new Date(endAt) <= new Date(startAt)) {
       return NextResponse.json(
         { error: "Validation Error: End date & time must be after the Start date & time." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

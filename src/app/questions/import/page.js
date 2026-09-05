@@ -84,7 +84,9 @@ export default function ImportQuestions() {
               <ArrowLeft className="h-4 w-4" />
               Back to Question Bank
             </Link>
-            <h1 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">Bulk Question Import</h1>
+            <h1 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">
+              Bulk Question Import
+            </h1>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Upload CSV file with MCQs in Marathi or English to auto-populate the question bank.
             </p>
@@ -109,7 +111,7 @@ export default function ImportQuestions() {
                 setPreview(null);
                 setResult(null);
               }}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white file:mr-3 file:rounded-xl file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-bold file:text-blue-700 dark:file:bg-blue-950/60 dark:file:text-blue-300"
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-900 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-bold file:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:file:bg-blue-950/60 dark:file:text-blue-300"
             />
             <select
               value={defaultSubjectId}
@@ -158,10 +160,16 @@ export default function ImportQuestions() {
 
         {preview && (
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-black text-slate-900 dark:text-white">Validation Preview</h2>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white">
+              Validation Preview
+            </h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <Stat n={preview.total} l="Total Rows" color="text-slate-900 dark:text-white" />
-              <Stat n={preview.valid} l="Valid Questions" color="text-emerald-600 dark:text-emerald-400" />
+              <Stat
+                n={preview.valid}
+                l="Valid Questions"
+                color="text-emerald-600 dark:text-emerald-400"
+              />
               <Stat n={preview.invalid} l="Invalid Rows" color="text-rose-600 dark:text-rose-400" />
             </div>
             <div className="mt-5 max-h-72 space-y-2 overflow-auto pr-1">
@@ -170,8 +178,8 @@ export default function ImportQuestions() {
                   key={x.index}
                   className={`flex items-start gap-2.5 rounded-2xl border p-3 text-xs ${
                     x.valid
-                      ? "border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/40 text-slate-800 dark:text-slate-200"
-                      : "border-rose-200 bg-rose-50/50 dark:border-rose-900/40 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300"
+                      ? "border-slate-200 bg-slate-50/50 text-slate-800 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-200"
+                      : "border-rose-200 bg-rose-50/50 text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-300"
                   }`}
                 >
                   {x.valid ? (
@@ -180,7 +188,8 @@ export default function ImportQuestions() {
                     <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-600 dark:text-rose-400" />
                   )}
                   <div>
-                    <b className="text-slate-900 dark:text-white">Row {x.index}:</b> {x.valid ? "Ready for import" : x.errors.join("; ")}
+                    <b className="text-slate-900 dark:text-white">Row {x.index}:</b>{" "}
+                    {x.valid ? "Ready for import" : x.errors.join("; ")}
                     <div className="mt-0.5 font-medium text-slate-700 dark:text-slate-300">
                       {x.row.questionTextMr || x.row.questionText}
                     </div>
@@ -198,10 +207,26 @@ export default function ImportQuestions() {
               Import Completed Successfully
             </h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-4">
-              <Stat n={result.importedRows} l="Successfully Imported" color="text-emerald-600 dark:text-emerald-400" />
-              <Stat n={result.duplicateRows} l="Skipped Duplicates" color="text-amber-600 dark:text-amber-400" />
-              <Stat n={result.invalidRows} l="Failed / Invalid" color="text-rose-600 dark:text-rose-400" />
-              <Stat n={result.totalRows} l="Total Analyzed" color="text-slate-900 dark:text-white" />
+              <Stat
+                n={result.importedRows}
+                l="Successfully Imported"
+                color="text-emerald-600 dark:text-emerald-400"
+              />
+              <Stat
+                n={result.duplicateRows}
+                l="Skipped Duplicates"
+                color="text-amber-600 dark:text-amber-400"
+              />
+              <Stat
+                n={result.invalidRows}
+                l="Failed / Invalid"
+                color="text-rose-600 dark:text-rose-400"
+              />
+              <Stat
+                n={result.totalRows}
+                l="Total Analyzed"
+                color="text-slate-900 dark:text-white"
+              />
             </div>
             {result.errors?.length > 0 && (
               <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">

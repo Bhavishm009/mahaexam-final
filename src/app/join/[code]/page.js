@@ -313,13 +313,21 @@ export default function JoinInvitePage({ params }) {
                         onChange={(e) => setRegForm({ ...regForm, targetExam: e.target.value })}
                         className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                       >
-                        <option value="Maharashtra Police Bharti">पोलीस भरती (Maharashtra Police Bharti)</option>
-                        <option value="Maharashtra Talathi Bharti">तलाठी भरती (Talathi Bharti)</option>
-                        <option value="MPSC Combine Group B & C">MPSC संयुक्त पूर्व परीक्षा (Group B & C)</option>
+                        <option value="Maharashtra Police Bharti">
+                          पोलीस भरती (Maharashtra Police Bharti)
+                        </option>
+                        <option value="Maharashtra Talathi Bharti">
+                          तलाठी भरती (Talathi Bharti)
+                        </option>
+                        <option value="MPSC Combine Group B & C">
+                          MPSC संयुक्त पूर्व परीक्षा (Group B & C)
+                        </option>
                         <option value="MPSC Rajyaseva">MPSC राज्यसेवा (Civil Services)</option>
                         <option value="Zilla Parishad Bharti">जिल्हा परिषद भरती (ZP Bharti)</option>
                         <option value="Maharashtra Vanrakshak">वनरक्षक भरती (Forest Guard)</option>
-                        <option value="Other Government Exam">इतर स्पर्धा परीक्षा (Other Exam)</option>
+                        <option value="Other Government Exam">
+                          इतर स्पर्धा परीक्षा (Other Exam)
+                        </option>
                       </select>
                     </div>
 

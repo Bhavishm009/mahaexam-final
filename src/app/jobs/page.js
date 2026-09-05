@@ -39,15 +39,15 @@ export default async function JobAlertsPage() {
         <div className="mb-10 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 p-8 text-white shadow-xl sm:p-10">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1 text-xs font-bold text-blue-100 backdrop-blur-md">
-              <Bell className="h-3.5 w-3.5 text-amber-300 animate-bounce" />
+              <Bell className="h-3.5 w-3.5 animate-bounce text-amber-300" />
               अधिकृत नोकरी व भरती अपडेट्स २०२६
             </span>
             <h1 className="mt-4 text-3xl font-black sm:text-4xl lg:text-5xl">
               महाराष्ट्र सरकारी भरती जाहिराती व सूचना
             </h1>
             <p className="mt-3 text-sm text-blue-100 sm:text-base">
-              पोलीस भरती, MPSC, तलाठी आणि जिल्हा परिषद परीक्षांच्या ताज्या जाहिराती, पात्रता व
-              थेट मोफत सराव पेपर्स.
+              पोलीस भरती, MPSC, तलाठी आणि जिल्हा परिषद परीक्षांच्या ताज्या जाहिराती, पात्रता व थेट
+              मोफत सराव पेपर्स.
             </p>
           </div>
         </div>
@@ -61,8 +61,14 @@ export default async function JobAlertsPage() {
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${job.statusColor}`}>
-                    {job.status === "ACTIVE" ? "अर्ज प्रक्रिया सुरू (Active)" : job.status === "UPCOMING" ? "आगामी भरती (Upcoming)" : job.status}
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${job.statusColor}`}
+                  >
+                    {job.status === "ACTIVE"
+                      ? "अर्ज प्रक्रिया सुरू (Active)"
+                      : job.status === "UPCOMING"
+                        ? "आगामी भरती (Upcoming)"
+                        : job.status}
                   </span>
                   <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400">
                     {job.vacancies}
@@ -80,14 +86,16 @@ export default async function JobAlertsPage() {
                   </h2>
                 </Link>
 
-                <p className="mt-2 text-xs leading-relaxed text-slate-500 line-clamp-3 dark:text-slate-400">
+                <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                   {job.descriptionMr || job.description}
                 </p>
 
                 <div className="mt-4 space-y-1.5 rounded-2xl bg-slate-50 p-3 text-xs dark:bg-slate-800/60">
                   <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                     <GraduationCap className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                    <span className="font-semibold truncate">{job.qualificationMr || job.qualification}</span>
+                    <span className="truncate font-semibold">
+                      {job.qualificationMr || job.qualification}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                     <Calendar className="h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -135,4 +143,3 @@ export default async function JobAlertsPage() {
     </div>
   );
 }
-

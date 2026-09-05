@@ -12,7 +12,11 @@ export default function AdminAnalytics() {
   }, []);
 
   if (!d) {
-    return <main className="grid min-h-screen place-items-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-300">Loading...</main>;
+    return (
+      <main className="grid min-h-screen place-items-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-300">
+        Loading...
+      </main>
+    );
   }
 
   return (
@@ -27,7 +31,10 @@ export default function AdminAnalytics() {
             ["Results", d.completedResults],
             ["Avg %", `${(d.averagePercent || 0).toFixed(1)}%`],
           ].map(([label, val]) => (
-            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div
+              key={label}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
               <div className="text-sm text-slate-500 dark:text-slate-400">{label}</div>
               <div className="mt-2 text-3xl font-black text-slate-900 dark:text-white">{val}</div>
             </div>
@@ -35,7 +42,9 @@ export default function AdminAnalytics() {
         </div>
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h2 className="font-black text-slate-900 dark:text-white">Platform Pass Rate</h2>
-          <div className="mt-3 text-4xl font-black text-emerald-600 dark:text-emerald-400">{(d.passPercentage || 0).toFixed(1)}%</div>
+          <div className="mt-3 text-4xl font-black text-emerald-600 dark:text-emerald-400">
+            {(d.passPercentage || 0).toFixed(1)}%
+          </div>
         </div>
       </div>
     </main>

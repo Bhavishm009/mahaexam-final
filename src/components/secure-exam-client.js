@@ -96,7 +96,7 @@ export function SecureExamClient({ examId }) {
     return () => {
       active = false;
     };
-  }, [examId]);
+  }, [examId, router]);
 
   // Submit attempt helper
   const submit = useCallback(
@@ -379,7 +379,7 @@ export function SecureExamClient({ examId }) {
   return (
     <div className="flex h-screen max-h-screen flex-col overflow-hidden bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       {/* TOP CBT NAVBAR */}
-      <header className="shrink-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-colors dark:border-slate-800 dark:bg-slate-900/95">
+      <header className="z-30 shrink-0 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-colors dark:border-slate-800 dark:bg-slate-900/95">
         {/* DESKTOP HEADER (>= 1024px) */}
         <div className="mx-auto hidden max-w-7xl items-center justify-between px-6 py-3 lg:flex">
           <div className="flex items-center gap-3">
@@ -535,11 +535,11 @@ export function SecureExamClient({ examId }) {
       )}
 
       {/* MAIN EXAMINATION AREA */}
-      <main className="mx-auto flex w-full max-w-7xl flex-1 min-h-0 overflow-hidden flex-col gap-4 p-3 pb-20 sm:p-4 lg:grid lg:grid-cols-[1fr_340px] lg:pb-4">
+      <main className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-4 overflow-hidden p-3 pb-20 sm:p-4 lg:grid lg:grid-cols-[1fr_340px] lg:pb-4">
         {/* Left Question Card */}
         <div className="flex h-full min-h-0 flex-1 flex-col justify-between overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           {/* Desktop Question Header */}
-          <div className="shrink-0 hidden items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800 lg:flex">
+          <div className="hidden shrink-0 items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800 lg:flex">
             <div className="flex items-center gap-2">
               <span className="rounded-xl bg-blue-50 px-3 py-1 text-xs font-black text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
                 {lang === "mr" ? `प्रश्न क्रमांक ${current + 1}` : `Question ${current + 1}`}
@@ -567,7 +567,7 @@ export function SecureExamClient({ examId }) {
           </div>
 
           {/* Scrollable Middle Container: Question Statement & Options */}
-          <div className="flex-1 min-h-0 overflow-y-auto py-3 pr-2 space-y-4">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto py-3 pr-2">
             {/* Question Statement */}
             <div>
               <h2 className="text-base font-bold leading-relaxed text-slate-900 dark:text-white sm:text-xl">
@@ -632,7 +632,7 @@ export function SecureExamClient({ examId }) {
           </div>
 
           {/* Desktop Actions Bar (Pinned at Bottom of Card) */}
-          <div className="shrink-0 hidden flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800 lg:flex">
+          <div className="hidden shrink-0 flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800 lg:flex">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -708,7 +708,7 @@ export function SecureExamClient({ examId }) {
           </h3>
 
           {/* Color Legend */}
-          <div className="shrink-0 mt-3 grid grid-cols-2 gap-2 text-[11px] font-bold text-slate-600 dark:text-slate-400">
+          <div className="mt-3 grid shrink-0 grid-cols-2 gap-2 text-[11px] font-bold text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
               <span className="h-3 w-3 rounded-md bg-emerald-500" />
               <span>
@@ -734,7 +734,7 @@ export function SecureExamClient({ examId }) {
           </div>
 
           {/* Question Grid */}
-          <div className="mt-4 flex-1 min-h-0 overflow-y-auto p-1 pr-1">
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto p-1 pr-1">
             <div className="grid grid-cols-5 gap-2">
               {questionsList.map((item, index) => {
                 const isCurrent = current === index;

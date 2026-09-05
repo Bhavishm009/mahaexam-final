@@ -114,14 +114,6 @@ export default function RootLayout({ children }) {
       className={`${jakarta.variable} ${notoDevanagari.variable} ${mukta.variable} ${baloo2.variable} ${tiroMarathi.variable}`}
       data-scroll-behavior="smooth"
     >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@400;500;600;700&family=Mukta:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Tiro+Devanagari+Marathi:ital@0;1&display=swap"
-        />
-      </head>
       <body className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-blue-600 selection:text-white dark:bg-slate-950 dark:text-slate-100">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <LanguageProvider>

@@ -42,9 +42,9 @@ export function NavigationProgress() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-1 bg-transparent overflow-hidden"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-1 overflow-hidden bg-transparent"
     >
-      <div className="h-full w-full bg-gradient-to-r from-blue-600 via-indigo-500 to-amber-500 animate-nav-progress shadow-sm shadow-blue-500/50" />
+      <div className="animate-nav-progress h-full w-full bg-gradient-to-r from-blue-600 via-indigo-500 to-amber-500 shadow-sm shadow-blue-500/50" />
     </div>
   );
 }

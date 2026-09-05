@@ -32,7 +32,7 @@ if (secondaryUrl) {
   if (secondaryUrl.includes("db.mhhmyckndlmylpgciblz.supabase.co:5432")) {
     secondaryUrl = secondaryUrl.replace(
       "db.mhhmyckndlmylpgciblz.supabase.co:5432",
-      "aws-0-ap-south-1.pooler.supabase.com:6543"
+      "aws-0-ap-south-1.pooler.supabase.com:6543",
     );
     if (!secondaryUrl.includes("pgbouncer=true")) {
       secondaryUrl += (secondaryUrl.includes("?") ? "&" : "?") + "pgbouncer=true";
@@ -64,4 +64,6 @@ try {
   process.exit(1);
 }
 
-console.log("\n🎉 Dual Database Schema Push & Migration Complete! Both DBs have identical schemas.");
+console.log(
+  "\n🎉 Dual Database Schema Push & Migration Complete! Both DBs have identical schemas.",
+);

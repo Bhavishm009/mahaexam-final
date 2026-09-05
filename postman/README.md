@@ -46,6 +46,7 @@ This directory contains the ready-to-import Postman collection and environment f
 ## Automated Authentication & Token Capture
 
 The collection is pre-configured with Postman Test Scripts:
+
 - When you execute **`Login - Student`**, **`Login - Coaching Admin`**, or **`Login - Platform Admin`**, Postman will automatically extract `token` from the response JSON and save it to the `authToken` environment variable.
 - All requests in the collection inherit **Bearer Authentication** with `{{authToken}}` or use the session cookie automatically maintained by Postman.
 - When you execute **`Start Exam Attempt`**, Postman automatically captures the new `attemptId` so subsequent calls to `/answer`, `/event`, `/submit`, and `/results/{{attemptId}}` work seamlessly without manual copying!
@@ -56,8 +57,9 @@ The collection is pre-configured with Postman Test Scripts:
 ## Testing Local Server
 
 Ensure your Next.js application is running before executing requests:
+
 ```bash
 npm run dev
 ```
-Then run **`01 - Health & System -> Health Check`** to verify connectivity (`http://localhost:3000/api/health`).
 
+Then run **`01 - Health & System -> Health Check`** to verify connectivity (`http://localhost:3000/api/health`).

@@ -37,7 +37,7 @@ const eslintConfig = [
       "prefer-const": "off",
       "no-duplicate-imports": "off",
       "no-undef": "off",
-      "@next/next/no-img-element": "warn",
+      "@next/next/no-img-element": "off",
       "react-hooks/exhaustive-deps": "warn",
     },
   },

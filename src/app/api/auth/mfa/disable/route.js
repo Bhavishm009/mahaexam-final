@@ -43,7 +43,7 @@ export async function POST(request) {
     if (!authenticated) {
       return NextResponse.json(
         { error: "Incorrect password or 6-digit code. Verification failed." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

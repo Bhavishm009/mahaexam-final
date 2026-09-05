@@ -38,7 +38,7 @@ export async function POST(req) {
   if (!secondaryPrisma) {
     return NextResponse.json(
       { success: false, error: "SECONDARY_DATABASE_URL is not configured" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -61,9 +61,10 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: false,
-        error: "Primary Database (Aiven) is currently offline. System is running in automatic failover on Secondary DB. Cannot perform sync until Primary DB is restored.",
+        error:
+          "Primary Database (Aiven) is currently offline. System is running in automatic failover on Secondary DB. Cannot perform sync until Primary DB is restored.",
       },
-      { status: 503 }
+      { status: 503 },
     );
   }
 
@@ -88,7 +89,7 @@ export async function POST(req) {
   if (targetTable && modelsToSync.length === 0) {
     return NextResponse.json(
       { success: false, error: `Table '${targetTable}' is not a valid syncable model.` },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -98,7 +99,9 @@ export async function POST(req) {
       const { replayFailoverQueue } = await import("@/lib/db-sync-queue.js");
       const replayRes = await replayFailoverQueue();
       if (replayRes && replayRes.replayed > 0) {
-        syncLog.push(`📦 Replayed ${replayRes.replayed} failover outbox mutations from Secondary to Primary`);
+        syncLog.push(
+          `📦 Replayed ${replayRes.replayed} failover outbox mutations from Secondary to Primary`,
+        );
       }
     } catch (_) {}
   }
@@ -111,8 +114,12 @@ export async function POST(req) {
         let pCount = null;
         let sCount = null;
 
-        try { pCount = await primaryPrisma[key].count(); } catch {}
-        try { sCount = await secondaryPrisma[key].count(); } catch {}
+        try {
+          pCount = await primaryPrisma[key].count();
+        } catch {}
+        try {
+          sCount = await secondaryPrisma[key].count();
+        } catch {}
 
         if (pCount === null || sCount === null) {
           syncLog.push(`⚠️ ${label}: Skipped (Table missing or inaccessible)`);
@@ -176,7 +183,9 @@ export async function POST(req) {
                         select: { id: true },
                       });
                       if (conflict && conflict.id !== item.id) {
-                        await secondaryPrisma[key].delete({ where: { id: conflict.id } }).catch(() => {});
+                        await secondaryPrisma[key]
+                          .delete({ where: { id: conflict.id } })
+                          .catch(() => {});
                         await secondaryPrisma[key].create({ data: item });
                         syncedToSecondary++;
                         continue;
@@ -249,7 +258,7 @@ export async function POST(req) {
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error?.message || "Sync Execution Failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

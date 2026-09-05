@@ -40,16 +40,31 @@ export default function ExamStartInstructionsPage({ params }) {
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-          <Link href="/" prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
+        >
+          <Link
+            href="/"
+            prefetch={true}
+            className="transition hover:text-blue-600 dark:hover:text-white"
+          >
             मुख्यपृष्ठ
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link href={`/exams/${category}`} prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white">
+          <Link
+            href={`/exams/${category}`}
+            prefetch={true}
+            className="transition hover:text-blue-600 dark:hover:text-white"
+          >
             {cat.badgeMr}
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link href={`/exams/${category}/${examSlug}`} prefetch={true} className="transition hover:text-blue-600 dark:hover:text-white truncate max-w-[150px]">
+          <Link
+            href={`/exams/${category}/${examSlug}`}
+            prefetch={true}
+            className="max-w-[150px] truncate transition hover:text-blue-600 dark:hover:text-white"
+          >
             {formattedExamTitle}
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
@@ -90,7 +105,9 @@ export default function ExamStartInstructionsPage({ params }) {
                 <Clock className="h-4 w-4 text-emerald-600" />
                 <span>वेळ मर्यादा</span>
               </div>
-              <div className="mt-1 text-xl font-black text-slate-900 dark:text-white">९० मिनिटे</div>
+              <div className="mt-1 text-xl font-black text-slate-900 dark:text-white">
+                ९० मिनिटे
+              </div>
             </div>
             <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
               <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
@@ -104,7 +121,9 @@ export default function ExamStartInstructionsPage({ params }) {
                 <AlertTriangle className="h-4 w-4 text-rose-600" />
                 <span>निगेटिव्ह गुण</span>
               </div>
-              <div className="mt-1 text-base font-black text-slate-900 dark:text-white">०.२५ (1/4)</div>
+              <div className="mt-1 text-base font-black text-slate-900 dark:text-white">
+                ०.२५ (1/4)
+              </div>
             </div>
           </div>
 
@@ -120,11 +139,17 @@ export default function ExamStartInstructionsPage({ params }) {
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                <span>प्रत्येक बरोबर उत्तरासाठी १ गुण मिळेल. चुकीच्या उत्तरासाठी ०.२५ गुण वजा केले जातील.</span>
+                <span>
+                  प्रत्येक बरोबर उत्तरासाठी १ गुण मिळेल. चुकीच्या उत्तरासाठी ०.२५ गुण वजा केले
+                  जातील.
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                <span>उत्तर सेव्ह करण्यासाठी नेहमी <strong>&quot;Save & Next&quot;</strong> बटनावर क्लिक करा.</span>
+                <span>
+                  उत्तर सेव्ह करण्यासाठी नेहमी <strong>&quot;Save & Next&quot;</strong> बटनावर क्लिक
+                  करा.
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
@@ -174,7 +199,8 @@ export default function ExamStartInstructionsPage({ params }) {
                 className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900"
               />
               <span className="font-semibold">
-                मी सर्व सूचना व नियम काळजीपूर्वक वाचले आहेत आणि मला ते मान्य आहेत. मी प्रामाणिकपणे परीक्षा देईन.
+                मी सर्व सूचना व नियम काळजीपूर्वक वाचले आहेत आणि मला ते मान्य आहेत. मी प्रामाणिकपणे
+                परीक्षा देईन.
               </span>
             </label>
 
@@ -193,8 +219,8 @@ export default function ExamStartInstructionsPage({ params }) {
                 onClick={handleStartExam}
                 className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-xs font-bold text-white shadow-lg transition active:scale-95 ${
                   agreed
-                    ? "bg-blue-600 hover:bg-blue-500 shadow-blue-500/25"
-                    : "cursor-not-allowed bg-slate-300 dark:bg-slate-800 opacity-60"
+                    ? "bg-blue-600 shadow-blue-500/25 hover:bg-blue-500"
+                    : "cursor-not-allowed bg-slate-300 opacity-60 dark:bg-slate-800"
                 }`}
               >
                 <Zap className="h-4 w-4 text-amber-300" />

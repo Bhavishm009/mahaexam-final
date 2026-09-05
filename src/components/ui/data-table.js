@@ -52,27 +52,29 @@ export function DataTable({ columns, data = [], searchPlaceholder = "Search reco
       </div>
 
       {/* Table Shell */}
-      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <table className="w-full text-left text-xs border-collapse">
-          <thead className="bg-slate-50/80 text-slate-700 dark:bg-slate-950/80 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
+      <div className="shadow-xs overflow-x-auto rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <table className="w-full border-collapse text-left text-xs">
+          <thead className="border-b border-slate-200 bg-slate-50/80 text-slate-700 dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-300">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-4 py-3.5 font-extrabold uppercase tracking-wider text-[11px]"
+                    className="px-4 py-3.5 text-[11px] font-extrabold uppercase tracking-wider"
                   >
                     {header.isPlaceholder ? null : (
                       <div
                         className={
                           header.column.getCanSort()
-                            ? "cursor-pointer select-none flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400"
+                            ? "flex cursor-pointer select-none items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400"
                             : ""
                         }
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getCanSort() && <ArrowUpDown className="h-3 w-3 opacity-60" />}
+                        {header.column.getCanSort() && (
+                          <ArrowUpDown className="h-3 w-3 opacity-60" />
+                        )}
                       </div>
                     )}
                   </th>
@@ -83,7 +85,10 @@ export function DataTable({ columns, data = [], searchPlaceholder = "Search reco
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="p-8 text-center text-xs font-semibold text-slate-400">
+                <td
+                  colSpan={columns.length}
+                  className="p-8 text-center text-xs font-semibold text-slate-400"
+                >
                   No records found.
                 </td>
               </tr>
@@ -94,7 +99,10 @@ export function DataTable({ columns, data = [], searchPlaceholder = "Search reco
                   className="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3.5 align-middle text-slate-700 dark:text-slate-300 font-medium">
+                    <td
+                      key={cell.id}
+                      className="px-4 py-3.5 align-middle font-medium text-slate-700 dark:text-slate-300"
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

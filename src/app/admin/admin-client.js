@@ -541,10 +541,11 @@ export function AdminDashboardClient({ initialStats }) {
               <button
                 type="button"
                 onClick={() => setActiveTab("seeding")}
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${activeTab === "seeding"
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
+                  activeTab === "seeding"
                     ? "border border-slate-200 bg-white text-blue-600 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-blue-400"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                  }`}
+                }`}
               >
                 <Database className="h-4 w-4" />
                 <span>1. Database Seeding &amp; Schema</span>
@@ -553,10 +554,11 @@ export function AdminDashboardClient({ initialStats }) {
               <button
                 type="button"
                 onClick={() => setActiveTab("push")}
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${activeTab === "push"
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all ${
+                  activeTab === "push"
                     ? "border border-slate-200 bg-white text-purple-600 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-purple-400"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                  }`}
+                }`}
               >
                 <Radio className="h-4 w-4 animate-pulse text-purple-500" />
                 <span>2. Push Notification &amp; Test Broadcast</span>
@@ -739,10 +741,11 @@ export function AdminDashboardClient({ initialStats }) {
             {pushStatusMessage && (
               <div className="mx-6">
                 <div
-                  className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${pushStatusMessage.type === "success"
+                  className={`flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold ${
+                    pushStatusMessage.type === "success"
                       ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
                       : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
-                    }`}
+                  }`}
                 >
                   {pushStatusMessage.type === "success" ? (
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />

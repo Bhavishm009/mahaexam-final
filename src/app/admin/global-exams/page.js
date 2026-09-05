@@ -284,8 +284,6 @@ export default function GlobalExamsManagementPage() {
         </Link>
       </div>
 
-
-
       {/* Reschedule Exam Modal */}
       {rescheduleModalExam && (
         <div

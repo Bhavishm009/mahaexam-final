@@ -13,7 +13,10 @@ export function PricingSection() {
   const isCoaching = user?.role === "COACHING_ADMIN" || user?.role === "TEACHER";
 
   return (
-    <section id="pricing" className="border-t border-slate-200/80 bg-slate-100/50 py-16 transition-colors dark:border-slate-800/80 dark:bg-slate-950/40 sm:py-20">
+    <section
+      id="pricing"
+      className="border-t border-slate-200/80 bg-slate-100/50 py-16 transition-colors dark:border-slate-800/80 dark:bg-slate-950/40 sm:py-20"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
@@ -72,7 +75,9 @@ export function PricingSection() {
               <span className="text-3xl font-black text-blue-600 dark:text-blue-400">
                 {t.planStudentPrice}
               </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{t.planStudentPeriod}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {t.planStudentPeriod}
+              </span>
             </div>
             <ul className="mt-6 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
               <li className="flex items-center gap-2">
@@ -107,7 +112,9 @@ export function PricingSection() {
               <span className="text-3xl font-black text-amber-600 dark:text-amber-400">
                 {t.planCoachingPrice}
               </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{t.planCoachingPeriod}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {t.planCoachingPeriod}
+              </span>
             </div>
             <ul className="mt-6 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
               <li className="flex items-center gap-2">
@@ -137,4 +144,3 @@ export function PricingSection() {
     </section>
   );
 }
-
