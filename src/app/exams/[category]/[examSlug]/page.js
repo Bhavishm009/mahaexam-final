@@ -2,8 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import { getCategoryBySlug } from "@/lib/exam-category-helper";
 import { prisma } from "@/lib/db";
 import {
@@ -103,8 +101,6 @@ export default async function ExamSlugDetailPage({ params }) {
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <PublicNavbar />
-
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Admin Review Banner */}
         {isPrivilegedUser && (
@@ -348,8 +344,6 @@ export default async function ExamSlugDetailPage({ params }) {
           </div>
         </div>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }

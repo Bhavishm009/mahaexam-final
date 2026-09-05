@@ -3,8 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCachedPublicExams } from "@/lib/cached-exams";
 import { EXAM_CATEGORIES, getCategoryBySlug, getCategorySlugFromExam } from "@/lib/exam-category-helper";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import { getBaseUrl } from "@/lib/base-url";
 import { ExamsDirectoryClient } from "../exams-directory-client";
 import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
@@ -70,8 +68,6 @@ export default async function ExamCategoryPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PublicNavbar />
-
       <main className="flex-1 py-8 sm:py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb Navigation */}
@@ -130,8 +126,6 @@ export default async function ExamCategoryPage({ params }) {
           </Suspense>
         </div>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }

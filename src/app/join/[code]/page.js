@@ -3,8 +3,6 @@
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import { Sparkles, ArrowRight, User, Mail, Phone, Lock, MapPin, Check } from "lucide-react";
 
 export default function JoinInvitePage({ params }) {
@@ -103,8 +101,6 @@ export default function JoinInvitePage({ params }) {
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <PublicNavbar />
-
       <main className="mx-auto flex w-full max-w-4xl flex-1 items-center justify-center px-4 py-10 sm:px-6">
         {loading ? (
           <div className="text-center">
@@ -344,8 +340,6 @@ export default function JoinInvitePage({ params }) {
           </div>
         )}
       </main>
-
-      <PublicFooter />
     </div>
   );
 }

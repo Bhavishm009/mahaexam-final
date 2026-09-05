@@ -56,6 +56,8 @@ export const viewport = {
   ],
 };
 
+import { PublicLayoutWrapper } from "@/components/public-layout-wrapper";
+
 export default function RootLayout({ children }) {
   return (
     <html
@@ -74,7 +76,7 @@ export default function RootLayout({ children }) {
                 <Suspense fallback={null}>
                   <NavigationProgress />
                 </Suspense>
-                {children}
+                <PublicLayoutWrapper>{children}</PublicLayoutWrapper>
               </ReactQueryProvider>
             </AuthProvider>
           </LanguageProvider>

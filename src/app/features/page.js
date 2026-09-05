@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import {
   Sparkles,
   ShieldCheck,
@@ -97,97 +95,91 @@ export default function FeaturesPage() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <PublicNavbar />
+    <div className="py-12 sm:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
+            <Sparkles className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+            महाराष्ट्र स्पर्धा परीक्षांसाठी आधुनिक तंत्रज्ञान
+          </span>
+          <h1 className="mt-4 text-3xl font-black sm:text-4xl lg:text-5xl">
+            MahaExam प्लॅटफॉर्मची वैशिष्ट्ये
+          </h1>
+          <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+            पोलीस भरती, MPSC, तलाठी व जिल्हा परिषद परीक्षांच्या अचूक सरावासाठी तयार केलेले
+            महाराष्ट्रातील एकमेव प्रगत टेस्ट पोर्टल.
+          </p>
+        </div>
 
-      <main className="flex-1 py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
-              <Sparkles className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-              महाराष्ट्र स्पर्धा परीक्षांसाठी आधुनिक तंत्रज्ञान
-            </span>
-            <h1 className="mt-4 text-3xl font-black sm:text-4xl lg:text-5xl">
-              MahaExam प्लॅटफॉर्मची वैशिष्ट्ये
-            </h1>
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-              पोलीस भरती, MPSC, तलाठी व जिल्हा परिषद परीक्षांच्या अचूक सरावासाठी तयार केलेले
-              महाराष्ट्रातील एकमेव प्रगत टेस्ट पोर्टल.
-            </p>
-          </div>
-
-          {/* Feature Cards Grid */}
-          <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuresList.map((f, idx) => {
-              const Icon = f.icon;
-              return (
-                <div
-                  key={idx}
-                  className="group relative flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:border-blue-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-600 transition group-hover:scale-110 dark:bg-blue-950/60 dark:text-blue-400">
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${f.badgeColor}`}
-                      >
-                        {f.badge}
-                      </span>
+        {/* Feature Cards Grid */}
+        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {featuresList.map((f, idx) => {
+            const Icon = f.icon;
+            return (
+              <div
+                key={idx}
+                className="group relative flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:border-blue-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-600 transition group-hover:scale-110 dark:bg-blue-950/60 dark:text-blue-400">
+                      <Icon className="h-6 w-6" />
                     </div>
-
-                    <h3 className="mt-5 text-lg font-black text-slate-900 dark:text-white">
-                      {f.titleMr}
-                    </h3>
-                    <div className="text-xs font-semibold text-slate-400">{f.titleEn}</div>
-
-                    <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300 sm:text-sm">
-                      {f.descMr}
-                    </p>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${f.badgeColor}`}
+                    >
+                      {f.badge}
+                    </span>
                   </div>
 
-                  <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span>परीक्षेसाठी १००% उपयुक्त</span>
-                  </div>
+                  <h3 className="mt-5 text-lg font-black text-slate-900 dark:text-white">
+                    {f.titleMr}
+                  </h3>
+                  <div className="text-xs font-semibold text-slate-400">{f.titleEn}</div>
+
+                  <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300 sm:text-sm">
+                    {f.descMr}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
 
-          {/* CTA Banner */}
-          <div className="mt-16 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 p-8 text-center text-white shadow-xl sm:p-12">
-            <h2 className="text-2xl font-black sm:text-3xl">
-              आजच तुमची पहिली मोफत मॉक टेस्ट सोडवून पहा!
-            </h2>
-            <p className="mx-auto mt-2 max-w-xl text-xs text-blue-100 sm:text-sm">
-              कोणतीही फी नाही. थेट लॉग इन करा किंवा गेस्ट म्हणून सराव सुरू करा.
-            </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/exams"
-                prefetch={true}
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-xs font-black text-blue-700 shadow-md transition hover:bg-blue-50 active:scale-95 sm:text-sm"
-              >
-                <Zap className="h-4 w-4 text-amber-500" />
-                <span>सर्व सराव परीक्षा पहा</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/register"
-                prefetch={true}
-                className="inline-flex items-center gap-2 rounded-2xl bg-white/20 px-7 py-3.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/30 sm:text-sm"
-              >
-                मोफत खाते तयार करा
-              </Link>
-            </div>
+                <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>परीक्षेसाठी १००% उपयुक्त</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA Banner */}
+        <div className="mt-16 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 p-8 text-center text-white shadow-xl sm:p-12">
+          <h2 className="text-2xl font-black sm:text-3xl">
+            आजच तुमची पहिली मोफत मॉक टेस्ट सोडवून पहा!
+          </h2>
+          <p className="mx-auto mt-2 max-w-xl text-xs text-blue-100 sm:text-sm">
+            कोणतीही फी नाही. थेट लॉग इन करा किंवा गेस्ट म्हणून सराव सुरू करा.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/exams"
+              prefetch={true}
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-xs font-black text-blue-700 shadow-md transition hover:bg-blue-50 active:scale-95 sm:text-sm"
+            >
+              <Zap className="h-4 w-4 text-amber-500" />
+              <span>सर्व सराव परीक्षा पहा</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/register"
+              prefetch={true}
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/20 px-7 py-3.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/30 sm:text-sm"
+            >
+              मोफत खाते तयार करा
+            </Link>
           </div>
         </div>
-      </main>
-
-      <PublicFooter />
+      </div>
     </div>
   );
 }

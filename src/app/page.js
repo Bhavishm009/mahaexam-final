@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { getCachedPublicExams } from "@/lib/cached-exams";
 import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import { HeroTitle } from "@/components/home/hero-title";
 import { HeroCta } from "@/components/home/hero-cta";
 import { HeroStatsBanner } from "@/components/home/hero-stats-banner";
@@ -47,39 +45,33 @@ export default async function Home() {
     : null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <PublicNavbar />
+    <>
+      {/* HERO SECTION */}
+      <section className="relative overflow-hidden pb-16 pt-12 sm:pb-24 sm:pt-20">
+        <div className="bg-radial-gradient pointer-events-none absolute inset-0 -z-10 opacity-60" />
+        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <HeroTitle />
+          <HeroCta initialSession={initialSession} />
+          <HeroStatsBanner />
+        </div>
+      </section>
 
-      <main className="flex-1">
-        {/* HERO SECTION */}
-        <section className="relative overflow-hidden pb-16 pt-12 sm:pb-24 sm:pt-20">
-          <div className="bg-radial-gradient pointer-events-none absolute inset-0 -z-10 opacity-60" />
-          <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-            <HeroTitle />
-            <HeroCta initialSession={initialSession} />
-            <HeroStatsBanner />
-          </div>
-        </section>
+      {/* MOCK TESTS CATALOG */}
+      <Suspense fallback={<ExamsSkeleton />}>
+        <PublicExamsSection initialExams={dbExams} />
+      </Suspense>
 
-        {/* MOCK TESTS CATALOG */}
-        <Suspense fallback={<ExamsSkeleton />}>
-          <PublicExamsSection initialExams={dbExams} />
-        </Suspense>
+      {/* FEATURES GRID */}
+      <FeaturesSection />
 
-        {/* FEATURES GRID */}
-        <FeaturesSection />
+      {/* COACHING PROMO */}
+      <CoachingSection />
 
-        {/* COACHING PROMO */}
-        <CoachingSection />
+      {/* PRICING PLANS */}
+      <PricingSection />
 
-        {/* PRICING PLANS */}
-        <PricingSection />
-
-        {/* FAQS ACCORDION */}
-        <FaqAccordion />
-      </main>
-
-      <PublicFooter />
-    </div>
+      {/* FAQS ACCORDION */}
+      <FaqAccordion />
+    </>
   );
 }

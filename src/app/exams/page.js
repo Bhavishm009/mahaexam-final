@@ -2,8 +2,6 @@ import { Suspense } from "react";
 import { getCachedPublicExams } from "@/lib/cached-exams";
 import { ExamsDirectoryClient } from "./exams-directory-client";
 import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import { Sparkles } from "lucide-react";
 import { getBaseUrl } from "@/lib/base-url";
 
@@ -46,40 +44,34 @@ export default async function ExamsDirectoryPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <div className="py-10 sm:py-14">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PublicNavbar />
-
-      <main className="flex-1 py-10 sm:py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Header Banner */}
-          <div className="mb-10 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 p-8 text-white shadow-xl sm:p-10">
-            <div className="max-w-3xl">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1 text-xs font-bold text-blue-100 backdrop-blur-md">
-                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                {exams.length} लाइव्ह परीक्षा उपलब्ध (१००% मोफत व TCS/IBPS पॅटर्न)
-              </span>
-              <h1 className="mt-4 text-3xl font-black sm:text-4xl lg:text-5xl">
-                महाराष्ट्र स्पर्धा परीक्षा सराव दालन
-              </h1>
-              <p className="mt-3 text-sm text-blue-100 sm:text-base">
-                पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद आणि सरळसेवा परीक्षांचे अस्सल ऑनलाइन CBT पेपर्स.
-                तुमची अचूकता आणि वेळ व्यवस्थापन सुधारा.
-              </p>
-            </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header Banner */}
+        <div className="mb-10 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 p-8 text-white shadow-xl sm:p-10">
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1 text-xs font-bold text-blue-100 backdrop-blur-md">
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              {exams.length} लाइव्ह परीक्षा उपलब्ध (१००% मोफत व TCS/IBPS पॅटर्न)
+            </span>
+            <h1 className="mt-4 text-3xl font-black sm:text-4xl lg:text-5xl">
+              महाराष्ट्र स्पर्धा परीक्षा सराव दालन
+            </h1>
+            <p className="mt-3 text-sm text-blue-100 sm:text-base">
+              पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद आणि सरळसेवा परीक्षांचे अस्सल ऑनलाइन CBT पेपर्स.
+              तुमची अचूकता आणि वेळ व्यवस्थापन सुधारा.
+            </p>
           </div>
-
-          {/* Directory Client */}
-          <Suspense fallback={<ExamsSkeleton />}>
-            <ExamsDirectoryClient exams={exams} />
-          </Suspense>
         </div>
-      </main>
 
-      <PublicFooter />
+        {/* Directory Client */}
+        <Suspense fallback={<ExamsSkeleton />}>
+          <ExamsDirectoryClient exams={exams} />
+        </Suspense>
+      </div>
     </div>
   );
 }

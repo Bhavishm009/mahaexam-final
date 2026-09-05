@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import {
   Clock,
   HelpCircle,
@@ -152,52 +150,52 @@ export default async function ExamPublicPage({ params }) {
         },
       },
     });
-  } catch {}
+  } catch { }
 
   const staticExam = examDetailsMap[examId];
   const exam = dbExam
     ? {
-        id: dbExam.id,
-        slug: dbExam.slug || dbExam.id,
-        title: dbExam.title,
-        titleMr: dbExam.title,
-        category: dbExam.examType || "Competitive Exam",
-        categoryMr: dbExam.examType || "स्पर्धा परीक्षा",
-        questions: dbExam.totalQuestions || dbExam.questions?.length || 25,
-        duration: dbExam.durationMinutes || 90,
-        marks: dbExam.totalMarks || 100,
-        negativeMarks: dbExam.negativeMarks > 0 ? `${dbExam.negativeMarks} गुण` : "नाही (शून्य)",
-        language: "मराठी",
-        isFree: dbExam.isFree,
-        price: dbExam.price,
-        pattern: dbExam.organization
-          ? `${dbExam.organization.name} टेस्ट सिरीज`
-          : "TCS/IBPS ऑनलाइन संगणक परीक्षा (CBT)",
-        subjects: staticExam?.subjects || [
-          { name: "मराठी भाषा व व्याकरण", count: 25, marks: 25 },
-          { name: "सामान्य ज्ञान व चालू घडामोडी", count: 25, marks: 25 },
-          { name: "अंकगणित व बुद्धिमत्ता चाचणी", count: 25, marks: 25 },
-        ],
-      }
+      id: dbExam.id,
+      slug: dbExam.slug || dbExam.id,
+      title: dbExam.title,
+      titleMr: dbExam.title,
+      category: dbExam.examType || "Competitive Exam",
+      categoryMr: dbExam.examType || "स्पर्धा परीक्षा",
+      questions: dbExam.totalQuestions || dbExam.questions?.length || 25,
+      duration: dbExam.durationMinutes || 90,
+      marks: dbExam.totalMarks || 100,
+      negativeMarks: dbExam.negativeMarks > 0 ? `${dbExam.negativeMarks} गुण` : "नाही (शून्य)",
+      language: "मराठी",
+      isFree: dbExam.isFree,
+      price: dbExam.price,
+      pattern: dbExam.organization
+        ? `${dbExam.organization.name} टेस्ट सिरीज`
+        : "TCS/IBPS ऑनलाइन संगणक परीक्षा (CBT)",
+      subjects: staticExam?.subjects || [
+        { name: "मराठी भाषा व व्याकरण", count: 25, marks: 25 },
+        { name: "सामान्य ज्ञान व चालू घडामोडी", count: 25, marks: 25 },
+        { name: "अंकगणित व बुद्धिमत्ता चाचणी", count: 25, marks: 25 },
+      ],
+    }
     : staticExam || {
-        id: examId,
-        slug: examId,
-        title: `Maharashtra Competitive Exam (${examId})`,
-        titleMr: `महाराष्ट्र स्पर्धा परीक्षा सराव चाचणी (${examId})`,
-        category: "Mock Test",
-        categoryMr: "सराव चाचणी",
-        questions: 50,
-        duration: 45,
-        marks: 100,
-        negativeMarks: "०.२५",
-        language: "मराठी",
-        pattern: "TCS/IBPS ऑनलाइन संगणक परीक्षा (CBT)",
-        subjects: [
-          { name: "मराठी व इंग्रजी भाषा", count: 20, marks: 40 },
-          { name: "सामान्य ज्ञान", count: 15, marks: 30 },
-          { name: "अंकगणित व बुद्धिमत्ता", count: 15, marks: 30 },
-        ],
-      };
+      id: examId,
+      slug: examId,
+      title: `Maharashtra Competitive Exam (${examId})`,
+      titleMr: `महाराष्ट्र स्पर्धा परीक्षा सराव चाचणी (${examId})`,
+      category: "Mock Test",
+      categoryMr: "सराव चाचणी",
+      questions: 50,
+      duration: 45,
+      marks: 100,
+      negativeMarks: "०.२५",
+      language: "मराठी",
+      pattern: "TCS/IBPS ऑनलाइन संगणक परीक्षा (CBT)",
+      subjects: [
+        { name: "मराठी व इंग्रजी भाषा", count: 20, marks: 40 },
+        { name: "सामान्य ज्ञान", count: 15, marks: 30 },
+        { name: "अंकगणित व बुद्धिमत्ता", count: 15, marks: 30 },
+      ],
+    };
 
   const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
   const isPrivilegedUser =
@@ -205,8 +203,6 @@ export default async function ExamPublicPage({ params }) {
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <PublicNavbar />
-
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Admin/Teacher Review Banner */}
         {isPrivilegedUser && (
@@ -456,8 +452,6 @@ export default async function ExamPublicPage({ params }) {
           </div>
         </div>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }

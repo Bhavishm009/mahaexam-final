@@ -3,8 +3,6 @@
 import { useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
 import { getCategoryBySlug } from "@/lib/exam-category-helper";
 import {
   Shield,
@@ -40,8 +38,6 @@ export default function ExamStartInstructionsPage({ params }) {
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <PublicNavbar />
-
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -209,8 +205,6 @@ export default function ExamStartInstructionsPage({ params }) {
           </div>
         </div>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }
