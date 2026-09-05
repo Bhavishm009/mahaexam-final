@@ -5,7 +5,7 @@ const secret = new TextEncoder().encode(
     process.env.NEXTAUTH_SECRET ||
     "mahaexam-super-secret-jwt-key-for-local-development-2026"
 );
-const COOKIE = process.env.AUTH_COOKIE_NAME || "maha_exam_session";
+const COOKIE = process.env.AUTH_COOKIE_NAME || "mahaexam_session";
 
 export async function createSessionToken(user) {
   const userId = user.id || user.sub;
