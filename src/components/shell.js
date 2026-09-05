@@ -153,7 +153,7 @@ const navDefinitions = {
       href: "/admin/global-exams",
       icon: BookOpen,
     },
-    { labelMr: "Questions", labelEn: "Questions", href: "/questions/bank", icon: Database },
+    { labelMr: "Questions", labelEn: "Questions", href: "/admin/questions/bank", icon: Database },
     { labelMr: "Analytics", labelEn: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { labelMr: "Payments", labelEn: "Payments", href: "/admin/payments", icon: CreditCard },
     { labelMr: "Finance", labelEn: "Finance", href: "/admin/finance", icon: Wallet },
