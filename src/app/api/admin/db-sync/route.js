@@ -42,6 +42,19 @@ export async function POST() {
     );
   }
 
+  // Verify Primary is reachable before attempting sync
+  try {
+    await primaryPrisma.$queryRaw`SELECT 1`;
+  } catch (err) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Primary Database (Aiven) is currently offline. System is running in automatic failover on Secondary DB. Cannot perform bidirectional sync until Primary DB is restored.",
+      },
+      { status: 503 }
+    );
+  }
+
   const syncLog = [];
   const stats = {};
 

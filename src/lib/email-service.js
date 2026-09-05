@@ -270,3 +270,70 @@ export async function sendTeacherCredentialsEmail({
     return { success: true, fallback: true };
   }
 }
+
+/**
+ * Send instant emergency failover alert email to Super Admin
+ */
+export async function sendFailoverAlertEmail({ to, adminName = "Super Admin", reason, timestamp }) {
+  const from =
+    process.env.SMTP_FROM || '"MahaExam Security & Infrastructure" <noreply@mahaexam.org.in>';
+  const mailer = getEmailTransporter();
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fef2f2; margin: 0; padding: 20px; color: #1e293b; }
+        .card { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #fecaca; overflow: hidden; box-shadow: 0 4px 25px rgba(220, 38, 38, 0.1); }
+        .header { background: linear-gradient(135deg, #dc2626, #991b1b); color: #ffffff; padding: 28px 32px; text-align: center; }
+        .header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .body { padding: 32px; text-align: left; }
+        .badge { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 12px; margin-bottom: 16px; }
+        .details-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin: 20px 0; font-family: monospace; font-size: 13px; }
+        .footer { background: #f8fafc; padding: 16px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <h1>🚨 Database Failover Incident Alert</h1>
+        </div>
+        <div class="body">
+          <div class="badge">FAILOVER ACTIVATED</div>
+          <p>Hello <strong>${adminName}</strong>,</p>
+          <p>This is an automated critical alert from the <strong>MahaExam Infrastructure Monitor</strong>.</p>
+          <p>The <strong>Primary Database (Aiven PostgreSQL)</strong> became unreachable, and the system has <strong>automatically switched to the Secondary Failover Database (Supabase Shadow DB)</strong>. All user traffic and queries are currently being served by the secondary database with zero interruption.</p>
+          
+          <div class="details-box">
+            <p style="margin: 4px 0;"><strong>Incident Time:</strong> ${timestamp}</p>
+            <p style="margin: 4px 0;"><strong>Active DB Target:</strong> Supabase IPv4 Pooler</p>
+            <p style="margin: 4px 0;"><strong>Failure Reason:</strong> ${reason || "Connection unreachable or timed out"}</p>
+            <p style="margin: 4px 0;"><strong>Status:</strong> Live Failover Running</p>
+          </div>
+
+          <p style="font-size: 13px; color: #475569;">You can review the live database status, table record counts, and trigger manual synchronization once the primary host is restored from the Admin DB Sync dashboard.</p>
+        </div>
+        <div class="footer">
+          MahaExam Auto-Failover Monitor • Automated Alert
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const info = await mailer.sendMail({
+      from,
+      to,
+      subject: `🚨 [CRITICAL ALERT] Primary Database Down - Failover Activated | MahaExam`,
+      text: `CRITICAL ALERT: Primary Database is DOWN. Failover to Secondary DB (Supabase) activated at ${timestamp}. Reason: ${reason}`,
+      html: htmlContent,
+    });
+    return { success: true, messageId: info?.messageId };
+  } catch (error) {
+    console.warn(`[EmailService] Failover alert email error: ${error.message}`);
+    return { success: false, error: error.message };
+  }
+}

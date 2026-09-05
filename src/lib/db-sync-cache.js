@@ -1,4 +1,4 @@
-import { primaryPrisma, secondaryPrisma } from "@/lib/db.js";
+import { primaryPrisma, secondaryPrisma } from "./db.js";
 
 // List of all database models to track and sync
 export const SYNC_MODELS = [
@@ -42,6 +42,17 @@ if (!globalForCache.__mahaDbSyncCache) {
     lastCheckedAt: 0,
     data: null,
   };
+}
+
+/**
+ * Invalidate the in-memory DB Sync Cache when write mutations occur
+ */
+export function invalidateDbSyncCache() {
+  const cache = globalForCache.__mahaDbSyncCache;
+  if (cache) {
+    cache.lastCheckedAt = 0;
+    cache.data = null;
+  }
 }
 
 /**
@@ -149,12 +160,26 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
     ? "SECONDARY (Supabase Failover Active)"
     : "NONE (Offline)";
 
+  const failoverState = globalThis.__mahaDbFailover || {};
+  const isFailoverActive = !primaryStatus.connected || !!failoverState.isFailoverActive;
+
+  const failoverIncident = {
+    isFailoverActive,
+    startedAt: failoverState.failoverStartedAt || (!primaryStatus.connected ? new Date().toISOString() : null),
+    reason: primaryStatus.error || failoverState.failoverReason || (isFailoverActive ? "Primary DB is offline" : null),
+    activeDb,
+    targetHost: secondaryStatus.host || "aws-0-ap-south-1.pooler.supabase.com",
+    adminNotified: !!failoverState.adminNotified,
+    lastNotifiedAt: failoverState.lastNotifiedAt ? new Date(failoverState.lastNotifiedAt).toISOString() : null,
+  };
+
   const result = {
     success: true,
     timestamp: new Date().toISOString(),
     responseDurationMs: Date.now() - startTime,
     activeDb,
     isSynced: allTablesSynced,
+    failoverIncident,
     primaryStatus,
     secondaryStatus,
     primaryCounts,

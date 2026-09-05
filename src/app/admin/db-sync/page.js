@@ -15,6 +15,8 @@ import {
   ArrowLeftRight,
   XCircle,
   Activity,
+  AlertOctagon,
+  BellRing,
 } from "lucide-react";
 
 export default function DatabaseSyncPage() {
@@ -135,6 +137,8 @@ export default function DatabaseSyncPage() {
 
   const primary = data?.primaryStatus;
   const secondary = data?.secondaryStatus;
+  const failover = data?.failoverIncident;
+  const isFailoverActive = failover?.isFailoverActive || (primary && !primary.connected);
   const pCounts = data?.primaryCounts || {};
   const sCounts = data?.secondaryCounts || {};
 
@@ -180,6 +184,7 @@ export default function DatabaseSyncPage() {
   }));
 
   const syncing = syncMutation.isPending;
+  const isBusy = isLoading || isFetching || rechecking || syncing;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12 font-sans">
@@ -195,15 +200,29 @@ export default function DatabaseSyncPage() {
                 <h1 className="text-xl font-black text-slate-900 dark:text-white sm:text-2xl">
                   Database Sync & Live Health Monitor 🗄️
                 </h1>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
-                  <Zap className="h-3 w-3 text-amber-500" />
-                  Instant Cache (1h)
-                </span>
+                {isFailoverActive ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-bold text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 animate-pulse">
+                    <Activity className="h-3 w-3 text-rose-600" />
+                    Failover Active (Supabase)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                    <Zap className="h-3 w-3 text-amber-500" />
+                    Instant Cache (1h)
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                 Primary (Aiven) & Secondary Failover (Supabase Shadow DB) status •{" "}
                 <span className="font-bold text-slate-700 dark:text-slate-200">
-                  Last Checked: {formatTimeAgo(data?.cachedAt || data?.timestamp)}
+                  {isBusy ? (
+                    <span className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold">
+                      <RefreshCw className="h-3 w-3 animate-spin" />
+                      Checking database status...
+                    </span>
+                  ) : (
+                    `Last Checked: ${formatTimeAgo(data?.cachedAt || data?.timestamp)}`
+                  )}
                 </span>
               </p>
             </div>
@@ -213,17 +232,18 @@ export default function DatabaseSyncPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleForceRecheck}
-            disabled={rechecking || isFetching}
+            disabled={isBusy}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/60"
           >
-            <RefreshCw className={`h-4 w-4 ${rechecking || isFetching ? "animate-spin text-blue-600" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${isBusy ? "animate-spin text-blue-600" : ""}`} />
             Re-check Status Now
           </button>
 
           <button
             onClick={handleTriggerSync}
-            disabled={syncing}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+            disabled={isBusy || isFailoverActive}
+            title={isFailoverActive ? "Cannot sync while Primary DB is offline" : "Synchronize databases"}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {syncing ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -235,8 +255,108 @@ export default function DatabaseSyncPage() {
         </div>
       </div>
 
+      {/* Critical Failover Incident Banner (Rendered when Primary DB is Down) */}
+      {isFailoverActive && (
+        <div className="relative overflow-hidden rounded-3xl border-2 border-rose-500/80 bg-gradient-to-br from-rose-500/15 via-rose-500/5 to-amber-500/10 p-6 shadow-xl shadow-rose-500/10 dark:from-rose-950/50 dark:via-slate-900 dark:to-amber-950/20">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-rose-200/80 pb-5 dark:border-rose-900/60">
+            <div className="flex items-center gap-3.5">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-600/30 animate-pulse">
+                <AlertOctagon className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h2 className="text-base font-black text-rose-950 dark:text-rose-200 sm:text-lg">
+                    🚨 CRITICAL INCIDENT: PRIMARY DATABASE OFFLINE
+                  </h2>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-3 py-0.5 text-xs font-black text-white shadow-sm">
+                    <Activity className="h-3.5 w-3.5 animate-spin" />
+                    FAILOVER ACTIVE
+                  </span>
+                </div>
+                <p className="mt-1 text-xs font-semibold text-rose-800 dark:text-rose-300">
+                  Primary Aiven Database is unreachable. All read & write operations have seamlessly failed over to Secondary Database (Supabase IPv4 Pooler) with zero downtime.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-rose-700 shadow-sm border border-rose-200 dark:border-rose-900 dark:bg-slate-900 dark:text-rose-300">
+                <BellRing className="h-3.5 w-3.5 text-rose-600" />
+                Super Admin Notified Instantly
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-xs">
+            <div className="rounded-2xl border border-rose-200/80 bg-white/80 p-3.5 backdrop-blur dark:border-rose-900/50 dark:bg-slate-900/80">
+              <span className="text-[11px] font-bold text-slate-400">Incident Detected:</span>
+              <p className="mt-1 font-mono font-bold text-slate-800 dark:text-slate-200">
+                {failover?.startedAt ? new Date(failover.startedAt).toLocaleTimeString() : "Just now"}
+                <span className="ml-1 text-[11px] font-normal text-slate-500">
+                  ({formatTimeAgo(failover?.startedAt)})
+                </span>
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-rose-200/80 bg-white/80 p-3.5 backdrop-blur dark:border-rose-900/50 dark:bg-slate-900/80">
+              <span className="text-[11px] font-bold text-slate-400">Active Serving Host:</span>
+              <p className="mt-1 truncate font-mono font-bold text-purple-700 dark:text-purple-300">
+                {failover?.targetHost || "aws-0-ap-south-1.pooler.supabase.com"}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-rose-200/80 bg-white/80 p-3.5 backdrop-blur dark:border-rose-900/50 dark:bg-slate-900/80">
+              <span className="text-[11px] font-bold text-slate-400">Failover Strategy:</span>
+              <p className="mt-1 font-bold text-emerald-600 dark:text-emerald-400">
+                Zero-Downtime Smart Proxy
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-rose-200/80 bg-white/80 p-3.5 backdrop-blur dark:border-rose-900/50 dark:bg-slate-900/80">
+              <span className="text-[11px] font-bold text-slate-400">Super Admin Alert:</span>
+              <p className="mt-1 font-bold text-rose-600 dark:text-rose-400 truncate">
+                bhavishm009@gmail.com
+              </p>
+            </div>
+          </div>
+
+          {failover?.reason && (
+            <div className="mt-3 rounded-xl bg-rose-100/80 p-3 text-[11px] font-mono text-rose-900 dark:bg-rose-950/60 dark:text-rose-200">
+              <span className="font-bold">Error Detail: </span>
+              <span className="break-all">{failover.reason}</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Sync Status Alert */}
-      {!data?.isSynced && (
+      {isBusy ? (
+        <div className="flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50/80 p-4 text-xs font-bold text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200">
+          <RefreshCw className="h-5 w-5 shrink-0 animate-spin text-blue-600 dark:text-blue-400" />
+          <div>
+            <p className="font-extrabold text-blue-950 dark:text-blue-200">
+              {syncing ? "Synchronizing Databases..." : "Checking Database Health & Sync Status..."}
+            </p>
+            <p className="font-medium text-blue-800 dark:text-blue-300">
+              {syncing
+                ? "Mirroring records between Primary (Aiven) and Secondary (Supabase) databases..."
+                : "Pinging hosts and computing live record counts..."}
+            </p>
+          </div>
+        </div>
+      ) : isFailoverActive ? (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-xs font-bold text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-200">
+          <div className="flex items-center gap-2.5">
+            <AlertOctagon className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
+            <div>
+              <p className="font-extrabold">Failover Active: Secondary Database Preserving System Data 🛡️</p>
+              <p className="font-medium text-rose-800 dark:text-rose-300">
+                All mock tests, exams, student attempts, and user registrations are safely running on Supabase Shadow DB.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : !data?.isSynced ? (
         <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs font-bold text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -244,6 +364,18 @@ export default function DatabaseSyncPage() {
               <p className="font-extrabold">Data Sync Required</p>
               <p className="font-medium text-amber-800 dark:text-amber-300">
                 Some records in Secondary Shadow DB are out of sync. Click &apos;Sync Now&apos; above.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-xs font-bold text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <div>
+              <p className="font-extrabold">Databases Fully Synchronized 🟢</p>
+              <p className="font-medium text-emerald-800 dark:text-emerald-300">
+                All primary and secondary shadow database records match perfectly.
               </p>
             </div>
           </div>
@@ -267,25 +399,22 @@ export default function DatabaseSyncPage() {
               </div>
             </div>
 
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold ${
-                primary?.connected
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
-                  : "bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300"
-              }`}
-            >
-              {primary?.connected ? (
-                <>
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                  Active (Online)
-                </>
-              ) : (
-                <>
-                  <XCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
-                  Offline (Error)
-                </>
-              )}
-            </span>
+            {isBusy ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-extrabold text-blue-800 dark:bg-blue-950/80 dark:text-blue-300">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-600 dark:text-blue-400" />
+                Checking...
+              </span>
+            ) : primary?.connected ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                Active (Online)
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1 text-xs font-extrabold text-rose-800 dark:bg-rose-950/80 dark:text-rose-300">
+                <XCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
+                Offline (Connection Failed)
+              </span>
+            )}
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
@@ -297,13 +426,15 @@ export default function DatabaseSyncPage() {
             </div>
             <div>
               <span className="text-slate-400">Ping Latency:</span>
-              <p className="mt-0.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                {primary?.latencyMs ? `${primary.latencyMs} ms` : "N/A"}
+              <p className={`mt-0.5 font-mono font-bold ${primary?.connected ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                {isBusy ? "Checking..." : primary?.connected ? `${primary.latencyMs} ms` : "Unreachable"}
               </p>
             </div>
             <div>
               <span className="text-slate-400">Failover Role:</span>
-              <p className="mt-0.5 font-bold text-blue-600 dark:text-blue-400">Primary Active Master</p>
+              <p className={`mt-0.5 font-bold ${primary?.connected ? "text-blue-600 dark:text-blue-400" : "text-rose-600 dark:text-rose-400"}`}>
+                {primary?.connected ? "Primary Active Master" : "Master Offline (Failed)"}
+              </p>
             </div>
           </div>
         </div>
@@ -323,25 +454,29 @@ export default function DatabaseSyncPage() {
               </div>
             </div>
 
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold ${
-                secondary?.connected
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
-                  : "bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300"
-              }`}
-            >
-              {secondary?.connected ? (
-                <>
+            {isBusy ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-extrabold text-blue-800 dark:bg-blue-950/80 dark:text-blue-300">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-600 dark:text-blue-400" />
+                Checking...
+              </span>
+            ) : secondary?.connected ? (
+              isFailoverActive ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-extrabold text-white shadow-sm animate-pulse">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                  Active (Serving Live Traffic)
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                   Standby (Ready)
-                </>
-              ) : (
-                <>
-                  <XCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
-                  Offline
-                </>
-              )}
-            </span>
+                </span>
+              )
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1 text-xs font-extrabold text-rose-800 dark:bg-rose-950/80 dark:text-rose-300">
+                <XCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
+                Offline
+              </span>
+            )}
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
@@ -354,12 +489,14 @@ export default function DatabaseSyncPage() {
             <div>
               <span className="text-slate-400">Ping Latency:</span>
               <p className="mt-0.5 font-mono font-bold text-purple-600 dark:text-purple-400">
-                {secondary?.latencyMs ? `${secondary.latencyMs} ms` : "N/A"}
+                {isBusy ? "Checking..." : secondary?.latencyMs ? `${secondary.latencyMs} ms` : "N/A"}
               </p>
             </div>
             <div>
               <span className="text-slate-400">Failover Role:</span>
-              <p className="mt-0.5 font-bold text-purple-600 dark:text-purple-400">Shadow Mirror Backup</p>
+              <p className={`mt-0.5 font-bold ${isFailoverActive ? "text-emerald-600 dark:text-emerald-400 font-extrabold" : "text-purple-600 dark:text-purple-400"}`}>
+                {isFailoverActive ? "Active Failover Primary ⚡" : "Shadow Mirror Backup"}
+              </p>
             </div>
           </div>
         </div>
@@ -391,7 +528,6 @@ export default function DatabaseSyncPage() {
                 const hasP = typeof row.p === "number";
                 const hasS = typeof row.s === "number";
                 const match = hasP && hasS && row.p === row.s;
-                const isError = !hasP || !hasS;
 
                 return (
                   <tr key={row.key} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
@@ -399,15 +535,28 @@ export default function DatabaseSyncPage() {
                       {row.label}
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">
-                      {hasP ? row.p.toLocaleString() : "—"}
+                      {isBusy ? (
+                        <span className="animate-pulse text-slate-400 font-medium">Checking...</span>
+                      ) : hasP ? (
+                        row.p.toLocaleString()
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-purple-600 dark:text-purple-400">
-                      {hasS ? row.s.toLocaleString() : "—"}
+                      {isBusy ? (
+                        <span className="animate-pulse text-slate-400 font-medium">Checking...</span>
+                      ) : hasS ? (
+                        row.s.toLocaleString()
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {isError ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                          Connecting...
+                      {isBusy ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-extrabold text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+                          <RefreshCw className="h-3 w-3 animate-spin text-blue-500" />
+                          Checking...
                         </span>
                       ) : match ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-extrabold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
