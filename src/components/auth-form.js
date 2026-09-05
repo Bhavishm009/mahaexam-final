@@ -13,6 +13,8 @@ import {
   Building2,
   MapPin,
   Fingerprint,
+  ShieldCheck,
+  Key,
 } from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES } from "@/lib/exam-types";
 import { useAuth } from "@/components/auth-provider";
@@ -28,6 +30,13 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
 
+  // Two-Factor Authentication (MFA) state
+  const [mfaStep, setMfaStep] = useState(false);
+  const [mfaTicket, setMfaTicket] = useState(null);
+  const [mfaUser, setMfaUser] = useState(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [useBackupCode, setUseBackupCode] = useState(false);
+
   async function submit(e) {
     e.preventDefault();
     setLoading(true);
@@ -42,6 +51,58 @@ export function LoginForm() {
       const data = await r.json();
       if (!r.ok) {
         setError(data.error || "लॉगिन अयशस्वी. कृपया योग्य माहिती तपासा.");
+        setLoading(false);
+        return;
+      }
+
+      // If user has 2FA enabled, transition to MFA code challenge
+      if (data.mfaRequired && data.mfaTicket) {
+        setMfaTicket(data.mfaTicket);
+        setMfaUser(data.user);
+        setMfaStep(true);
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        await refreshUser();
+      }
+
+      const next = params.get("next");
+      const targetRoute =
+        next ||
+        (data.user?.role === "SUPER_ADMIN" || data.user?.role === "ADMIN"
+          ? "/admin"
+          : data.user?.role === "COACHING_ADMIN" || data.user?.role === "TEACHER"
+            ? "/coaching/dashboard"
+            : "/student/dashboard");
+
+      window.location.href = targetRoute;
+    } catch {
+      setError("नेटवर्क त्रुटी. कृपया पुन्हा प्रयत्न करा.");
+      setLoading(false);
+    }
+  }
+
+  async function submitMfa(e) {
+    e.preventDefault();
+    if (!mfaCode) return;
+    setLoading(true);
+    setError("");
+    try {
+      const r = await fetch("/api/auth/mfa/verify-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mfaTicket,
+          code: mfaCode.trim(),
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        setError(data.error || "सत्यापन कोड चुकीचा आहे. कृपया पुन्हा तपासा.");
         setLoading(false);
         return;
       }
@@ -167,93 +228,195 @@ export function LoginForm() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
-        <h2 className="text-xl font-black text-slate-900 dark:text-white">
-          खात्यात लॉगिन करा (Sign In)
-        </h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          ईमेल-पासवर्ड किंवा फिंगरप्रिंट / Face ID द्वारे सुरक्षित लॉगिन करा.
-        </p>
-      </div>
-
-      <form onSubmit={submit} className="space-y-4">
-        {error && (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-bold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/80 dark:text-rose-300">
-            {error}
+      {mfaStep ? (
+        /* MFA / 2FA Verification Challenge Screen */
+        <div className="space-y-5">
+          <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-500/30">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                  Two-Factor Authentication (2FA)
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {mfaUser?.email || mfaUser?.name || "Account"} has 2FA enabled.
+                </p>
+              </div>
+            </div>
           </div>
-        )}
 
-        <div>
-          <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-            ईमेल किंवा १० अंकी मोबाईल नंबर (Email or Mobile)
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-            <input
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              type="text"
-              autoCapitalize="none"
-              autoCorrect="off"
-              required
-              placeholder="bhavishm009@gmail.com किंवा 7721841331"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-            />
-          </div>
+          <form onSubmit={submitMfa} className="space-y-4">
+            {error && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-bold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/80 dark:text-rose-300">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                {useBackupCode
+                  ? "एक-वेळ वापरणारा बॅकअप रिकव्हरी कोड (Backup Recovery Code)"
+                  : "ऑथेंटिकेटर अ‍ॅपमधील ६-अंकी कोड (6-Digit Authenticator Code)"}
+              </label>
+              <div className="relative">
+                <Key className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                <input
+                  value={mfaCode}
+                  onChange={(e) =>
+                    setMfaCode(
+                      useBackupCode
+                        ? e.target.value.toUpperCase()
+                        : e.target.value.replace(/\D/g, "")
+                    )
+                  }
+                  type="text"
+                  autoFocus
+                  maxLength={useBackupCode ? 10 : 6}
+                  required
+                  placeholder={useBackupCode ? "XXXX-XXXX" : "123456"}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-center font-mono text-xl font-black tracking-widest text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                />
+              </div>
+              <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                {useBackupCode
+                  ? "उदा. 4A82-9B10. हा कोड वापरल्यानंतर आपोआप निष्क्रीय होईल."
+                  : "Google Authenticator किंवा Microsoft Authenticator मधील सध्याचा ६-अंकी कोड टाका."}
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !mfaCode.trim()}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-60"
+            >
+              <span>{loading ? "सत्यापित करत आहे..." : "Verify & Complete Sign In"}</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+
+            <div className="flex flex-col gap-2 pt-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+              <button
+                type="button"
+                onClick={() => {
+                  setUseBackupCode(!useBackupCode);
+                  setMfaCode("");
+                  setError("");
+                }}
+                className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
+              >
+                {useBackupCode
+                  ? "← Use 6-Digit Authenticator Code"
+                  : "Lost phone? Use a backup recovery code"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMfaStep(false);
+                  setMfaTicket(null);
+                  setMfaCode("");
+                  setError("");
+                }}
+                className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              >
+                Cancel & Login with different account
+              </button>
+            </div>
+          </form>
         </div>
+      ) : (
+        /* Standard Email/Phone & Password Sign In Form */
+        <>
+          <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              खात्यात लॉगिन करा (Sign In)
+            </h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              ईमेल-पासवर्ड किंवा फिंगरप्रिंट / Face ID द्वारे सुरक्षित लॉगिन करा.
+            </p>
+          </div>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-            पासवर्ड (Password)
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type={showPassword ? "text" : "password"}
-              required
-              placeholder="••••••••"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-11 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-            />
+          <form onSubmit={submit} className="space-y-4">
+            {error && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-bold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/80 dark:text-rose-300">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                ईमेल किंवा १० अंकी मोबाईल नंबर (Email or Mobile)
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                <input
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  type="text"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  required
+                  placeholder="bhavishm009@gmail.com किंवा 7721841331"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                पासवर्ड (Password)
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="••••••••"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-11 text-sm text-slate-900 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || biometricLoading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-60"
+            >
+              <span>{loading ? "लॉगिन होत आहे..." : "खात्यात लॉगिन करा"}</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+
+            <div className="relative my-4 flex items-center justify-center">
+              <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+              <span className="absolute bg-white px-3 text-[11px] font-bold text-slate-400 dark:bg-slate-900">
+                किंवा बायोमेट्रिक (OR)
+              </span>
+            </div>
+
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-3.5 text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
+              onClick={handlePasskeyLogin}
+              disabled={loading || biometricLoading}
+              className="inline-flex w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-xs font-bold text-slate-800 transition hover:bg-slate-100 active:scale-95 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <Fingerprint className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span>
+                {biometricLoading ? "Verifying Fingerprint..." : "Login with Fingerprint / Passkey"}
+              </span>
             </button>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || biometricLoading}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-500 active:scale-95 disabled:opacity-60"
-        >
-          <span>{loading ? "लॉगिन होत आहे..." : "खात्यात लॉगिन करा"}</span>
-          <ArrowRight className="h-4 w-4" />
-        </button>
-
-        <div className="relative my-4 flex items-center justify-center">
-          <div className="w-full border-t border-slate-200 dark:border-slate-800" />
-          <span className="absolute bg-white px-3 text-[11px] font-bold text-slate-400 dark:bg-slate-900">
-            किंवा बायोमेट्रिक (OR)
-          </span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handlePasskeyLogin}
-          disabled={loading || biometricLoading}
-          className="inline-flex w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-xs font-bold text-slate-800 transition hover:bg-slate-100 active:scale-95 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          <Fingerprint className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <span>
-            {biometricLoading ? "Verifying Fingerprint..." : "Login with Fingerprint / Passkey"}
-          </span>
-        </button>
-      </form>
+          </form>
+        </>
+      )}
     </div>
   );
 }

@@ -47,6 +47,7 @@ export async function GET(request) {
         preferredLanguage: true,
         createdAt: true,
         organizationId: true,
+        mfaEnabled: true,
         organization: {
           select: {
             id: true,

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { getInitials } from "@/lib/avatar";
 import { PasskeyManager } from "@/components/passkey-manager";
 import { ChangePasswordCard } from "@/components/change-password-card";
+import { MfaManager } from "@/components/mfa-manager";
 
 export default function AdminProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -341,6 +342,9 @@ export default function AdminProfilePage() {
           </div>
         </div>
       </form>
+
+      {/* Two-Factor Authentication (MFA) */}
+      <MfaManager />
 
       {/* Change Password Card */}
       <ChangePasswordCard />

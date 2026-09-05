@@ -176,6 +176,9 @@ model User {
   batchMemberships           BatchMembership[]
   pushSubscriptions          PushSubscription[]
   passkeys                   PasskeyCredential[]
+  mfaEnabled                 Boolean                     @default(false)
+  mfaSecret                  String?
+  mfaRecoveryCodes           String[]                    @default([])
 }
 
 model StudentProfile {

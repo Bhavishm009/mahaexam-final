@@ -14,6 +14,7 @@ import {
 import { getInitials } from "@/lib/avatar";
 import { PasskeyManager } from "@/components/passkey-manager";
 import { ChangePasswordCard } from "@/components/change-password-card";
+import { MfaManager } from "@/components/mfa-manager";
 import { fetchJson } from "@/lib/api-client";
 
 const maharashtraDistricts = [
@@ -429,6 +430,9 @@ export default function StudentProfilePage() {
           </div>
         </div>
       </form>
+
+      {/* Two-Factor Authentication (MFA) */}
+      <MfaManager />
 
       {/* Change Password Card */}
       <ChangePasswordCard />

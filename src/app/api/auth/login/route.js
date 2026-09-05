@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { loginUser } from "@/lib/auth-repository";
-import { createSessionToken, sessionCookieOptions, COOKIE } from "@/lib/auth";
+import {
+  createSessionToken,
+  createMfaTicket,
+  sessionCookieOptions,
+  COOKIE,
+} from "@/lib/auth";
 
 export async function POST(request) {
   try {
@@ -12,6 +17,24 @@ export async function POST(request) {
       phone: body.phone || identifier,
       password: body.password,
     });
+
+    // If user has MFA enabled, require 6-digit authenticator code before issuing session cookie
+    if (user.mfaEnabled) {
+      const mfaTicket = await createMfaTicket(user);
+      return NextResponse.json({
+        success: true,
+        mfaRequired: true,
+        mfaTicket,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+        },
+      });
+    }
+
     const token = await createSessionToken(user);
 
     const response = NextResponse.json({

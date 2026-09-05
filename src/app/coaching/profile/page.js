@@ -15,6 +15,7 @@ import {
 import { getInitials } from "@/lib/avatar";
 import { PasskeyManager } from "@/components/passkey-manager";
 import { ChangePasswordCard } from "@/components/change-password-card";
+import { MfaManager } from "@/components/mfa-manager";
 
 export default function CoachingProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -279,6 +280,9 @@ export default function CoachingProfilePage() {
           </div>
         </div>
       </form>
+
+      {/* Two-Factor Authentication (MFA) */}
+      <MfaManager />
 
       {/* Change Password Card */}
       <ChangePasswordCard />
