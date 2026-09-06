@@ -7,7 +7,9 @@ export async function GET() {
   if (!s || s.role !== "SUPER_ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const [transfers, accounts] = await Promise.all([
+  const successfulStatuses = ["PAID", "VERIFIED", "CAPTURED", "SUCCESS"];
+
+  const [transfers, accounts, payments] = await Promise.all([
     prisma.marketplaceTransfer.findMany({
       orderBy: { createdAt: "desc" },
       take: 200,
@@ -20,15 +22,31 @@ export async function GET() {
       include: { organization: { select: { id: true, name: true } } },
       orderBy: { updatedAt: "desc" },
     }),
+    prisma.payment.findMany({
+      where: { status: { in: successfulStatuses } },
+      include: {
+        user: { select: { id: true, name: true, email: true, phone: true } },
+        exam: { select: { id: true, title: true, price: true } },
+        organization: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
   ]);
-  const totals = transfers.reduce(
-    (a, x) => {
-      a.gross += x.grossAmount;
-      a.platform += x.platformFee;
-      a.coaching += x.coachingShare;
-      return a;
-    },
-    { gross: 0, platform: 0, coaching: 0 },
-  );
-  return NextResponse.json({ transfers, accounts, totals });
+
+  const coachingTotal = transfers.reduce((sum, t) => sum + Number(t.coachingShare || 0), 0);
+  const grossTotal = payments.reduce((sum, p) => {
+    const amt = Number(p.amount > 0 ? p.amount : p.amountPaise ? p.amountPaise / 100 : 0);
+    return sum + amt;
+  }, 0);
+  const platformTotal = Math.max(0, grossTotal - coachingTotal);
+
+  const totals = {
+    gross: grossTotal,
+    platform: platformTotal,
+    coaching: coachingTotal,
+    paidCount: payments.length,
+  };
+
+  return NextResponse.json({ transfers, accounts, totals, payments });
 }

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 export async function adminStats() {
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  const successfulStatuses = ["PAID", "VERIFIED", "CAPTURED", "SUCCESS"];
+
   const [
     organizations,
     users,
@@ -10,7 +12,7 @@ export async function adminStats() {
     exams,
     results,
     purchases,
-    payments,
+    paymentsAggregate,
     activeExamAttempts,
     recentLogins,
   ] = await Promise.all([
@@ -19,8 +21,11 @@ export async function adminStats() {
     prisma.user.count({ where: { role: "STUDENT" } }),
     prisma.exam.count(),
     prisma.examResult.count(),
-    prisma.examPurchase.count({ where: { status: "PAID" } }),
-    prisma.payment.aggregate({ where: { status: "PAID" }, _sum: { amount: true } }),
+    prisma.payment.count({ where: { status: { in: successfulStatuses } } }),
+    prisma.payment.aggregate({
+      where: { status: { in: successfulStatuses } },
+      _sum: { amount: true, amountPaise: true },
+    }),
     // Live exam takers: Only count active attempts where student had heartbeat/activity in the last 10 minutes
     prisma.examAttempt
       .count({
@@ -43,6 +48,11 @@ export async function adminStats() {
   // Online count is strictly the real active users from DB, bounded between 0 and total users
   const onlineCount = Math.min(users, Math.max(0, recentLogins));
 
+  let revenue = Number(paymentsAggregate?._sum?.amount || 0);
+  if (revenue <= 0 && paymentsAggregate?._sum?.amountPaise) {
+    revenue = Number(paymentsAggregate._sum.amountPaise) / 100;
+  }
+
   return {
     organizations,
     users,
@@ -50,7 +60,7 @@ export async function adminStats() {
     exams,
     results,
     paidPurchases: purchases,
-    revenue: payments._sum.amount || 0,
+    revenue,
     activeExamAttempts,
     onlineUsers: onlineCount,
   };
@@ -97,7 +107,8 @@ export async function listPayments() {
   return prisma.payment.findMany({
     include: {
       organization: { select: { name: true } },
-      user: { select: { name: true, email: true } },
+      user: { select: { id: true, name: true, email: true, phone: true } },
+      exam: { select: { id: true, title: true, price: true } },
       subscription: { include: { plan: true } },
     },
     orderBy: { createdAt: "desc" },

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { getAttemptForStudent, examRemainingMs } from "@/lib/secure-exam-service";
+import { shuffleOptionsDeterministically } from "@/lib/option-shuffler";
+
 export async function GET(request, { params }) {
   const s = await verifySessionToken((await cookies()).get(COOKIE)?.value);
   if (!s || s.role !== "STUDENT") {
@@ -26,18 +28,25 @@ export async function GET(request, { params }) {
           title: a.exam.title,
           durationMinutes: a.exam.durationMinutes,
           fullscreenRequired: a.exam.fullscreenRequired,
-          questions: a.exam.questions.map((x) => ({
-            id: x.question.id,
-            order: x.questionOrder,
-            text: x.question.questionText,
-            textMr: x.question.questionTextMr,
-            options: x.question.options.map((o) => ({
+          questions: a.exam.questions.map((x) => {
+            const rawOpts = (x.question.options || []).map((o, optIdx) => ({
               id: o.id,
               text: o.optionText,
               textMr: o.optionTextMr,
-              order: o.optionOrder,
-            })),
-          })),
+              order: o.optionOrder || optIdx + 1,
+            }));
+            const randomizedOptions = shuffleOptionsDeterministically(
+              rawOpts,
+              `${a.exam.id}_${x.question.id}_${s.sub}`,
+            );
+            return {
+              id: x.question.id,
+              order: x.questionOrder,
+              text: x.question.questionText,
+              textMr: x.question.questionTextMr,
+              options: randomizedOptions,
+            };
+          }),
           answers: (a.answers || []).map((x) => ({
             questionId: x.questionId,
             optionId: x.optionId,

@@ -256,6 +256,14 @@ async function testFullRazorpayFlow() {
   console.log("\n==================================================");
   console.log("🎉 ALL RAZORPAY VERIFICATION TESTS COMPLETED SUCCESSFULLY!");
   console.log("==================================================\n");
+
+  // Clean up any test records so production DB stays 100% clean
+  await prisma.examPurchase.deleteMany({
+    where: { razorpayPaymentId: { startsWith: "pay_test_" } },
+  }).catch(() => {});
+  await prisma.paymentOrder.deleteMany({
+    where: { providerPaymentId: { startsWith: "pay_test_" } },
+  }).catch(() => {});
 }
 
 testFullRazorpayFlow()

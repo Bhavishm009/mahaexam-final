@@ -433,7 +433,7 @@ export function AdminDashboardClient({ initialStats }) {
               href: "/admin/analytics",
             },
             {
-              label: "Paid Subscriptions",
+              label: "Paid Orders & Subscriptions",
               val: stats.paidPurchases,
               desc: "Completed transactions",
               icon: CreditCard,

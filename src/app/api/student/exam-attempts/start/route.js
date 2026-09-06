@@ -5,6 +5,7 @@ import { getStudentExamAccess } from "@/lib/exam-access-service";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { logError } from "@/lib/logger";
+import { shuffleOptionsDeterministically } from "@/lib/option-shuffler";
 
 export async function POST(request) {
   let s = null;
@@ -150,6 +151,21 @@ export async function POST(request) {
         seenQuestionTexts.add(qText);
       }
 
+      const rawOpts = (q.options || []).map((o, optIdx) => ({
+        id: o.id || `opt-${optIdx + 1}`,
+        text: o.optionText || "",
+        textMr: o.optionTextMr || o.optionText || "",
+        optionText: o.optionText || "",
+        optionTextMr: o.optionTextMr || o.optionText || "",
+        order: o.optionOrder || optIdx + 1,
+      }));
+
+      // Deterministically randomize option positions so correct answer is not always at position 1 (A)
+      const randomizedOptions = shuffleOptionsDeterministically(
+        rawOpts,
+        `${realExamId}_${qId}_${s.sub}`,
+      );
+
       questions.push({
         id: qId,
         order: questions.length + 1,
@@ -161,14 +177,7 @@ export async function POST(request) {
         explanationMr: q.explanationMr || "",
         marks: eq.marks || q.marks || 1,
         negativeMarks: eq.negativeMarks || q.negativeMarks || 0,
-        options: (q.options || []).map((o, optIdx) => ({
-          id: o.id || `opt-${optIdx + 1}`,
-          text: o.optionText || "",
-          textMr: o.optionTextMr || o.optionText || "",
-          optionText: o.optionText || "",
-          optionTextMr: o.optionTextMr || o.optionText || "",
-          order: o.optionOrder || optIdx + 1,
-        })),
+        options: randomizedOptions,
       });
     }
 

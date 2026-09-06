@@ -138,8 +138,8 @@ const navDefinitions = {
       icon: Activity,
     },
     {
-      labelMr: "Database Sync & Failover 🗄️",
-      labelEn: "Database Sync & Failover 🗄️",
+      labelMr: "Database Health & Status 🗄️",
+      labelEn: "Database Health & Status 🗄️",
       href: "/admin/db-sync",
       icon: Database,
     },
