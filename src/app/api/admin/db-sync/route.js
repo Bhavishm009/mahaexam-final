@@ -126,6 +126,13 @@ export async function POST(req) {
           continue;
         }
 
+        // Fast-path: If counts already match perfectly, skip downloading thousands of IDs
+        if (pCount === sCount && !targetTable) {
+          stats[key] = pCount;
+          syncLog.push(`In Sync (${pCount} ${label})`);
+          continue;
+        }
+
         // Fetch IDs to find exact missing records in both directions
         const pRows = await primaryPrisma[key].findMany({ select: { id: true } });
         const sRows = await secondaryPrisma[key].findMany({ select: { id: true } });

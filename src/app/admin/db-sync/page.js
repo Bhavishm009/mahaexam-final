@@ -23,15 +23,15 @@ export default function DatabaseSyncPage() {
   const queryClient = useQueryClient();
   const [realtimeStatus, setRealtimeStatus] = useState("Connecting...");
 
-  // 1. Fetch DB Status using TanStack React Query (Loads INSTANTLY from hourly cache)
+  // 1. Fetch DB Status using TanStack React Query (Live fresh check)
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["db-sync-status"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/db-sync");
+      const res = await fetch("/api/admin/db-sync?refresh=true");
       if (!res.ok) throw new Error("Failed to fetch database health status");
       return await res.json();
     },
-    staleTime: 60 * 60 * 1000, // 1 hour stale time for instant loads
+    staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -429,45 +429,43 @@ export default function DatabaseSyncPage() {
             </div>
           </div>
         </div>
-      ) : failover?.lastRecoveredAt ? (
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-950 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-            <div>
-              <p className="font-extrabold">Primary Database Restored & Operational 🟢</p>
-              <p className="font-medium text-emerald-800 dark:text-emerald-300">
-                Primary Database (Aiven) connection recovered at{" "}
-                {new Date(failover.lastRecoveredAt).toLocaleTimeString()} (
-                {formatTimeAgo(failover.lastRecoveredAt)}). All queries have safely returned to
-                Primary Master DB.
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : !data?.isSynced ? (
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs font-bold text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-          <div className="flex items-center gap-2.5">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-            <div>
-              <p className="font-extrabold">Data Sync Required</p>
-              <p className="font-medium text-amber-800 dark:text-amber-300">
-                Some records in Secondary Shadow DB are out of sync. Click &apos;Sync Now&apos;
-                above.
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : (
+      ) : data?.isSynced ? (
         <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-xs font-bold text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <div>
-              <p className="font-extrabold">Databases Fully Synchronized 🟢</p>
+              <p className="font-extrabold">Databases Perfectly Synchronized 1:1 🟢</p>
               <p className="font-medium text-emerald-800 dark:text-emerald-300">
-                All primary and secondary shadow database records match perfectly.
+                All primary (Aiven) and secondary (Supabase) core database records match with 100%
+                parity.
               </p>
             </div>
           </div>
+          {failover?.lastRecoveredAt && (
+            <span className="rounded-lg bg-emerald-200/60 px-2.5 py-1 text-[10px] font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-200">
+              Recovered {formatTimeAgo(failover.lastRecoveredAt)}
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs font-bold text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <div>
+              <p className="font-extrabold">Database Mirroring Sync Required ⚠️</p>
+              <p className="font-medium text-amber-800 dark:text-amber-300">
+                Some table records differ between Primary (Aiven) and Secondary (Supabase)
+                databases. Click &ldquo;Sync Now&rdquo; to mirror all records 1:1.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleTriggerSync}
+            disabled={isBusy}
+            className="shrink-0 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700 disabled:opacity-50"
+          >
+            Sync Databases Now
+          </button>
         </div>
       )}
 
@@ -703,6 +701,8 @@ export default function DatabaseSyncPage() {
                 const hasS = typeof row.s === "number";
                 const countMatch = hasP && hasS && row.p === row.s;
                 const countDiff = hasP && hasS ? row.p - row.s : 0;
+                const isEphemeral =
+                  row.key === "auditLog" || row.key === "notification" || row.key === "job";
 
                 // Check for per-table schema divergence
                 const tableKeyLower = row.key.toLowerCase();
@@ -711,7 +711,7 @@ export default function DatabaseSyncPage() {
                   schemaData?.byTable?.[row.label.toLowerCase()] ||
                   null;
                 const hasSchemaMismatch = !!schemaIssue && schemaIssue.missingColumns?.length > 0;
-                const isRowOutdated = !countMatch || hasSchemaMismatch;
+                const isRowOutdated = (!countMatch && !isEphemeral) || hasSchemaMismatch;
 
                 return (
                   <tr
@@ -799,6 +799,14 @@ export default function DatabaseSyncPage() {
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-extrabold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           In Sync
+                        </span>
+                      ) : isEphemeral ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-bold text-blue-800 dark:bg-blue-950/80 dark:text-blue-300"
+                          title="Continuous background event logs"
+                        >
+                          <Activity className="h-3.5 w-3.5 text-blue-600" />
+                          Live Stream ({countDiff > 0 ? `+${countDiff}` : countDiff})
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-extrabold text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
