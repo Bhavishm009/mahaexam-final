@@ -3,65 +3,114 @@ import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-async function authGuard() {
+async function authGuard(examId) {
   const token = (await cookies()).get(COOKIE)?.value;
   const session = await verifySessionToken(token);
-  if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "ADMIN")) {
+  if (!session || !["SUPER_ADMIN", "ADMIN", "COACHING_ADMIN", "TEACHER"].includes(session.role)) {
     return null;
   }
+
+  // If role is coaching admin or teacher, verify organization ownership of the exam if applicable
+  if (examId && (session.role === "COACHING_ADMIN" || session.role === "TEACHER")) {
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      select: { organizationId: true, createdBy: true },
+    });
+    if (
+      exam &&
+      exam.organizationId &&
+      session.organizationId &&
+      exam.organizationId !== session.organizationId
+    ) {
+      return null;
+    }
+  }
+
   return session;
 }
 
 /**
  * GET /api/admin/global-exams/[id]/questions
- * Fetch all questions currently assigned to an exam.
+ * Fetch all questions currently assigned to an exam, with subject breakdown and subject list.
  */
 export async function GET(request, { params }) {
-  const session = await authGuard();
-  if (!session) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
   const { id } = await params;
   if (!id) {
     return NextResponse.json({ error: "Exam ID is required" }, { status: 400 });
   }
 
+  const session = await authGuard(id);
+  if (!session) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
-    const exam = await prisma.exam.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        examType: true,
-        totalQuestions: true,
-        totalMarks: true,
-        negativeMarks: true,
-        status: true,
-        questions: {
-          include: {
-            question: {
-              include: {
-                options: {
-                  orderBy: { optionOrder: "asc" },
-                },
-                subject: {
-                  select: { id: true, name: true, nameMr: true },
+    const [exam, allSubjects] = await Promise.all([
+      prisma.exam.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          examType: true,
+          language: true,
+          totalQuestions: true,
+          totalMarks: true,
+          negativeMarks: true,
+          durationMinutes: true,
+          status: true,
+          organizationId: true,
+          questions: {
+            include: {
+              question: {
+                include: {
+                  options: {
+                    orderBy: { optionOrder: "asc" },
+                  },
+                  subject: {
+                    select: { id: true, name: true, nameMr: true },
+                  },
                 },
               },
             },
+            orderBy: { questionOrder: "asc" },
           },
-          orderBy: { questionOrder: "asc" },
         },
-      },
-    });
+      }),
+      prisma.subject.findMany({
+        include: {
+          _count: { select: { questions: true } },
+        },
+        orderBy: { name: "asc" },
+      }),
+    ]);
 
     if (!exam) {
       return NextResponse.json({ error: "Exam not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, exam });
+    // Compute subject breakdown for questions currently in this exam
+    const subjectBreakdown = {};
+    for (const eq of exam.questions) {
+      const subName = eq.question?.subject?.name || "General";
+      const subNameMr = eq.question?.subject?.nameMr || subName;
+      if (!subjectBreakdown[subName]) {
+        subjectBreakdown[subName] = { count: 0, nameMr: subNameMr };
+      }
+      subjectBreakdown[subName].count += 1;
+    }
+
+    return NextResponse.json({
+      success: true,
+      exam,
+      subjectBreakdown,
+      allSubjects: allSubjects.map((s) => ({
+        id: s.id,
+        name: s.name,
+        nameMr: s.nameMr,
+        questionCount: s._count?.questions || 0,
+      })),
+    });
   } catch (error) {
     console.error("Failed to fetch exam questions:", error);
     return NextResponse.json(
@@ -76,14 +125,14 @@ export async function GET(request, { params }) {
  * Add selected questions from question bank to an exam.
  */
 export async function POST(request, { params }) {
-  const session = await authGuard();
-  if (!session) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
   const { id } = await params;
   if (!id) {
     return NextResponse.json({ error: "Exam ID is required" }, { status: 400 });
+  }
+
+  const session = await authGuard(id);
+  if (!session) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -143,7 +192,7 @@ export async function POST(request, { params }) {
       skipDuplicates: true,
     });
 
-    // Update totalQuestions on the exam
+    // Update totalQuestions and totalMarks on the exam
     const updatedCount = await prisma.examQuestion.count({ where: { examId: id } });
     await prisma.exam.update({
       where: { id },
@@ -170,26 +219,52 @@ export async function POST(request, { params }) {
 
 /**
  * DELETE /api/admin/global-exams/[id]/questions
- * Remove a question from an exam and re-index question orders.
+ * Remove a question from an exam or clear all questions, then re-index question orders.
  */
 export async function DELETE(request, { params }) {
-  const session = await authGuard();
-  if (!session) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
   const { id } = await params;
   if (!id) {
     return NextResponse.json({ error: "Exam ID is required" }, { status: 400 });
   }
 
+  const session = await authGuard(id);
+  if (!session) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     const url = new URL(request.url);
     let questionId = url.searchParams.get("questionId");
+    let clearAll = url.searchParams.get("clearAll") === "true";
 
-    if (!questionId && request.headers.get("content-type")?.includes("application/json")) {
+    if (
+      !questionId &&
+      !clearAll &&
+      request.headers.get("content-type")?.includes("application/json")
+    ) {
       const body = await request.json().catch(() => ({}));
       questionId = body.questionId;
+      clearAll = body.clearAll === true;
+    }
+
+    if (clearAll) {
+      await prisma.examQuestion.deleteMany({
+        where: { examId: id },
+      });
+
+      await prisma.exam.update({
+        where: { id },
+        data: {
+          totalQuestions: 0,
+          totalMarks: 0,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        totalQuestions: 0,
+        message: "All questions removed from this examination paper.",
+      });
     }
 
     if (!questionId) {

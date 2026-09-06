@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 
 export function canManageQuestionBank(session) {
-  return !!session && ["SUPER_ADMIN", "COACHING_ADMIN", "TEACHER"].includes(session.role);
+  return !!session && ["SUPER_ADMIN", "ADMIN", "COACHING_ADMIN", "TEACHER"].includes(session.role);
 }
 
 export async function getQuestionBankScope(session) {
@@ -9,8 +9,8 @@ export async function getQuestionBankScope(session) {
     throw new Error("FORBIDDEN");
   }
 
-  if (session.role === "SUPER_ADMIN") {
-    // Super Admin sees global questions plus every coaching question.
+  if (session.role === "SUPER_ADMIN" || session.role === "ADMIN") {
+    // Super Admin and Admin see global questions plus every coaching question.
     return {
       mode: "SUPER_ADMIN_ALL",
       where: {},
@@ -56,8 +56,11 @@ export async function listQuestionsForExamBuilder(session, filters = {}) {
       },
     ];
   }
-  if (filters.difficulty) {
+  if (filters.difficulty && filters.difficulty !== "ALL") {
     where.difficulty = filters.difficulty;
+  }
+  if (filters.subjectId && filters.subjectId !== "ALL") {
+    where.subjectId = filters.subjectId;
   }
 
   return prisma.question.findMany({

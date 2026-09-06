@@ -1642,16 +1642,15 @@ export default function GlobalExamsManagementPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      {/* Select Questions from Bank Button */}
-                      <button
-                        type="button"
-                        onClick={() => openQuestionsModal(x)}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-700 transition hover:bg-teal-100 active:scale-95 dark:border-teal-800 dark:bg-teal-950/60 dark:text-teal-300"
-                        title="Pick questions from Question Bank"
+                      {/* Manage Questions - Dedicated Full-Page Question Editor */}
+                      <Link
+                        href={`/admin/global-exams/${x.id}/questions`}
+                        className="shadow-2xs inline-flex items-center gap-1.5 rounded-xl border border-teal-300 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 transition hover:bg-teal-100 active:scale-95 dark:border-teal-700 dark:bg-teal-950/60 dark:text-teal-200"
+                        title="Open Dedicated Question Paper Editor"
                       >
-                        <HelpCircle className="h-3.5 w-3.5" />
-                        <span>Select Questions ({x._count?.questions ?? x.totalQuestions})</span>
-                      </button>
+                        <HelpCircle className="h-3.5 w-3.5 text-teal-600" />
+                        <span>Manage Questions ({x._count?.questions ?? x.totalQuestions})</span>
+                      </Link>
 
                       {/* Edit Exam Details Button */}
                       <button

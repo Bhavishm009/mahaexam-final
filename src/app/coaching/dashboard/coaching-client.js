@@ -246,13 +246,21 @@ function Exams({ exams }) {
             <td className="font-semibold text-slate-900 dark:text-white">
               ₹{(Number(e.price || 0) / 100).toLocaleString("en-IN")}
             </td>
-            <td>
-              <Link
-                className="font-bold text-blue-600 hover:underline dark:text-blue-400"
-                href={`/coaching/results/${e.id}`}
-              >
-                Results
-              </Link>
+            <td className="p-3">
+              <div className="flex items-center gap-2">
+                <Link
+                  className="rounded-lg bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300"
+                  href={`/coaching/exams/${e.id}/questions`}
+                >
+                  Manage Paper
+                </Link>
+                <Link
+                  className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                  href={`/coaching/results/${e.id}`}
+                >
+                  Results
+                </Link>
+              </div>
             </td>
           </tr>
         ))}

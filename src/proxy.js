@@ -9,7 +9,7 @@ export async function proxy(request) {
   const authPages = ["/login", "/register", "/coaching/login", "/coaching/register"];
   const isAuthPage = authPages.includes(pathname);
 
-  // If user is already logged in and attempts to access any login or register page
+  // 1. If user is already authenticated and visits login/register pages, redirect to role dashboard
   if (session && isAuthPage) {
     const target =
       session.role === "SUPER_ADMIN" || session.role === "ADMIN"
@@ -20,44 +20,119 @@ export async function proxy(request) {
     return NextResponse.redirect(new URL(target, request.url));
   }
 
-  // Public coaching auth pages must not be treated as protected routes
+  // 2. Public auth endpoints that must never be blocked
   if (pathname === "/coaching/login" || pathname === "/coaching/register") {
     return NextResponse.next();
   }
 
-  const protectedPath =
-    pathname.startsWith("/student") ||
-    pathname.startsWith("/coaching") ||
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/exam");
-  if (!protectedPath) {
+  // 3. API Route Protection
+  if (pathname.startsWith("/api/admin")) {
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // Students can NEVER access any admin APIs
+    if (session.role === "STUDENT") {
+      return NextResponse.json(
+        { error: "Forbidden: Super Admin access required" },
+        { status: 403 },
+      );
+    }
+    // Allow coaching admin and teachers to access question paper editor endpoint
+    const isExamQuestionsEndpoint = pathname.includes("/questions");
+    if (
+      (session.role === "COACHING_ADMIN" || session.role === "TEACHER") &&
+      !isExamQuestionsEndpoint
+    ) {
+      return NextResponse.json(
+        { error: "Forbidden: Super Admin access required" },
+        { status: 403 },
+      );
+    }
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/api/coaching")) {
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // Students can NEVER access coaching administration APIs
+    if (session.role === "STUDENT") {
+      return NextResponse.json({ error: "Forbidden: Coaching access required" }, { status: 403 });
+    }
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith("/api/exam-builder")) {
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (session.role === "STUDENT") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.next();
+  }
+
+  // 4. Page Route Protection
+  const isProtectedPage =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/coaching") ||
+    pathname.startsWith("/student") ||
+    pathname.startsWith("/exam-builder") ||
+    pathname.startsWith("/questions");
+
+  if (!isProtectedPage) {
+    return NextResponse.next();
+  }
+
+  // If unauthenticated, redirect to appropriate login portal with callback
   if (!session) {
-    const url = new URL("/login", request.url);
+    const loginTarget = pathname.startsWith("/coaching") ? "/coaching/login" : "/login";
+    const url = new URL(loginTarget, request.url);
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (
-    pathname.startsWith("/student") &&
-    session.role !== "STUDENT" &&
-    session.role !== "SUPER_ADMIN" &&
-    session.role !== "ADMIN"
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // 5. Strict Role Enforcement: Block Students from Admin & Coaching Pages
+  // A) Admin pages (/admin, /admin/finance, /admin/global-exams, /admin/users, etc.)
+  if (pathname.startsWith("/admin")) {
+    const isAllowedCoachingEditor = pathname.includes("/questions");
+    if (session.role === "STUDENT") {
+      return NextResponse.redirect(new URL("/student/dashboard", request.url));
+    }
+    if (
+      (session.role === "COACHING_ADMIN" || session.role === "TEACHER") &&
+      !isAllowedCoachingEditor
+    ) {
+      return NextResponse.redirect(new URL("/coaching/dashboard", request.url));
+    }
   }
 
-  if (
-    pathname.startsWith("/coaching") &&
-    !["COACHING_ADMIN", "TEACHER", "SUPER_ADMIN"].includes(session.role)
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // B) Coaching pages (/coaching, /coaching/dashboard, /coaching/batches, /coaching/exams, etc.)
+  if (pathname.startsWith("/coaching")) {
+    if (session.role === "STUDENT") {
+      return NextResponse.redirect(new URL("/student/dashboard", request.url));
+    }
   }
 
-  if (pathname.startsWith("/admin") && !["SUPER_ADMIN", "ADMIN"].includes(session.role)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // C) Root Exam Builder (/exam-builder)
+  if (pathname.startsWith("/exam-builder")) {
+    if (session.role === "STUDENT") {
+      return NextResponse.redirect(new URL("/student/dashboard", request.url));
+    }
+  }
+
+  // D) Root Question Bank Management (/questions, /questions/bank, /questions/import)
+  if (pathname.startsWith("/questions")) {
+    if (session.role === "STUDENT") {
+      return NextResponse.redirect(new URL("/student/dashboard", request.url));
+    }
+  }
+
+  // E) Student Portal (/student/*)
+  if (pathname.startsWith("/student")) {
+    if (session.role !== "STUDENT" && session.role !== "SUPER_ADMIN" && session.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/coaching/dashboard", request.url));
+    }
   }
 
   return NextResponse.next();
@@ -67,9 +142,18 @@ export const config = {
   matcher: [
     "/login",
     "/register",
+    "/student",
     "/student/:path*",
+    "/coaching",
     "/coaching/:path*",
+    "/admin",
     "/admin/:path*",
-    "/exam/:path*",
+    "/exam-builder",
+    "/exam-builder/:path*",
+    "/questions",
+    "/questions/:path*",
+    "/api/admin/:path*",
+    "/api/coaching/:path*",
+    "/api/exam-builder/:path*",
   ],
 };
