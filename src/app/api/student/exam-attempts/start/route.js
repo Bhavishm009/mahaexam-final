@@ -71,58 +71,15 @@ export async function POST(request) {
       return NextResponse.json({ error: "Exam details not found" }, { status: 404 });
     }
 
-    // If exam has no questions linked, attempt to link available published questions
+    // Verify that exam has questions assigned by administrator
     if (!examData.questions || examData.questions.length === 0) {
-      const fallbackQuestions = await prisma.question.findMany({
-        where: { status: "PUBLISHED" },
-        take: 25,
-        include: {
-          options: {
-            orderBy: { optionOrder: "asc" },
-          },
+      return NextResponse.json(
+        {
+          error:
+            "This examination currently has no questions assigned. Please contact the administrator.",
         },
-      });
-
-      if (fallbackQuestions.length > 0) {
-        for (let i = 0; i < fallbackQuestions.length; i++) {
-          const q = fallbackQuestions[i];
-          await prisma.examQuestion.upsert({
-            where: {
-              examId_questionId: {
-                examId: examData.id,
-                questionId: q.id,
-              },
-            },
-            update: { questionOrder: i + 1 },
-            create: {
-              examId: examData.id,
-              questionId: q.id,
-              questionOrder: i + 1,
-              marks: q.marks || 1,
-              negativeMarks: q.negativeMarks || 0,
-            },
-          });
-        }
-
-        // Re-fetch exam
-        examData = await prisma.exam.findUnique({
-          where: { id: realExamId },
-          include: {
-            questions: {
-              include: {
-                question: {
-                  include: {
-                    options: {
-                      orderBy: { optionOrder: "asc" },
-                    },
-                  },
-                },
-              },
-              orderBy: { questionOrder: "asc" },
-            },
-          },
-        });
-      }
+        { status: 400 },
+      );
     }
 
     // Format and deduplicate questions list (guarantee 0 duplicates)

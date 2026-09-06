@@ -78,7 +78,10 @@ export async function POST(request) {
         examType: b.examType || "Police Bharti",
         language: b.language || "mr",
         durationMinutes: duration,
-        totalQuestions: questionsCount,
+        totalQuestions:
+          Array.isArray(b.selectedQuestionIds) && b.selectedQuestionIds.length > 0
+            ? b.selectedQuestionIds.length
+            : questionsCount,
         totalMarks: Number(b.totalMarks || questionsCount),
         negativeMarks: Number(b.negativeMarks || 0),
         passingScore:
@@ -86,7 +89,7 @@ export async function POST(request) {
         fullscreenRequired: b.fullscreenRequired !== false,
         startAt: b.startAt ? new Date(b.startAt) : null,
         endAt: b.endAt ? new Date(b.endAt) : null,
-        status: b.status || "LIVE",
+        status: b.status || "DRAFT",
         createdBy: s.sub,
         organizationId: null,
         visibilityMode: b.isFree === false ? "GLOBAL" : "FREE_GLOBAL",
@@ -95,16 +98,12 @@ export async function POST(request) {
       },
     });
 
-    // Auto-link existing questions if any
-    const existingQuestions = await prisma.question.findMany({
-      take: questionsCount,
-      orderBy: { createdAt: "asc" },
-    });
-    if (existingQuestions.length) {
+    // Link ONLY questions explicitly selected by the administrator
+    if (Array.isArray(b.selectedQuestionIds) && b.selectedQuestionIds.length > 0) {
       await prisma.examQuestion.createMany({
-        data: existingQuestions.map((q, idx) => ({
+        data: b.selectedQuestionIds.map((qId, idx) => ({
           examId: exam.id,
-          questionId: q.id,
+          questionId: qId,
           questionOrder: idx + 1,
           marks: 1,
           negativeMarks: Number(b.negativeMarks || 0),
@@ -113,11 +112,18 @@ export async function POST(request) {
       });
     }
 
-    if (b.sendNotification !== false) {
-      await scheduleExamNotifications(exam, { isReschedule: false });
+    // Only send notification if explicitly chosen AND exam has questions and is LIVE or SCHEDULED
+    if (
+      b.sendNotification === true &&
+      Array.isArray(b.selectedQuestionIds) &&
+      b.selectedQuestionIds.length > 0 &&
+      ["LIVE", "SCHEDULED"].includes(exam.status)
+    ) {
+      await scheduleExamNotifications(exam, { isReschedule: false }).catch(() => {});
     }
+
     return NextResponse.json(
-      { exam, success: true, message: "Global examination published successfully!" },
+      { exam, success: true, message: "Examination created successfully!" },
       { status: 201 },
     );
   } catch (e) {
@@ -139,14 +145,18 @@ export async function PATCH(request) {
       id,
       status,
       title,
+      description,
       examType,
       durationMinutes,
+      totalQuestions,
       totalMarks,
+      passingScore,
       negativeMarks,
       startAt,
       endAt,
       isFree,
       price,
+      sendNotification,
     } = await request.json();
     if (!id) {
       return NextResponse.json({ error: "Exam ID is required" }, { status: 400 });
@@ -163,10 +173,13 @@ export async function PATCH(request) {
     if (status) {
       dataToUpdate.status = status;
     }
-    if (title) {
-      dataToUpdate.title = title;
+    if (title !== undefined) {
+      dataToUpdate.title = title.trim();
     }
-    if (examType) {
+    if (description !== undefined) {
+      dataToUpdate.description = description ? description.trim() : null;
+    }
+    if (examType !== undefined) {
       dataToUpdate.examType = examType;
     }
     if (isFree !== undefined) {
@@ -179,8 +192,15 @@ export async function PATCH(request) {
     if (durationMinutes !== undefined) {
       dataToUpdate.durationMinutes = Number(durationMinutes);
     }
+    if (totalQuestions !== undefined) {
+      dataToUpdate.totalQuestions = Number(totalQuestions);
+    }
     if (totalMarks !== undefined) {
       dataToUpdate.totalMarks = Number(totalMarks);
+    }
+    if (passingScore !== undefined) {
+      dataToUpdate.passingScore =
+        passingScore === null || passingScore === "" ? null : Number(passingScore);
     }
     if (negativeMarks !== undefined) {
       dataToUpdate.negativeMarks = Number(negativeMarks);
@@ -197,8 +217,9 @@ export async function PATCH(request) {
       data: dataToUpdate,
     });
 
-    if (startAt !== undefined || status === "SCHEDULED") {
-      await scheduleExamNotifications(updated, { isReschedule: true });
+    // Only dispatch notification if explicitly requested
+    if (sendNotification === true) {
+      await scheduleExamNotifications(updated, { isReschedule: true }).catch(() => {});
     }
 
     return NextResponse.json({ exam: updated, success: true });
