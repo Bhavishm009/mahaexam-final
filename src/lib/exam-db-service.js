@@ -31,11 +31,35 @@ export async function startPersistentAttempt({ examId, studentId }) {
   if (!exam) {
     throw new Error("EXAM_NOT_FOUND");
   }
-  if (exam.startAt && new Date() < new Date(exam.startAt)) {
-    throw new Error("EXAM_NOT_STARTED");
+  if (exam.status === "ARCHIVED") {
+    throw new Error("EXAM_NOT_AVAILABLE");
   }
-  if (exam.endAt && new Date() > new Date(exam.endAt)) {
-    throw new Error("EXAM_ENDED");
+
+  const [purchase, entitlement, payment] = await Promise.all([
+    prisma.examPurchase.findUnique({
+      where: { userId_examId: { userId: studentId, examId } },
+    }),
+    prisma.examEntitlement.findUnique({
+      where: { studentId_examId: { studentId, examId } },
+    }),
+    prisma.payment.findFirst({
+      where: {
+        OR: [{ studentId }, { userId: studentId }],
+        examId,
+        status: { in: ["PAID", "SUCCESS", "VERIFIED", "CAPTURED"] },
+      },
+    }),
+  ]);
+  const hasPaid =
+    purchase?.status === "PAID" || entitlement?.status === "ACTIVE" || Boolean(payment);
+
+  if (!hasPaid) {
+    if (exam.startAt && new Date() < new Date(exam.startAt)) {
+      throw new Error("EXAM_NOT_STARTED");
+    }
+    if (exam.endAt && new Date() > new Date(exam.endAt)) {
+      throw new Error("EXAM_ENDED");
+    }
   }
 
   const attempts = await prisma.examAttempt.findMany({
@@ -52,7 +76,8 @@ export async function startPersistentAttempt({ examId, studentId }) {
   }
 
   const attemptNumber = (attempts[0]?.attemptNumber || 0) + 1;
-  if (attemptNumber > exam.attemptLimit) {
+  const isPaidExam = !exam.isFree && Number(exam.price || 0) > 0;
+  if (!hasPaid && !isPaidExam && exam.attemptLimit > 0 && attemptNumber > exam.attemptLimit) {
     throw new Error("ATTEMPT_LIMIT_REACHED");
   }
 

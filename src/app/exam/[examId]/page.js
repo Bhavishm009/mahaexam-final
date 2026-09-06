@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
+import { auth } from "@/auth";
 import {
   Clock,
   HelpCircle,
@@ -197,9 +198,102 @@ export default async function ExamPublicPage({ params }) {
         ],
       };
 
-  const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE)?.value;
+  const session = await verifySessionToken(token);
+  let userId = session?.sub;
+  if (!userId) {
+    try {
+      const nextAuthSession = await auth();
+      userId = nextAuthSession?.user?.id;
+    } catch {}
+  }
+
   const isPrivilegedUser =
     session && ["SUPER_ADMIN", "COACHING_ADMIN", "TEACHER"].includes(session.role);
+
+  let isPurchased = false;
+  if (userId && dbExam?.id) {
+    try {
+      const [p, ent, pymt] = await Promise.all([
+        prisma.examPurchase.findUnique({
+          where: { userId_examId: { userId, examId: dbExam.id } },
+        }),
+        prisma.examEntitlement.findUnique({
+          where: { studentId_examId: { studentId: userId, examId: dbExam.id } },
+        }),
+        prisma.payment.findFirst({
+          where: {
+            OR: [{ studentId: userId }, { userId }],
+            examId: dbExam.id,
+            status: { in: ["PAID", "SUCCESS", "VERIFIED", "CAPTURED"] },
+          },
+        }),
+      ]);
+      isPurchased = p?.status === "PAID" || ent?.status === "ACTIVE" || Boolean(pymt);
+    } catch {}
+  }
+
+  const isArchived = dbExam?.status === "ARCHIVED";
+  const isNotFound = !dbExam && !staticExam;
+
+  if ((isArchived || isNotFound) && !isPrivilegedUser) {
+    return (
+      <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+        <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
+          <div className="w-full rounded-3xl border border-amber-200/80 bg-white p-8 shadow-xl dark:border-amber-900/50 dark:bg-slate-900 sm:p-10">
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400">
+              <AlertTriangle className="h-8 w-8" />
+            </div>
+
+            <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
+              सूचना (Notice)
+            </span>
+
+            <h1 className="mt-3 text-xl font-black text-slate-900 dark:text-white sm:text-2xl">
+              सध्या ही परीक्षा किंवा प्रिव्ह्यू उपलब्ध नाही
+            </h1>
+            <p className="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-400">
+              Exam or exam preview is currently not available
+            </p>
+
+            <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300">
+              <p>
+                ही परीक्षा सिस्टीममधून काढून टाकण्यात आली आहे किंवा तिचे वेळापत्रक समाप्त झाले आहे.
+                जर आपण या परीक्षेचे शुल्क भरले असेल, तर आपले खरेदी तपशील व पावती आपल्या
+                प्रोफाईलमध्ये सुरक्षित जतन करण्यात आले आहेत.
+              </p>
+              <div className="mt-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                ✓ सर्व खरेदी रेकॉर्ड्स व पेमेंट इतिहास सुरक्षित आहेत (Purchase records preserved in
+                profile)
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
+              <Link
+                href="/student/dashboard"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+              >
+                डॅशबोर्डवर परत जा (Dashboard)
+              </Link>
+              <Link
+                href="/student/payments"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-6 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
+              >
+                खरेदी इतिहास पहा (My Purchases)
+              </Link>
+              <Link
+                href="/student/exams"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+              >
+                इतर परीक्षा पहा (Browse Exams)
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -336,7 +430,11 @@ export default async function ExamPublicPage({ params }) {
                   <div className="text-xs text-slate-500 dark:text-slate-400">प्रवेश शुल्क:</div>
                   <div className="mt-1 flex items-baseline gap-2">
                     <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                      {exam.isFree !== false ? "मोफत (Free)" : `₹${exam.price}`}
+                      {isPurchased
+                        ? "खरेदी केलेले (Unlocked)"
+                        : exam.isFree !== false
+                          ? "मोफत (Free)"
+                          : `₹${exam.price}`}
                     </span>
                   </div>
                 </div>

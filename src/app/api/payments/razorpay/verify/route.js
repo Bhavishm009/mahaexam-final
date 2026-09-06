@@ -54,6 +54,19 @@ export async function POST(request) {
             currency: po.currency,
           },
         });
+        await tx.examEntitlement.upsert({
+          where: { studentId_examId: { studentId: s.sub, examId: po.examId } },
+          update: {
+            status: "ACTIVE",
+            source: "PURCHASED",
+          },
+          create: {
+            studentId: s.sub,
+            examId: po.examId,
+            status: "ACTIVE",
+            source: "PURCHASED",
+          },
+        });
       }
       return updated;
     });

@@ -27,7 +27,22 @@ export async function POST(request) {
 
     const access = await getStudentExamAccess(s.sub, examId);
     if (!access.allowed) {
-      return NextResponse.json({ error: access.reason || "Exam access denied" }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: access.reason || "Exam access denied",
+          reason: access.reason || "ACCESS_DENIED",
+          exam: access.exam
+            ? {
+                id: access.exam.id,
+                slug: access.exam.slug,
+                title: access.exam.title,
+                price: access.exam.price,
+                isFree: access.exam.isFree,
+              }
+            : null,
+        },
+        { status: 403 },
+      );
     }
 
     const realExamId = access.exam.id;

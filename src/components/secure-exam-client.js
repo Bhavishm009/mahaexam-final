@@ -17,6 +17,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { RazorpayPaymentModal } from "@/components/RazorpayPaymentModal";
 
 export function SecureExamClient({ examId }) {
   const router = useRouter();
@@ -31,6 +32,8 @@ export function SecureExamClient({ examId }) {
   const [violations, setViolations] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [paymentExam, setPaymentExam] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showMobilePalette, setShowMobilePalette] = useState(false);
   const [offline, setOffline] = useState(false);
@@ -45,6 +48,8 @@ export function SecureExamClient({ examId }) {
 
     async function init() {
       try {
+        setLoading(true);
+        setError("");
         const res = await fetch("/api/student/exam-attempts/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -58,6 +63,16 @@ export function SecureExamClient({ examId }) {
             router.push(`/login?next=${encodeURIComponent(currentPath)}`);
             return;
           }
+          if (
+            res.status === 403 &&
+            (data.reason === "PAYMENT_REQUIRED" || data.error === "PAYMENT_REQUIRED")
+          ) {
+            if (active) {
+              setPaymentExam(data.exam || { id: examId });
+              setLoading(false);
+            }
+            return;
+          }
           if (active) {
             setError(data.error || "परीक्षेची माहिती लोड करताना अडचण आली.");
             setLoading(false);
@@ -66,6 +81,7 @@ export function SecureExamClient({ examId }) {
         }
 
         if (active) {
+          setPaymentExam(null);
           setExam(data.exam);
           setAttempt(data.attempt);
 
@@ -96,7 +112,7 @@ export function SecureExamClient({ examId }) {
     return () => {
       active = false;
     };
-  }, [examId, router]);
+  }, [examId, router, retryCount]);
 
   // Submit attempt helper
   const submit = useCallback(
@@ -323,38 +339,103 @@ export function SecureExamClient({ examId }) {
     );
   }
 
+  if (paymentExam && !exam) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 font-sans dark:bg-slate-950">
+        <RazorpayPaymentModal
+          exam={paymentExam}
+          onSuccess={() => {
+            setLoading(true);
+            setPaymentExam(null);
+            setRetryCount((prev) => prev + 1);
+          }}
+          onCancel={() => {
+            router.push("/student/exams");
+          }}
+        />
+      </div>
+    );
+  }
+
   if (error && !exam) {
+    const isUnavailable =
+      error === "EXAM_NOT_AVAILABLE" ||
+      error === "EXAM_NOT_FOUND" ||
+      error.includes("not available") ||
+      error.includes("not found");
+
+    const isAttemptLimit = error === "ATTEMPT_LIMIT" || error === "ATTEMPT_LIMIT_REACHED";
+
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 text-center font-sans dark:bg-slate-950">
-        <div className="w-full max-w-md rounded-3xl border border-rose-200 bg-white p-8 shadow-xl dark:border-rose-900/50 dark:bg-slate-900">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400">
-            <AlertTriangle className="h-6 w-6" />
+        <div className="w-full max-w-md rounded-3xl border border-amber-200/80 bg-white p-8 shadow-xl dark:border-amber-900/50 dark:bg-slate-900">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400">
+            <AlertTriangle className="h-7 w-7" />
           </div>
+
           <h3 className="mt-4 text-lg font-black text-slate-900 dark:text-white">
-            परीक्षा सुरू करताना अडचण आली
+            {isUnavailable
+              ? "सध्या ही परीक्षा किंवा प्रिव्ह्यू उपलब्ध नाही"
+              : isAttemptLimit
+                ? "कमाल प्रयत्न मर्यादा संपली आहे"
+                : "परीक्षा सुरू करताना अडचण आली"}
           </h3>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{error}</p>
-          <div className="mt-6 flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const curPath =
-                  typeof window !== "undefined" ? window.location.pathname : "/student/exams";
-                router.push(`/login?next=${encodeURIComponent(curPath)}`);
-              }}
-              className="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white transition hover:bg-blue-500 active:scale-95"
-            >
-              लॉगिन करा (Sign In to Start)
-            </button>
+
+          <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            {isUnavailable ? (
+              <>
+                ही परीक्षा सिस्टीममधून काढून टाकण्यात आली आहे किंवा तात्पुरती अनुपलब्ध करण्यात आली
+                आहे.
+                <br />
+                <span className="mt-1 block font-semibold text-emerald-600 dark:text-emerald-400">
+                  ✓ तुमचे खरेदी तपशील तुमच्या प्रोफाईलमध्ये सुरक्षित ठेवण्यात आले आहेत.
+                </span>
+              </>
+            ) : isAttemptLimit ? (
+              "आपली या परीक्षेसाठीची कमाल प्रयत्न मर्यादा संपली आहे. जर ही सशुल्क परीक्षा असेल तर कृपया सपोर्टशी संपर्क साधा."
+            ) : (
+              error
+            )}
+          </p>
+
+          <div className="mt-6 flex flex-col gap-2.5">
             <button
               type="button"
               onClick={() => router.push("/student/dashboard")}
+              className="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white transition hover:bg-blue-500 active:scale-95"
+            >
+              डॅशबोर्डवर परत जा (Dashboard)
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/student/payments")}
               className="rounded-2xl border border-slate-200 bg-slate-100 px-6 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300"
             >
-              डॅशबोर्डवर परत जा
+              माझे खरेदी तपशील पहा (View Purchases)
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/student/exams")}
+              className="rounded-2xl border border-slate-200 bg-white px-6 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+            >
+              इतर उपलब्ध सराव परीक्षा (Browse Exams)
             </button>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (!exam) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 text-center font-sans dark:bg-slate-950">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <h2 className="mt-4 text-sm font-bold text-slate-900 dark:text-white sm:text-base">
+          सुरक्षित CBT परीक्षा स्क्रीन लोड होत आहे...
+        </h2>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          कृपया प्रतीक्षा करा, प्रश्नपत्रिका तयार केली जात आहे.
+        </p>
       </div>
     );
   }

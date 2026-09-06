@@ -1,4 +1,17 @@
 import crypto from "crypto";
+import Razorpay from "razorpay";
+
+let razorpayClientInstance = null;
+
+export function getRazorpayClient() {
+  if (!razorpayClientInstance && razorpayReady()) {
+    razorpayClientInstance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  }
+  return razorpayClientInstance;
+}
 
 export function razorpayReady() {
   return !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
@@ -9,14 +22,11 @@ function getRequired(name) {
   if (!v && process.env.NODE_ENV === "production") {
     throw new Error(`${name}_MISSING`);
   }
-  return v || "demo_secret";
+  return v || "";
 }
 
 export async function razorpayRequest(path, options = {}) {
   if (!razorpayReady()) {
-    if (process.env.NODE_ENV !== "production") {
-      return { id: `order_mock_${Date.now()}`, status: "created" };
-    }
     throw new Error("RAZORPAY_NOT_CONFIGURED");
   }
   const key = process.env.RAZORPAY_KEY_ID;
@@ -39,44 +49,50 @@ export async function razorpayRequest(path, options = {}) {
 
 export async function createRazorpayOrder({ amount, amountPaise, receipt, notes = {} }) {
   const finalPaise = amountPaise ?? Math.round(Number(amount || 0) * 100);
-  if (!razorpayReady()) {
-    return {
-      id: `order_mock_${Date.now()}`,
-      entity: "order",
-      amount: finalPaise,
-      amount_paid: 0,
-      amount_due: finalPaise,
-      currency: "INR",
-      receipt: receipt || `rcpt_${Date.now()}`,
-      status: "created",
-      attempts: 0,
-      notes,
-      created_at: Math.floor(Date.now() / 1000),
-    };
+  if (finalPaise < 100) {
+    throw new Error("MINIMUM_AMOUNT_REQUIRED: Amount must be at least 100 paise (₹1)");
   }
+
+  if (!razorpayReady()) {
+    throw new Error("RAZORPAY_NOT_CONFIGURED");
+  }
+
+  const client = getRazorpayClient();
+  if (client?.orders?.create) {
+    return client.orders.create({
+      amount: finalPaise,
+      currency: "INR",
+      receipt: receipt || `rcpt_${Date.now()}`.slice(0, 40),
+      notes,
+    });
+  }
+
   return razorpayRequest("/orders", {
     method: "POST",
     body: JSON.stringify({
       amount: finalPaise,
       currency: "INR",
-      receipt,
+      receipt: receipt || `rcpt_${Date.now()}`.slice(0, 40),
       notes,
     }),
   });
 }
 
 export function verifyCheckoutSignature(orderId, paymentId, signature) {
-  if (!razorpayReady() && process.env.NODE_ENV !== "production") {
-    return true;
+  if (!orderId || !paymentId || !signature) {
+    return false;
   }
-  const secret = getRequired("RAZORPAY_KEY_SECRET");
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    throw new Error("RAZORPAY_KEY_SECRET_MISSING");
+  }
   const expected = crypto
     .createHmac("sha256", secret)
     .update(`${orderId}|${paymentId}`)
     .digest("hex");
   return (
-    expected.length === signature?.length &&
-    crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature || ""))
+    expected.length === signature.length &&
+    crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
   );
 }
 

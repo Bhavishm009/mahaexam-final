@@ -288,21 +288,48 @@ function Payments({ d }) {
   return (
     <Card title="Payment & Subscription History">
       <div className="divide-y divide-slate-100 dark:divide-slate-800">
-        {(d.purchases || []).map((p) => (
-          <div key={p.id} className="flex justify-between py-3.5">
-            <div>
-              <b className="text-sm text-slate-900 dark:text-white">
-                {p.exam?.title || "Exam Package"}
-              </b>
-              <div className="text-xs text-slate-500 dark:text-slate-400">
-                {new Date(p.purchasedAt).toLocaleString()}
+        {(d.purchases || []).map((p) => {
+          const isUnavailable = !p.exam || p.exam.status === "ARCHIVED";
+          return (
+            <div
+              key={p.id}
+              className="flex flex-col gap-2 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <b className="text-sm font-bold text-slate-900 dark:text-white">
+                    {p.exam?.title || "Exam Package"}
+                  </b>
+                  {isUnavailable ? (
+                    <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
+                      परीक्षा किंवा प्रिव्ह्यू उपलब्ध नाही
+                    </span>
+                  ) : (
+                    <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                      नेहमी सुरू / अमर्याद प्रयत्न
+                    </span>
+                  )}
+                </div>
+                <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  खरेदी तारीख: {new Date(p.purchasedAt).toLocaleString()}
+                </div>
+              </div>
+              <div className="flex items-center gap-3 self-end sm:self-auto">
+                <div className="font-mono font-bold text-slate-900 dark:text-white">
+                  ₹{(p.amount / 100).toLocaleString("en-IN")}
+                </div>
+                {!isUnavailable && (
+                  <Link
+                    href={`/exam/${p.exam?.slug || p.exam?.id || p.examId}`}
+                    className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-blue-500 active:scale-95"
+                  >
+                    परीक्षा द्या
+                  </Link>
+                )}
               </div>
             </div>
-            <div className="font-bold text-slate-900 dark:text-white">
-              ₹{(p.amount / 100).toLocaleString("en-IN")}
-            </div>
-          </div>
-        ))}
+          );
+        })}
         {!d.purchases?.length && (
           <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
             All currently available mock tests are 100% free. No payments required.

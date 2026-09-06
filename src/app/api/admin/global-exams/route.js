@@ -218,6 +218,23 @@ export async function DELETE(request) {
     if (!id) {
       return NextResponse.json({ error: "Exam ID is required" }, { status: 400 });
     }
+    const [purchaseCount, attemptCount] = await Promise.all([
+      prisma.examPurchase.count({ where: { examId: id } }),
+      prisma.examAttempt.count({ where: { examId: id } }),
+    ]);
+
+    if (purchaseCount > 0 || attemptCount > 0) {
+      await prisma.exam.update({
+        where: { id },
+        data: { status: "ARCHIVED" },
+      });
+      return NextResponse.json({
+        success: true,
+        archived: true,
+        message: "Exam archived to preserve student purchase records and scores.",
+      });
+    }
+
     await prisma.exam.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (e) {

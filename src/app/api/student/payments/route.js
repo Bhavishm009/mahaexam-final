@@ -11,7 +11,7 @@ export async function GET() {
     payments: await prisma.payment.findMany({
       where: { studentId: s.sub },
       orderBy: { createdAt: "desc" },
-      include: { exam: { select: { title: true } } },
+      include: { exam: { select: { id: true, slug: true, title: true, status: true } } },
     }),
   });
 }

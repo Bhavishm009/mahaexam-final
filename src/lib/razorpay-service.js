@@ -5,6 +5,9 @@ export function razorpayReady() {
 }
 
 export async function createRazorpayOrder({ amountPaise, receipt, notes = {} }) {
+  if (amountPaise < 100) {
+    throw new Error("MINIMUM_AMOUNT_REQUIRED: Amount must be at least 100 paise (₹1)");
+  }
   if (!razorpayReady()) {
     throw new Error("RAZORPAY_NOT_CONFIGURED");
   }
@@ -23,12 +26,19 @@ export async function createRazorpayOrder({ amountPaise, receipt, notes = {} }) 
 }
 
 export function verifyCheckoutSignature(orderId, paymentId, signature) {
+  if (!orderId || !paymentId || !signature) {
+    return false;
+  }
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    throw new Error("RAZORPAY_KEY_SECRET_MISSING");
+  }
   const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "")
+    .createHmac("sha256", secret)
     .update(`${orderId}|${paymentId}`)
     .digest("hex");
   return (
-    expected.length === signature?.length &&
+    expected.length === signature.length &&
     crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
   );
 }

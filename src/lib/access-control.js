@@ -36,17 +36,33 @@ export async function hasExamAccess({ userId, examId }) {
   if (!exam) {
     return { allowed: false, reason: "EXAM_NOT_FOUND" };
   }
+  if (exam.status === "ARCHIVED" || exam.status === "DRAFT") {
+    return { allowed: false, reason: "EXAM_NOT_AVAILABLE", exam };
+  }
 
   // Free exams are accessible if otherwise assigned/published.
   if (Number(exam.price || 0) <= 0) {
     return { allowed: true, exam };
   }
 
-  const purchase = await prisma.examPurchase.findUnique({
-    where: { userId_examId: { userId, examId } },
-  });
-  if (purchase?.status === "PAID") {
-    return { allowed: true, exam, purchase };
+  const [purchase, entitlement, payment] = await Promise.all([
+    prisma.examPurchase.findUnique({
+      where: { userId_examId: { userId, examId } },
+    }),
+    prisma.examEntitlement.findUnique({
+      where: { studentId_examId: { studentId: userId, examId } },
+    }),
+    prisma.payment.findFirst({
+      where: {
+        OR: [{ studentId: userId }, { userId }],
+        examId,
+        status: { in: ["PAID", "SUCCESS", "VERIFIED", "CAPTURED"] },
+      },
+    }),
+  ]);
+
+  if (purchase?.status === "PAID" || entitlement?.status === "ACTIVE" || Boolean(payment)) {
+    return { allowed: true, exam, purchase: purchase || payment };
   }
 
   return { allowed: false, reason: "PAYMENT_REQUIRED", exam };

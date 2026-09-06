@@ -25,16 +25,33 @@ export async function getExamAccess(studentId, examId) {
   if (exam.visibilityMode === "FREE_GLOBAL" || exam.isFree) {
     return { allowed: true, source: "FREE_GLOBAL", exam };
   }
-  const entitlement = await prisma.examEntitlement.findFirst({
-    where: {
-      studentId,
-      examId,
-      status: "ACTIVE",
-      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-    },
-  });
-  if (entitlement) {
-    return { allowed: true, source: entitlement.source, entitlement, exam };
+  const [entitlement, purchase, payment] = await Promise.all([
+    prisma.examEntitlement.findFirst({
+      where: {
+        studentId,
+        examId,
+        status: "ACTIVE",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      },
+    }),
+    prisma.examPurchase.findUnique({
+      where: { userId_examId: { userId: studentId, examId } },
+    }),
+    prisma.payment.findFirst({
+      where: {
+        OR: [{ studentId }, { userId: studentId }],
+        examId,
+        status: { in: ["PAID", "SUCCESS", "VERIFIED", "CAPTURED"] },
+      },
+    }),
+  ]);
+  if (entitlement || purchase?.status === "PAID" || Boolean(payment)) {
+    return {
+      allowed: true,
+      source: entitlement?.source || "PURCHASED",
+      entitlement: entitlement || purchase || payment,
+      exam,
+    };
   }
   const batchEntitlement = await ensureCoachingEntitlement(studentId, examId);
   if (batchEntitlement) {

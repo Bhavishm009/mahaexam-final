@@ -261,12 +261,22 @@ export function StudentExamsClient({ initialExams }) {
                     <div className="flex items-center gap-1.5">
                       <span
                         className={`rounded-full px-3 py-0.5 text-xs font-bold ${
-                          e.source === "FREE_GLOBAL" || e.isFree
+                          e.isPurchased
                             ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
-                            : "bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300"
+                            : e.source === "COACHING" || e.isAssigned
+                              ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-300"
+                              : !e.isFree && Number(e.price || 0) > 0
+                                ? "bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300"
+                                : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
                         }`}
                       >
-                        {e.source === "FREE_GLOBAL" || e.isFree ? "100% FREE" : "COACHING"}
+                        {e.isPurchased
+                          ? "खरेदी केलेले • UNLOCKED"
+                          : e.source === "COACHING" || e.isAssigned
+                            ? "अ‍ॅकॅडमी चाचणी • ASSIGNED"
+                            : !e.isFree && Number(e.price || 0) > 0
+                              ? `PAID • ₹${e.price}`
+                              : "100% FREE"}
                       </span>
                       {(e.slug?.includes("pyq") ||
                         e.title?.includes("PYQ") ||
@@ -324,9 +334,25 @@ export function StudentExamsClient({ initialExams }) {
                 <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
                   <Link
                     href={`/exam/${e.slug || e.id}/attempt`}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-blue-600 py-3 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-[0.98]"
+                    className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-3 text-xs font-bold text-white shadow-glow transition active:scale-[0.98] ${
+                      !e.isPurchased &&
+                      !e.isFree &&
+                      !e.isAssigned &&
+                      e.source !== "COACHING" &&
+                      Number(e.price || 0) > 0
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+                        : "bg-blue-600 hover:bg-blue-500"
+                    }`}
                   >
-                    <span>Attempt Now</span>
+                    <span>
+                      {!e.isPurchased &&
+                      !e.isFree &&
+                      !e.isAssigned &&
+                      e.source !== "COACHING" &&
+                      Number(e.price || 0) > 0
+                        ? `Unlock & Attempt (₹${e.price})`
+                        : "Attempt Now"}
+                    </span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
 

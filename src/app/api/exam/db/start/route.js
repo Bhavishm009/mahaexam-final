@@ -31,7 +31,9 @@ export async function POST(request) {
           error:
             access.reason === "PAYMENT_REQUIRED"
               ? "Payment required for this exam."
-              : "You cannot access this exam.",
+              : access.reason === "EXAM_NOT_AVAILABLE"
+                ? "Exam or exam preview is not available."
+                : "You cannot access this exam.",
         },
         { status: 403 },
       );
@@ -50,6 +52,7 @@ export async function POST(request) {
 
     const messages = {
       EXAM_NOT_FOUND: "Exam not found.",
+      EXAM_NOT_AVAILABLE: "Exam or exam preview is not available.",
       EXAM_NOT_STARTED: "Exam has not started yet.",
       EXAM_ENDED: "Exam has ended.",
       ATTEMPT_LIMIT_REACHED: "Attempt limit reached.",

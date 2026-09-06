@@ -77,8 +77,44 @@ export async function getStudentExamAccess(userId, examIdOrSlug) {
     return { allowed: false, reason: "NOT_ASSIGNED" };
   }
   if (exam.status === "DRAFT" || exam.status === "ARCHIVED") {
-    return { allowed: false, reason: "EXAM_NOT_AVAILABLE" };
+    return { allowed: false, reason: "EXAM_NOT_AVAILABLE", exam };
   }
+  const isPaid = !exam.isFree && Number(exam.price || 0) > 0;
+
+  if (isPaid) {
+    if (!userId) {
+      return { allowed: false, reason: "LOGIN_REQUIRED", exam };
+    }
+
+    const [purchase, entitlement, payment] = await Promise.all([
+      prisma.examPurchase.findUnique({
+        where: { userId_examId: { userId, examId: exam.id } },
+      }),
+      prisma.examEntitlement.findUnique({
+        where: { studentId_examId: { studentId: userId, examId: exam.id } },
+      }),
+      prisma.payment.findFirst({
+        where: {
+          OR: [{ studentId: userId }, { userId }],
+          examId: exam.id,
+          status: { in: ["PAID", "SUCCESS", "VERIFIED", "CAPTURED"] },
+        },
+      }),
+    ]);
+
+    if (purchase?.status === "PAID" || entitlement?.status === "ACTIVE" || Boolean(payment)) {
+      // User paid! Unlimited retries, always open anytime, no attempt limit
+      return { allowed: true, source: "PURCHASED", exam, purchase: purchase || payment };
+    }
+
+    if (isAssigned) {
+      // Student is directly enrolled in coaching or assigned batch
+      return { allowed: true, source: "ASSIGNED", exam };
+    }
+
+    return { allowed: false, reason: "PAYMENT_REQUIRED", exam };
+  }
+
   if (exam.startAt && now < exam.startAt) {
     return { allowed: false, reason: "EXAM_NOT_STARTED", exam };
   }
@@ -86,14 +122,26 @@ export async function getStudentExamAccess(userId, examIdOrSlug) {
     return { allowed: false, reason: "EXAM_ENDED", exam };
   }
 
-  const attempts = await prisma.examAttempt.count({
+  // If the student already has an active IN_PROGRESS attempt, allow them to resume immediately
+  const activeAttempt = await prisma.examAttempt.findFirst({
     where: {
       examId: exam.id,
       studentId: userId,
-      status: { in: ["IN_PROGRESS", "SUBMITTED", "AUTO_SUBMITTED"] },
+      status: "IN_PROGRESS",
     },
   });
-  if (!isFreeGlobal && exam.attemptLimit > 0 && attempts >= exam.attemptLimit) {
+  if (activeAttempt) {
+    return { allowed: true, source: "RESUME", exam, attempt: activeAttempt };
+  }
+
+  const finishedAttempts = await prisma.examAttempt.count({
+    where: {
+      examId: exam.id,
+      studentId: userId,
+      status: { in: ["SUBMITTED", "AUTO_SUBMITTED"] },
+    },
+  });
+  if (!isFreeGlobal && exam.attemptLimit > 0 && finishedAttempts >= exam.attemptLimit) {
     return { allowed: false, reason: "ATTEMPT_LIMIT", exam };
   }
 
@@ -103,7 +151,20 @@ export async function getStudentExamAccess(userId, examIdOrSlug) {
   if (isAssigned) {
     return { allowed: true, source: "ASSIGNED", exam };
   }
-  return { allowed: false, reason: "PAYMENT_REQUIRED", exam };
+  return { allowed: false, reason: "NOT_ASSIGNED", exam };
+}
+
+export function isExamAnswerKeyReleased(exam) {
+  if (!exam) return false;
+  // If exam is paid, answers are self-paced and released immediately upon submission
+  if (!exam.isFree && Number(exam.price || 0) > 0) return true;
+  // If free global practice test without strict endAt, released immediately
+  if (!exam.endAt && !exam.organizationId) return true;
+  // If admin/teacher manually published results
+  if (exam.frozenAt || exam.status === "RESULTS_PUBLISHED") return true;
+  // If scheduled exam window has concluded
+  if (exam.endAt && new Date() >= new Date(exam.endAt)) return true;
+  return false;
 }
 
 export const getStudentExamStatus = getStudentExamAccess;
@@ -286,11 +347,112 @@ export async function listStudentAvailableExams(userId = null) {
 
     for (const e of assignedDirect) {
       const qCount = e.totalQuestions || e._count?.questions || 100;
-      map.set(e.id, { ...e, totalQuestions: qCount, source: "COACHING" });
+      const existing = map.get(e.id) || {};
+      map.set(e.id, {
+        ...existing,
+        ...e,
+        totalQuestions: qCount,
+        source: "COACHING",
+        isAssigned: true,
+      });
     }
     for (const e of assignedBatches) {
       const qCount = e.totalQuestions || e._count?.questions || 100;
-      map.set(e.id, { ...e, totalQuestions: qCount, source: "COACHING" });
+      const existing = map.get(e.id) || {};
+      map.set(e.id, {
+        ...existing,
+        ...e,
+        totalQuestions: qCount,
+        source: "COACHING",
+        isAssigned: true,
+      });
+    }
+
+    const examSelect = {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      examType: true,
+      language: true,
+      durationMinutes: true,
+      totalQuestions: true,
+      totalMarks: true,
+      price: true,
+      isFree: true,
+      visibilityMode: true,
+      status: true,
+      startAt: true,
+      endAt: true,
+      _count: {
+        select: {
+          questions: true,
+        },
+      },
+    };
+
+    const [purchasedList, entitlementList, paymentList] = await Promise.all([
+      prisma.examPurchase.findMany({
+        where: { userId, status: "PAID" },
+        include: { exam: { select: examSelect } },
+      }),
+      prisma.examEntitlement.findMany({
+        where: { studentId: userId, status: "ACTIVE" },
+        include: { exam: { select: examSelect } },
+      }),
+      prisma.payment.findMany({
+        where: {
+          OR: [{ studentId: userId }, { userId }],
+          status: { in: ["PAID", "SUCCESS", "VERIFIED", "CAPTURED"] },
+          examId: { not: null },
+        },
+        include: { exam: { select: examSelect } },
+      }),
+    ]);
+
+    for (const p of purchasedList) {
+      if (p.exam && p.exam.status !== "ARCHIVED") {
+        const e = p.exam;
+        const existing = map.get(e.id) || {};
+        const qCount = e.totalQuestions || e._count?.questions || existing.totalQuestions || 100;
+        map.set(e.id, {
+          ...existing,
+          ...e,
+          totalQuestions: qCount,
+          source: "PURCHASED",
+          isPurchased: true,
+        });
+      }
+    }
+
+    for (const ent of entitlementList) {
+      if (ent.exam && ent.exam.status !== "ARCHIVED") {
+        const e = ent.exam;
+        const existing = map.get(e.id) || {};
+        const qCount = e.totalQuestions || e._count?.questions || existing.totalQuestions || 100;
+        map.set(e.id, {
+          ...existing,
+          ...e,
+          totalQuestions: qCount,
+          source: "PURCHASED",
+          isPurchased: true,
+        });
+      }
+    }
+
+    for (const pymt of paymentList) {
+      if (pymt.exam && pymt.exam.status !== "ARCHIVED") {
+        const e = pymt.exam;
+        const existing = map.get(e.id) || {};
+        const qCount = e.totalQuestions || e._count?.questions || existing.totalQuestions || 100;
+        map.set(e.id, {
+          ...existing,
+          ...e,
+          totalQuestions: qCount,
+          source: "PURCHASED",
+          isPurchased: true,
+        });
+      }
     }
   }
 

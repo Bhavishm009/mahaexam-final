@@ -32,9 +32,9 @@ export async function getStudentDashboard(userId) {
       }),
       prisma.examPurchase.findMany({
         where: { userId },
-        include: { exam: { select: { id: true, title: true } } },
+        include: { exam: { select: { id: true, slug: true, title: true, status: true } } },
         orderBy: { purchasedAt: "desc" },
-        take: 10,
+        take: 20,
       }),
       prisma.studentNotification.findMany({
         where: { userId },

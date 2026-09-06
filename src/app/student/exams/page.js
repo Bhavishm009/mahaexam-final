@@ -1,4 +1,4 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { auth } from "@/auth";
 import { listStudentAvailableExams } from "@/lib/exam-access-service";
@@ -13,14 +13,12 @@ export default async function StudentExamsPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE)?.value;
   let session = await verifySessionToken(token);
-  let userId = session?.role === "STUDENT" ? session.sub : null;
+  let userId = session?.sub || null;
 
   if (!userId) {
     try {
       const nextAuthSession = await auth();
-      if (nextAuthSession?.user?.role === "STUDENT") {
-        userId = nextAuthSession.user.id;
-      }
+      userId = nextAuthSession?.user?.id || null;
     } catch {}
   }
 

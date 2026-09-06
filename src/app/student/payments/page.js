@@ -74,8 +74,25 @@ export default function Payments() {
                       key={x.id}
                       className="transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
                     >
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">
-                        {x.exam?.title || "Exam Package"}
+                      <td className="p-3.5 text-slate-900 dark:text-white">
+                        <div className="font-bold">{x.exam?.title || "Exam Package"}</div>
+                        {!x.exam || x.exam?.status === "ARCHIVED" ? (
+                          <div className="mt-1 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                            सध्या ही परीक्षा किंवा प्रिव्ह्यू उपलब्ध नाही (Exam not available)
+                          </div>
+                        ) : (
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                              नेहमी सुरू / अमर्याद प्रयत्न (Always Open)
+                            </span>
+                            <Link
+                              href={`/exam/${x.exam.slug || x.exam.id || x.examId}`}
+                              className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                            >
+                              सुरू करा →
+                            </Link>
+                          </div>
+                        )}
                       </td>
                       <td className="p-3.5 font-mono font-bold text-slate-900 dark:text-white">
                         ₹{((x.amountPaise || 0) / 100).toFixed(2)}
