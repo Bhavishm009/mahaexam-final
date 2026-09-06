@@ -41,6 +41,8 @@ export function SecureExamClient({ examId }) {
 
   const isSubmittingRef = useRef(false);
   const violationSentRef = useRef(false);
+  const debounceTimerRef = useRef(null);
+  const dirtyRef = useRef(false);
 
   // Initialize attempt
   useEffect(() => {
@@ -85,10 +87,21 @@ export function SecureExamClient({ examId }) {
           setExam(data.exam);
           setAttempt(data.attempt);
 
-          // Restore previously saved answers
+          // Restore previously saved answers from server and local offline buffer
+          let restoredAnswers = {};
           if (data.attempt.answers && typeof data.attempt.answers === "object") {
-            setAnswers(data.attempt.answers);
+            restoredAnswers = { ...data.attempt.answers };
           }
+          try {
+            const cached = localStorage.getItem(`mahaexam_attempt_${examId}`);
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (parsed.answers && typeof parsed.answers === "object") {
+                restoredAnswers = { ...restoredAnswers, ...parsed.answers };
+              }
+            }
+          } catch {}
+          setAnswers(restoredAnswers);
 
           // Calculate remaining time
           const durationMs = (data.exam.duration || 60) * 60 * 1000;
@@ -137,6 +150,9 @@ export function SecureExamClient({ examId }) {
 
         const data = await res.json();
         if (res.ok) {
+          try {
+            localStorage.removeItem(`mahaexam_attempt_${examId}`);
+          } catch {}
           router.push(`/student/results/${data.attemptId || attempt.id}`);
           router.refresh();
         } else {
@@ -150,7 +166,7 @@ export function SecureExamClient({ examId }) {
         isSubmittingRef.current = false;
       }
     },
-    [attempt, answers, violations, router],
+    [attempt, answers, violations, router, examId],
   );
 
   // Sync Timer
@@ -246,24 +262,122 @@ export function SecureExamClient({ examId }) {
     };
   }, [loading, attempt, reportViolation]);
 
-  // Background state sync
+  // Background state sync with offline cache, delta updates, & attempt self-healing
   const syncAnswers = useCallback(
-    (newAnswers) => {
+    async (newAnswers, delta = null) => {
       if (!attempt) {
         return;
       }
-      fetch("/api/student/exam-attempts/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+
+      // Persist to offline buffer immediately
+      try {
+        localStorage.setItem(
+          `mahaexam_attempt_${examId}`,
+          JSON.stringify({
+            attemptId: attempt.id,
+            answers: newAnswers,
+            current,
+            updatedAt: Date.now(),
+          }),
+        );
+      } catch {}
+
+      try {
+        const payload = {
           attemptId: attempt.id,
-          answers: newAnswers,
+          examId,
           currentQuestion: current,
-        }),
-      }).catch(() => {});
+          answeredCount: Object.values(newAnswers).filter(Boolean).length,
+        };
+
+        if (delta) {
+          payload.delta = delta;
+        } else {
+          payload.answers = newAnswers;
+        }
+
+        const res = await fetch("/api/student/exam-attempts/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.recoveredAttemptId && data.recoveredAttemptId !== attempt.id) {
+            setAttempt((prev) => (prev ? { ...prev, id: data.recoveredAttemptId } : prev));
+          }
+        } else if (res.status === 404) {
+          const data = await res.json().catch(() => ({}));
+          if (data.shouldReinit) {
+            setRetryCount((c) => c + 1);
+          }
+        }
+      } catch {}
     },
-    [attempt, current],
+    [attempt, current, examId],
   );
+
+  // Periodic background heartbeat sync every 30 seconds
+  useEffect(() => {
+    if (!attempt || loading || submitting) return;
+    const interval = setInterval(() => {
+      if (dirtyRef.current) {
+        syncAnswers(answers);
+        dirtyRef.current = false;
+      } else {
+        // Heartbeat only: fast 1-query ping touching lastActivityAt without database lockup
+        fetch("/api/student/exam-attempts/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            attemptId: attempt.id,
+            examId,
+            heartbeatOnly: true,
+            currentQuestion: current,
+          }),
+        }).catch(() => {});
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [attempt, loading, submitting, answers, current, examId, syncAnswers]);
+
+  // Clean up debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Flush answers on window pagehide / beforeunload
+  useEffect(() => {
+    const handlePageHide = () => {
+      if (!attempt || submitting) return;
+      try {
+        const payload = JSON.stringify({
+          attemptId: attempt.id,
+          examId,
+          answers,
+          currentQuestion: current,
+        });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(
+            "/api/student/exam-attempts/sync",
+            new Blob([payload], { type: "application/json" }),
+          );
+        }
+      } catch {}
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handlePageHide);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handlePageHide);
+    };
+  }, [attempt, examId, answers, current, submitting]);
 
   function choose(optionId) {
     if (!exam || !exam.questions) {
@@ -281,7 +395,30 @@ export function SecureExamClient({ examId }) {
       nextAnswers[qId] = optionId;
     }
     setAnswers(nextAnswers);
-    syncAnswers(nextAnswers);
+
+    // Persist immediately to offline buffer
+    try {
+      localStorage.setItem(
+        `mahaexam_attempt_${examId}`,
+        JSON.stringify({
+          attemptId: attempt?.id,
+          answers: nextAnswers,
+          current,
+          updatedAt: Date.now(),
+        }),
+      );
+    } catch {}
+
+    dirtyRef.current = true;
+
+    // Debounce network delta sync to avoid connection pool saturation
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      syncAnswers(nextAnswers, { questionId: qId, optionId });
+      dirtyRef.current = false;
+    }, 1000);
   }
 
   function toggleMark() {

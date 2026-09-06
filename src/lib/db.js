@@ -158,10 +158,17 @@ export async function activateFailover(err) {
   }
 
   // Track failure count to avoid transient 2-second container deployment restart blips
-  state.failureCount = (state.failureCount || 0) + 1;
+  const isPoolTimeout =
+    cleanReason.toLowerCase().includes("timed out fetching a connection from the pool") ||
+    cleanReason.toLowerCase().includes("pool_timeout");
+
+  if (!isPoolTimeout) {
+    state.failureCount = (state.failureCount || 0) + 1;
+  }
 
   // Send instant notification to Super Admin only on sustained failure (throttled to once every 15 mins)
   if (
+    !isPoolTimeout &&
     state.failureCount >= 3 &&
     secondaryPrisma &&
     (!state.lastNotifiedAt || now - state.lastNotifiedAt > 15 * 60 * 1000)
@@ -236,6 +243,45 @@ export async function activateFailover(err) {
         );
       }
     })();
+  }
+}
+
+/**
+ * Asynchronously replicate a record discovered on Secondary back to Primary (Read-Repair)
+ */
+async function replicateToPrimaryAsync(modelName, record) {
+  if (!primaryPrisma || !record || typeof record !== "object" || !record.id) return;
+  try {
+    const priModel = primaryPrisma[modelName];
+    if (!priModel || typeof priModel.upsert !== "function") return;
+
+    const scalarData = {};
+    for (const [k, v] of Object.entries(record)) {
+      if (v === undefined) continue;
+      if (
+        v === null ||
+        typeof v === "string" ||
+        typeof v === "number" ||
+        typeof v === "boolean" ||
+        v instanceof Date ||
+        (Array.isArray(v) && v.every((x) => typeof x === "string" || typeof x === "number"))
+      ) {
+        scalarData[k] = v;
+      }
+    }
+
+    if (Object.keys(scalarData).length > 0 && scalarData.id) {
+      await priModel.upsert({
+        where: { id: scalarData.id },
+        create: scalarData,
+        update: scalarData,
+      });
+      console.log(
+        `🔄 [Read-Repair] Self-healed missing record ${modelName}:${scalarData.id} into Primary DB.`,
+      );
+    }
+  } catch (_) {
+    // Non-critical background repair; ignore conflict
   }
 }
 
@@ -481,7 +527,25 @@ export const prisma = new Proxy(primaryPrisma, {
               checkPrimaryRecovery().catch(() => {});
               const secondaryModel = secondaryPrisma[prop];
               if (secondaryModel && typeof secondaryModel[methodProp] === "function") {
-                const secRes = await secondaryModel[methodProp](...args);
+                let secRes = await secondaryModel[methodProp](...args);
+
+                // Reverse Read-Repair: If record is not found on Secondary DB during failover, check Primary DB
+                if (
+                  !secRes &&
+                  primaryPrisma &&
+                  (String(methodProp) === "findUnique" || String(methodProp) === "findFirst")
+                ) {
+                  try {
+                    const priModel = primaryPrisma[prop];
+                    if (priModel && typeof priModel[methodProp] === "function") {
+                      const priRes = await priModel[methodProp](...args);
+                      if (priRes) {
+                        secRes = priRes;
+                      }
+                    }
+                  } catch (_) {}
+                }
+
                 if (WRITE_METHODS.has(String(methodProp))) {
                   invalidateDbSyncCache();
                   // Log mutation to durable outbox queue for replay when Primary recovers
@@ -602,6 +666,26 @@ export const prisma = new Proxy(primaryPrisma, {
                     });
                 }
               }
+            }
+
+            // Cross-DB Read-Repair: If record is not found on Primary DB, check Secondary DB
+            if (
+              !primaryResult &&
+              secondaryPrisma &&
+              !primaryFailed &&
+              (String(methodProp) === "findUnique" || String(methodProp) === "findFirst")
+            ) {
+              try {
+                const secondaryModel = secondaryPrisma[prop];
+                if (secondaryModel && typeof secondaryModel[methodProp] === "function") {
+                  const secResult = await secondaryModel[methodProp](...args);
+                  if (secResult) {
+                    // Self-heal: found on Secondary DB! Replicate to Primary DB in background
+                    replicateToPrimaryAsync(String(prop), secResult).catch(() => {});
+                    return secResult;
+                  }
+                }
+              } catch (_) {}
             }
 
             return primaryResult;
