@@ -5,27 +5,23 @@ export async function adminStats() {
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
   const successfulStatuses = ["PAID", "VERIFIED", "CAPTURED", "SUCCESS"];
 
-  const [
-    organizations,
-    users,
-    students,
-    exams,
-    results,
-    purchases,
-    paymentsAggregate,
-    activeExamAttempts,
-    recentLogins,
-  ] = await Promise.all([
-    prisma.organization.count(),
-    prisma.user.count(),
-    prisma.user.count({ where: { role: "STUDENT" } }),
-    prisma.exam.count(),
-    prisma.examResult.count(),
-    prisma.payment.count({ where: { status: { in: successfulStatuses } } }),
-    prisma.payment.aggregate({
-      where: { status: { in: successfulStatuses } },
-      _sum: { amount: true, amountPaise: true },
-    }),
+  // Run queries in two smaller micro-batches to prevent exhausting PostgreSQL client connection pool
+  const [organizations, users, students, exams, results] = await Promise.all([
+    prisma.organization.count().catch(() => 0),
+    prisma.user.count().catch(() => 0),
+    prisma.user.count({ where: { role: "STUDENT" } }).catch(() => 0),
+    prisma.exam.count().catch(() => 0),
+    prisma.examResult.count().catch(() => 0),
+  ]);
+
+  const [purchases, paymentsAggregate, activeExamAttempts, recentLogins] = await Promise.all([
+    prisma.payment.count({ where: { status: { in: successfulStatuses } } }).catch(() => 0),
+    prisma.payment
+      .aggregate({
+        where: { status: { in: successfulStatuses } },
+        _sum: { amount: true, amountPaise: true },
+      })
+      .catch(() => null),
     // Live exam takers: Only count active attempts where student had heartbeat/activity in the last 10 minutes
     prisma.examAttempt
       .count({

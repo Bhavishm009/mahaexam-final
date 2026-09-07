@@ -8,7 +8,7 @@ export default async function AdminLayout({ children }) {
   const user = await getServerUser();
 
   if (!user) {
-    redirect("/login?next=/admin");
+    redirect("/login?next=/admin&expired=1");
   }
 
   // Block students completely from the entire Super Admin section

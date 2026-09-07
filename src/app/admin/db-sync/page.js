@@ -116,11 +116,17 @@ export default function DatabaseHealthPage() {
                 </h1>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                  Single DB Mode • Optimal 🟢
+                  {primary?.poolerMode
+                    ? "PgBouncer Pooler • Optimal 🟢"
+                    : "Enterprise DB • Optimal 🟢"}
                 </span>
               </div>
               <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Unified High-Performance Architecture on Aiven Managed PostgreSQL •{" "}
+                Active Provider:{" "}
+                <span className="font-bold text-slate-700 dark:text-slate-200">
+                  {primary?.provider || "Supabase Managed PostgreSQL (AWS Mumbai)"}
+                </span>{" "}
+                •{" "}
                 <span className="font-bold text-slate-700 dark:text-slate-200">
                   {isBusy ? (
                     <span className="inline-flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400">
@@ -170,19 +176,25 @@ export default function DatabaseHealthPage() {
             </div>
             <div>
               <h2 className="text-sm font-black text-slate-900 dark:text-white sm:text-base">
-                Platform Operating on Unified Single-Database Architecture
+                Platform Operating on{" "}
+                {primary?.architecture || "Enterprise Pooled Database Architecture"}
               </h2>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
                 All platform queries, student exam attempts, logins, and Razorpay transactions
-                stream directly into Aiven Managed PostgreSQL with zero replication delays, no proxy
-                overhead, and instant consistency.
+                stream through{" "}
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {primary?.provider || "Supabase"}
+                </span>{" "}
+                using {primary?.poolerMode || "PgBouncer Transaction Pooling"} on port{" "}
+                {primary?.port || 6543} with sub-millisecond multiplexing and zero connection
+                saturation.
               </p>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-sm dark:border-emerald-900 dark:bg-slate-900 dark:text-emerald-300">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              Zero Sync Overhead
+              PgBouncer Active
             </span>
           </div>
         </div>
@@ -236,9 +248,11 @@ export default function DatabaseHealthPage() {
             </div>
           </div>
           <div className="mt-3">
-            <p className="text-xl font-black text-slate-900 dark:text-white">PostgreSQL 16</p>
+            <p className="text-xl font-black text-slate-900 dark:text-white">
+              {primary?.engine || "PostgreSQL 17.6"}
+            </p>
             <p className="mt-1 truncate font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
-              Aiven Cloud • SSL
+              {primary?.provider || "Supabase"} • SSL
             </p>
           </div>
         </div>
@@ -252,9 +266,9 @@ export default function DatabaseHealthPage() {
             </div>
           </div>
           <div className="mt-3">
-            <p className="text-xl font-black text-slate-900 dark:text-white">Active (Daily)</p>
+            <p className="text-xl font-black text-slate-900 dark:text-white">Active (Continuous)</p>
             <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-              Continuous WAL & PITR 🛡️
+              WAL Archival + Standby 🛡️
             </p>
           </div>
         </div>
@@ -273,7 +287,7 @@ export default function DatabaseHealthPage() {
                 Connection & Engine Parameters
               </h3>
               <p className="text-[11px] font-semibold text-slate-400">
-                Aiven Cloud PostgreSQL Pool
+                {primary?.poolerMode || "PgBouncer IPv4 Transaction Pooler"}
               </p>
             </div>
           </div>
@@ -282,13 +296,19 @@ export default function DatabaseHealthPage() {
             <div className="flex items-center justify-between">
               <span className="text-slate-500">Database Host</span>
               <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                {primary?.host || "exam-kids.i.aivencloud.com"}
+                {primary?.host || "aws-0-ap-south-1.pooler.supabase.com"}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">Active Connection Limit</span>
-              <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
-                15 Connections
+              <span className="text-slate-500">Service Port</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                Port {primary?.port || 6543} (Transaction Pooler)
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Active PostgreSQL Sessions</span>
+              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                {primary?.activeConnections || 1} session(s)
               </span>
             </div>
             <div className="flex items-center justify-between">

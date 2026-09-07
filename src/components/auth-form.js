@@ -15,6 +15,7 @@ import {
   Fingerprint,
   ShieldCheck,
   Key,
+  Clock,
 } from "lucide-react";
 import { MAHARASHTRA_EXAM_TYPES } from "@/lib/exam-types";
 import { useAuth } from "@/components/auth-provider";
@@ -340,6 +341,18 @@ export function LoginForm() {
           </div>
 
           <form onSubmit={submit} className="space-y-4">
+            {params.get("expired") === "1" && (
+              <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50/90 p-3.5 text-xs font-semibold text-amber-800 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/70 dark:text-amber-300">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div>
+                  <p className="font-bold">सत्र समाप्त झाले आहे (Session Expired)</p>
+                  <p className="mt-0.5 text-[11px] opacity-90">
+                    सुरक्षेच्या कारणास्तव तुमचे सत्र समाप्त झाले. कृपया पुन्हा लॉगिन करा.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-bold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/80 dark:text-rose-300">
                 {error}

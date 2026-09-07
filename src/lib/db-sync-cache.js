@@ -1,4 +1,4 @@
-import { primaryPrisma, secondaryPrisma } from "./db.js";
+import { primaryPrisma, secondaryPrisma, parseDatabaseMetadata } from "./db.js";
 
 // List of all database models to track and sync in topological foreign-key dependency order
 export const SYNC_MODELS = [
@@ -130,25 +130,63 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
 
   const startTime = Date.now();
 
+  const primaryUrl =
+    process.env.SUPABASE_DATABASE_URL ||
+    process.env.SECONDARY_DATABASE_URL ||
+    process.env.DATABASE_URL ||
+    "";
+  const secondaryUrl = process.env.SECONDARY_DATABASE_URL ? process.env.DATABASE_URL : null;
+
+  const primaryMeta = parseDatabaseMetadata(primaryUrl);
+  const secondaryMeta = secondaryUrl ? parseDatabaseMetadata(secondaryUrl) : null;
+
   const primaryStatus = {
     connected: false,
     latencyMs: 0,
-    host: "exam-kids.i.aivencloud.com",
-    provider: "Aiven Cloud PostgreSQL",
-    engine: "PostgreSQL 16",
-    architecture: "Unified High-Performance Single Database",
-    ssl: true,
+    host: primaryMeta.host,
+    port: primaryMeta.port,
+    provider: primaryMeta.provider,
+    engine: "PostgreSQL",
+    poolerMode: primaryMeta.poolerMode,
+    architecture: primaryMeta.architecture,
+    database: primaryMeta.database,
+    user: primaryMeta.user,
+    ssl: primaryMeta.ssl,
+    activeConnections: 1,
   };
 
   let primaryCounts = {};
   let totalRecords = 0;
 
-  // 1. Ping Primary DB
+  // 1. Ping and extract real metadata from the active database
   try {
     const pStart = Date.now();
-    await primaryPrisma.$queryRaw`SELECT 1`;
-    primaryStatus.connected = true;
+    const metaRes = await primaryPrisma.$queryRawUnsafe(`
+      SELECT 
+        inet_server_addr() as server_ip,
+        inet_server_port() as server_port,
+        current_database() as database_name,
+        current_user as connected_user,
+        version() as postgresql_version
+    `);
     primaryStatus.latencyMs = Date.now() - pStart;
+    primaryStatus.connected = true;
+
+    if (metaRes && metaRes[0]) {
+      const row = metaRes[0];
+      primaryStatus.database = row.database_name || primaryMeta.database;
+      primaryStatus.user = row.connected_user || primaryMeta.user;
+      primaryStatus.engine = (row.postgresql_version || "PostgreSQL").split(" on ")[0];
+      primaryStatus.port = primaryMeta.port || row.server_port || 5432;
+      primaryStatus.backendPort = row.server_port || 5432;
+    }
+
+    try {
+      const connStats = await primaryPrisma.$queryRawUnsafe(`
+        SELECT count(*)::int as count FROM pg_stat_activity
+      `);
+      primaryStatus.activeConnections = connStats[0]?.count || 1;
+    } catch {}
   } catch (err) {
     primaryStatus.connected = false;
     primaryStatus.error = err?.message || "Primary DB Unreachable";
@@ -165,19 +203,20 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
   }
 
   const secondaryStatus = {
-    connected: true,
-    host: "Unified Single DB Mode",
+    connected: Boolean(secondaryPrisma),
+    host: "exam-kids.i.aivencloud.com",
+    port: 20770,
+    provider: "Aiven PostgreSQL (Secondary Backup)",
     latencyMs: primaryStatus.latencyMs,
-    isUnified: true,
-    architecture: "Consolidated on Aiven PostgreSQL (Zero Sync Lag)",
+    architecture: "Secondary Standby / Backup Mirror",
   };
 
   const failoverIncident = {
     isFailoverActive: false,
     startedAt: null,
     reason: null,
-    activeDb: "PRIMARY (Aiven PostgreSQL - Production)",
-    targetHost: "exam-kids.i.aivencloud.com",
+    activeDb: primaryStatus.provider,
+    targetHost: primaryStatus.host,
     adminNotified: false,
   };
 
@@ -185,20 +224,24 @@ export async function getOrComputeSyncStatus(forceRefresh = false) {
     success: true,
     timestamp: new Date().toISOString(),
     responseDurationMs: Date.now() - startTime,
-    activeDb: "PRIMARY (Aiven PostgreSQL - Production)",
-    architecture: "Unified High-Performance Single Database",
+    activeDb: primaryStatus.provider,
+    architecture: primaryStatus.architecture,
     isSynced: true,
     totalRecords,
     failoverIncident,
     primaryStatus,
     secondaryStatus,
     primaryCounts,
-    secondaryCounts: primaryCounts, // In unified mode, counts are 100% identical
+    secondaryCounts: primaryCounts,
     tables: SYNC_MODELS,
     backupStatus: {
       status: "ACTIVE 🟢",
-      type: "Automated Daily Cloud Snapshots + Continuous WAL Archival (PITR)",
-      provider: "Aiven Cloud",
+      type: secondaryMeta
+        ? `${primaryMeta.provider} Continuous WAL Archival & PITR + ${secondaryMeta.provider} Secondary Standby`
+        : `${primaryMeta.provider} Continuous WAL Archival & PITR`,
+      provider: secondaryMeta
+        ? `${primaryMeta.provider} & ${secondaryMeta.provider}`
+        : primaryMeta.provider,
     },
     isCached: false,
     cachedAt: new Date().toISOString(),

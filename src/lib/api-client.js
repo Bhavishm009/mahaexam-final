@@ -12,6 +12,22 @@ export async function fetchJson(url, options = {}) {
       return { ok: res.ok, status: res.status, data: { success: true } };
     }
 
+    // Automatic redirection if session expired on a protected route
+    if (res.status === 401 && typeof window !== "undefined") {
+      const pathname = window.location.pathname;
+      const isProtected =
+        pathname.startsWith("/student") ||
+        pathname.startsWith("/admin") ||
+        pathname.startsWith("/coaching");
+      if (isProtected && !pathname.startsWith("/login")) {
+        try {
+          localStorage.removeItem("mahaexam_user_cache");
+          sessionStorage.removeItem("mahaexam_user_cache");
+        } catch {}
+        window.location.href = `/login?next=${encodeURIComponent(pathname + window.location.search)}&expired=1`;
+      }
+    }
+
     const contentType = res.headers.get("content-type") || "";
     let data = null;
 

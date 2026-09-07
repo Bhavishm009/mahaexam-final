@@ -50,6 +50,22 @@ export function AuthProvider({ children }) {
     persistUser(newUser);
   }, []);
 
+  const handleSessionExpired = useCallback(() => {
+    setUser(null);
+    if (typeof window !== "undefined") {
+      const pathname = window.location.pathname;
+      const isProtectedRoute =
+        pathname.startsWith("/student") ||
+        pathname.startsWith("/admin") ||
+        pathname.startsWith("/coaching") ||
+        (pathname.startsWith("/exam") && pathname.includes("/attempt"));
+
+      if (isProtectedRoute) {
+        window.location.href = `/login?next=${encodeURIComponent(pathname + window.location.search)}&expired=1`;
+      }
+    }
+  }, [setUser]);
+
   const refreshUser = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me");
@@ -61,9 +77,9 @@ export function AuthProvider({ children }) {
           return data.user;
         }
       }
-      // If unauthorized or not authenticated, clear session
+      // If unauthorized or not authenticated, clear session and redirect if on protected route
       if (res.status === 401 || res.status === 403) {
-        setUser(null);
+        handleSessionExpired();
       }
     } catch {
       // Keep cached user if offline or brief network error
@@ -71,7 +87,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
     return null;
-  }, [setUser]);
+  }, [setUser, handleSessionExpired]);
 
   useEffect(() => {
     // Restore cached session after mount to ensure SSR matches client initial render
@@ -81,6 +97,21 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
     refreshUser();
+
+    // Re-verify session when user returns to the tab after inactivity
+    const onVisibilityOrFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        refreshUser();
+      }
+    };
+
+    window.addEventListener("focus", onVisibilityOrFocus);
+    document.addEventListener("visibilitychange", onVisibilityOrFocus);
+
+    return () => {
+      window.removeEventListener("focus", onVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", onVisibilityOrFocus);
+    };
   }, [refreshUser]);
 
   const logout = useCallback(async () => {
@@ -88,6 +119,9 @@ export function AuthProvider({ children }) {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {}
     setUser(null);
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
   }, [setUser]);
 
   return (

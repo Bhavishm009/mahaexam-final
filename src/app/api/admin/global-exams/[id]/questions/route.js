@@ -165,11 +165,25 @@ export async function POST(request, { params }) {
     const newIds = questionIds.filter((qid) => !existingIds.has(qid));
 
     if (newIds.length === 0) {
+      const allLinkedQuestions = await prisma.examQuestion.findMany({
+        where: { examId: id },
+        include: {
+          question: {
+            include: {
+              options: { orderBy: { optionOrder: "asc" } },
+              subject: { select: { id: true, name: true, nameMr: true } },
+            },
+          },
+        },
+        orderBy: { questionOrder: "asc" },
+      });
+
       return NextResponse.json({
         success: true,
         message: "All selected questions are already linked to this examination.",
         addedCount: 0,
-        totalQuestions: existing.length,
+        totalQuestions: allLinkedQuestions.length,
+        questions: allLinkedQuestions,
       });
     }
 
@@ -192,21 +206,45 @@ export async function POST(request, { params }) {
       skipDuplicates: true,
     });
 
-    // Update totalQuestions and totalMarks on the exam
-    const updatedCount = await prisma.examQuestion.count({ where: { examId: id } });
+    // Fetch updated questions for instant UI update without extra roundtrip
+    const updatedQuestions = await prisma.examQuestion.findMany({
+      where: { examId: id },
+      include: {
+        question: {
+          include: {
+            options: { orderBy: { optionOrder: "asc" } },
+            subject: { select: { id: true, name: true, nameMr: true } },
+          },
+        },
+      },
+      orderBy: { questionOrder: "asc" },
+    });
+
     await prisma.exam.update({
       where: { id },
       data: {
-        totalQuestions: updatedCount,
-        totalMarks: updatedCount,
+        totalQuestions: updatedQuestions.length,
+        totalMarks: updatedQuestions.length,
       },
     });
+
+    const subjectBreakdown = {};
+    for (const eq of updatedQuestions) {
+      const subName = eq.question?.subject?.name || "General";
+      const subNameMr = eq.question?.subject?.nameMr || subName;
+      if (!subjectBreakdown[subName]) {
+        subjectBreakdown[subName] = { count: 0, nameMr: subNameMr };
+      }
+      subjectBreakdown[subName].count += 1;
+    }
 
     return NextResponse.json({
       success: true,
       addedCount: newIds.length,
-      totalQuestions: updatedCount,
-      message: `Successfully added ${newIds.length} question(s) to the examination!`,
+      totalQuestions: updatedQuestions.length,
+      questions: updatedQuestions,
+      subjectBreakdown,
+      message: `Added ${newIds.length} question(s) to paper`,
     });
   } catch (error) {
     console.error("Failed to add questions to exam:", error);
@@ -263,6 +301,8 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({
         success: true,
         totalQuestions: 0,
+        questions: [],
+        subjectBreakdown: {},
         message: "All questions removed from this examination paper.",
       });
     }
@@ -296,18 +336,44 @@ export async function DELETE(request, { params }) {
       }
     }
 
-    // Update totalQuestions on the exam
+    // Fetch updated questions for instant UI update
+    const updatedQuestions = await prisma.examQuestion.findMany({
+      where: { examId: id },
+      include: {
+        question: {
+          include: {
+            options: { orderBy: { optionOrder: "asc" } },
+            subject: { select: { id: true, name: true, nameMr: true } },
+          },
+        },
+      },
+      orderBy: { questionOrder: "asc" },
+    });
+
+    // Update totalQuestions and totalMarks on the exam
     await prisma.exam.update({
       where: { id },
       data: {
-        totalQuestions: remaining.length,
-        totalMarks: remaining.length,
+        totalQuestions: updatedQuestions.length,
+        totalMarks: updatedQuestions.length,
       },
     });
 
+    const subjectBreakdown = {};
+    for (const eq of updatedQuestions) {
+      const subName = eq.question?.subject?.name || "General";
+      const subNameMr = eq.question?.subject?.nameMr || subName;
+      if (!subjectBreakdown[subName]) {
+        subjectBreakdown[subName] = { count: 0, nameMr: subNameMr };
+      }
+      subjectBreakdown[subName].count += 1;
+    }
+
     return NextResponse.json({
       success: true,
-      totalQuestions: remaining.length,
+      totalQuestions: updatedQuestions.length,
+      questions: updatedQuestions,
+      subjectBreakdown,
       message: "Question removed from exam successfully.",
     });
   } catch (error) {

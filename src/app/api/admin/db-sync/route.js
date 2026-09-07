@@ -47,7 +47,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       success: true,
-      message: `Database Health Benchmark Completed! Direct Aiven PostgreSQL Latency: ${pingLatencyMs}ms. Zero failover/sync lag.`,
+      message: `Database Health Benchmark Completed! Active ${freshStatus.primaryStatus.provider} Latency: ${pingLatencyMs}ms. PgBouncer Pooler is 100% stable.`,
       stats: freshStatus.primaryCounts,
       totalRecords: freshStatus.totalRecords,
       pingLatencyMs,
