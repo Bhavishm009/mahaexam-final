@@ -58,7 +58,7 @@ export function StudentDashboardClient({ initialData }) {
     <div className="w-full min-w-0 max-w-full space-y-6 font-sans">
       <NotificationPermissionPrompt />
       {/* Welcome Banner */}
-      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 p-5 text-white shadow-xl sm:p-8">
+      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-700 p-5 text-white shadow-xl shadow-sky-500/10 backdrop-blur-xl dark:border-sky-500/20 dark:from-sky-950/90 dark:via-blue-900/70 dark:to-indigo-950/90 sm:p-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="min-w-0 flex-1">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-blue-100 backdrop-blur-md">
@@ -157,10 +157,7 @@ function Overview({ d, setTab }) {
             "text-amber-600 bg-amber-50 dark:bg-amber-950/60 dark:text-amber-300",
           ],
         ].map(([label, val, badgeStyle]) => (
-          <div
-            key={label}
-            className="min-w-0 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5"
-          >
+          <div key={label} className="glass-card min-w-0 overflow-hidden rounded-3xl p-4 sm:p-5">
             <div className="truncate text-xs font-semibold text-slate-500 dark:text-slate-400">
               {label}
             </div>
@@ -272,7 +269,7 @@ function ExamList({ items, emptyText }) {
             <div className="mt-3.5 w-full sm:flex sm:justify-end">
               <Link
                 href={attemptUrl}
-                className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-blue-500/15 transition hover:bg-blue-500 active:scale-95 sm:w-auto"
+                className="glass-btn-primary flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-sm transition active:scale-95 sm:w-auto"
               >
                 <span>परीक्षा द्या</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -423,7 +420,7 @@ function NotificationsList({ items }) {
 
 function Card({ title, children, badge, action }) {
   return (
-    <section className="w-full min-w-0 max-w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+    <section className="glass-card w-full min-w-0 max-w-full overflow-hidden rounded-3xl p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="min-w-0 flex-1 break-words text-sm font-black leading-snug text-slate-900 dark:text-white sm:text-base md:text-lg">
           {title}

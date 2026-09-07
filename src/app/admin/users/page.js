@@ -217,8 +217,8 @@ export default function AdminUsersPage() {
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
         >
-          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+          <div className="glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 dark:border-slate-800/80">
               <div className="flex items-center gap-2">
                 <Plus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
@@ -376,8 +376,8 @@ export default function AdminUsersPage() {
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
         >
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+          <div className="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 dark:border-slate-800/80">
               <div className="flex items-center gap-2">
                 <Filter className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
@@ -476,7 +476,7 @@ export default function AdminUsersPage() {
       )}
 
       {/* Main Table Card */}
-      <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+      <div className="glass-card w-full min-w-0 max-w-full space-y-4 rounded-3xl p-5 shadow-sm sm:p-6">
         {/* Header Row: 16px font title, Search, Filter & Add in SAME line */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2.5">
@@ -519,7 +519,7 @@ export default function AdminUsersPage() {
             <button
               type="button"
               onClick={() => setShowAddUserModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95"
+              className="glass-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-xs font-bold text-white shadow-sm transition active:scale-95"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Add New User</span>

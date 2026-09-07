@@ -8,7 +8,7 @@
   --foreground: 222 47% 11%;
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
-  --primary: 221 83% 53%;
+  --primary: 200 95% 45%;
   --primary-foreground: 210 40% 98%;
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
@@ -16,15 +16,15 @@
 }
 
 .dark {
-  --background: 224 71% 4%;
-  --foreground: 213 31% 91%;
-  --card: 224 71% 7%;
-  --card-foreground: 213 31% 91%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-  --muted: 223 47% 11%;
+  --background: 224 71% 2%;
+  --foreground: 213 31% 95%;
+  --card: 222 47% 6%;
+  --card-foreground: 213 31% 95%;
+  --primary: 199 89% 55%;
+  --primary-foreground: 222 47% 8%;
+  --muted: 223 47% 10%;
   --muted-foreground: 215 20% 65%;
-  --border: 223 47% 14%;
+  --border: 217 33% 16%;
 }
 
 @font-face {
@@ -391,4 +391,97 @@ canvas {
 .animate-nav-progress {
   transform-origin: 0% 50%;
   animation: nav-progress 0.5s ease-in-out infinite;
+}
+
+/* Titanium Frosted Luxury Glassmorphism & Specular Effects */
+.glass-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow:
+    0 10px 30px -10px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  color: #0f172a;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .glass-card {
+  background: rgba(13, 18, 30, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 20px 40px -15px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+}
+
+.glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow:
+    0 16px 36px -10px rgba(14, 165, 233, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  color: #0f172a;
+}
+
+.dark .glass-panel {
+  background: rgba(10, 15, 29, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  color: #0f172a;
+}
+
+.dark .glass-pill {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.glass-btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 4px 14px 0 rgba(2, 132, 199, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .glass-btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0284c7 50%, #0369a1 100%);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow:
+    0 4px 20px -2px rgba(14, 165, 233, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.glass-btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    0 6px 20px 0 rgba(2, 132, 199, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.glass-btn-primary:active {
+  transform: scale(0.97);
 }

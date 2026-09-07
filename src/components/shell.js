@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
@@ -210,15 +210,15 @@ function NavLinks({ role, close, user }) {
             onClick={close}
             className={`group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all ${
               active
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100"
+                ? "bg-gradient-to-r from-sky-500 to-blue-600 font-black text-white shadow-md shadow-sky-500/25"
+                : "text-slate-800 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:hover:text-white"
             }`}
           >
             <Icon
               className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
                 active
                   ? "text-white"
-                  : "text-slate-400 group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:text-blue-400"
+                  : "text-slate-600 group-hover:text-sky-600 dark:text-slate-300 dark:group-hover:text-sky-400"
               }`}
             />
             <span className="truncate">{label}</span>
@@ -232,10 +232,27 @@ function NavLinks({ role, close, user }) {
 export function Shell({ children, role = "student", user }) {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
   const [currentUser, setCurrentUser] = useState(user || null);
   const router = useRouter();
   const { language, toggleLanguage } = useLanguage();
   const { user: authUser } = useAuth();
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [userMenuOpen]);
 
   useEffect(() => {
     if (user) {
@@ -312,23 +329,23 @@ export function Shell({ children, role = "student", user }) {
         : "/student/profile";
 
   return (
-    <div className="flex min-h-screen w-full max-w-full bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen w-full max-w-full bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-[#030712] dark:text-slate-100">
       {/* Sidebar Desktop */}
       <aside
         data-shell-sidebar="true"
-        className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-slate-200 bg-white p-4 transition-colors dark:border-slate-800 dark:bg-slate-950 md:flex"
+        className="glass-panel sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-slate-200/80 p-4 backdrop-blur-2xl transition-colors dark:border-slate-800/80 md:flex"
       >
         <div className="space-y-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 font-black text-white shadow-sm">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 font-black text-white shadow-sm shadow-sky-500/20">
               M
             </div>
             <div>
               <div className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-                Maha<span className="text-blue-600 dark:text-blue-400">Exam</span>
+                Maha<span className="text-sky-500 dark:text-sky-400">Exam</span>
               </div>
-              <div className="text-[10px] font-semibold text-slate-400">
+              <div className="text-[10px] font-bold text-slate-600 dark:text-slate-300">
                 {roleLabels[activeUser?.role] || (role === "admin" ? "Super Admin Console" : role)}
               </div>
             </div>
@@ -341,19 +358,19 @@ export function Shell({ children, role = "student", user }) {
         </div>
 
         {/* Bottom User Card */}
-        <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
-          <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-2.5 dark:bg-slate-900">
+        <div className="border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-100/80 p-2.5 dark:border-slate-700/60 dark:bg-slate-900/80">
             <Link
               href={profileUrl}
-              className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-slate-200/60 dark:hover:bg-slate-800"
+              className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-slate-200/70 dark:hover:bg-slate-800"
               title="View Profile"
             >
               <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
               <div className="min-w-0 truncate">
-                <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                <div className="truncate text-xs font-black text-slate-900 dark:text-white">
                   {activeUser?.name || "User"}
                 </div>
-                <div className="truncate text-[10px] text-slate-400">
+                <div className="truncate text-[10px] font-semibold text-slate-600 dark:text-slate-300">
                   {activeUser?.email || "Account"}
                 </div>
               </div>
@@ -361,7 +378,7 @@ export function Shell({ children, role = "student", user }) {
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-xl p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/60 dark:hover:text-rose-400"
+              className="rounded-xl p-1.5 text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/60 dark:hover:text-rose-400"
               title="Sign Out"
             >
               <LogOut className="h-4 w-4" />
@@ -375,7 +392,7 @@ export function Shell({ children, role = "student", user }) {
         {/* Top App Header */}
         <header
           data-shell-header="true"
-          className="sticky top-0 z-40 flex h-16 w-full shrink-0 items-center justify-between gap-1.5 border-b border-slate-200/80 bg-white/95 px-3 backdrop-blur-md transition-colors dark:border-slate-800/80 dark:bg-slate-950/95 sm:px-6"
+          className="sticky top-0 z-40 flex h-16 w-full shrink-0 items-center justify-between gap-1.5 border-b border-slate-200/80 bg-white/80 px-3 backdrop-blur-2xl transition-colors dark:border-slate-800/80 dark:bg-[#030712]/75 sm:px-6"
         >
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <button
@@ -412,7 +429,7 @@ export function Shell({ children, role = "student", user }) {
             <NotificationCenter />
 
             {/* Profile Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -428,7 +445,7 @@ export function Shell({ children, role = "student", user }) {
               {userMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                  <div className="absolute right-0 z-50 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                  <div className="glass-card absolute right-0 z-50 mt-2 w-56 rounded-2xl p-2.5 shadow-2xl">
                     <div className="border-b border-slate-100 px-3 py-2 text-xs dark:border-slate-800">
                       <div className="font-bold text-slate-900 dark:text-white">
                         {activeUser?.name || "User"}
@@ -489,7 +506,7 @@ export function Shell({ children, role = "student", user }) {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="animate-in slide-in-from-left flex h-full w-72 flex-col justify-between border-r border-slate-200 bg-white p-4 shadow-2xl transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950"
+            className="glass-card animate-in slide-in-from-left flex h-full w-72 flex-col justify-between rounded-r-3xl border-r border-slate-200/80 p-5 shadow-2xl backdrop-blur-2xl transition-colors dark:border-slate-800/80"
           >
             <div className="space-y-6">
               <div className="flex items-center justify-between px-2">
@@ -515,19 +532,19 @@ export function Shell({ children, role = "student", user }) {
               </div>
             </div>
 
-            <div className="space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+            <div className="space-y-3 border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
               <Link
                 href={profileUrl}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-2xl bg-slate-50 p-2 dark:bg-slate-900"
+                className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-slate-100/80 p-2.5 dark:border-slate-700/60 dark:bg-slate-900/80"
                 title="View Profile"
               >
                 <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
                 <div className="min-w-0 truncate">
-                  <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                  <div className="truncate text-xs font-black text-slate-900 dark:text-white">
                     {activeUser?.name || "User"}
                   </div>
-                  <div className="truncate text-[10px] text-slate-400">
+                  <div className="truncate text-[10px] font-semibold text-slate-600 dark:text-slate-300">
                     {activeUser?.email || "Account"}
                   </div>
                 </div>
@@ -536,7 +553,7 @@ export function Shell({ children, role = "student", user }) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 py-3 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200/80 bg-rose-50/90 py-3 text-xs font-bold text-rose-700 transition hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
               >
                 <LogOut className="h-4 w-4" />
                 <span>

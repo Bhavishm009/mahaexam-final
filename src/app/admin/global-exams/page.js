@@ -1252,12 +1252,12 @@ export default function GlobalExamsManagementPage() {
       {/* Main Grid: Create Paper Form & Exam List */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Form: Create Global Paper */}
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:col-span-4">
+        <section className="glass-card space-y-4 p-5 sm:p-6 lg:col-span-4">
           <div>
             <h2 className="text-base font-black text-slate-900 dark:text-white">
               Create New Global Paper
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
               Publish a new official examination for Maharashtra students.
             </p>
           </div>
@@ -1477,13 +1477,13 @@ export default function GlobalExamsManagementPage() {
         </section>
 
         {/* Right List: Manage All Global Exams with Responsive Cards */}
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6 lg:col-span-8">
+        <section className="glass-card space-y-4 p-5 sm:p-6 lg:col-span-8">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white">
                 All Published Global Papers
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                 Manage questions, edit details, reschedule dates, and review question papers.
               </p>
             </div>
@@ -1553,26 +1553,26 @@ export default function GlobalExamsManagementPage() {
               {paginatedExams.map((x) => (
                 <div
                   key={x.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60"
+                  className="glass-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                 >
                   {/* Top Badges */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                      <span className="rounded-md bg-sky-500/15 px-2 py-0.5 text-[11px] font-bold text-sky-700 dark:text-sky-300">
                         {x.examType}
                       </span>
                       <span
                         className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
                           x.isFree
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                            : "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300"
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                            : "bg-purple-500/15 text-purple-700 dark:text-purple-300"
                         }`}
                       >
                         {x.isFree ? "Free" : `₹${x.price || 49}`}
                       </span>
                       {x.startAt && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                          <Clock className="h-3 w-3 text-blue-500" />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                          <Clock className="h-3 w-3 text-sky-500" />
                           {new Date(x.startAt).toLocaleString("en-IN", {
                             dateStyle: "medium",
                             timeStyle: "short",
@@ -1580,7 +1580,9 @@ export default function GlobalExamsManagementPage() {
                         </span>
                       )}
                     </div>
-                    <span className="font-mono text-[11px] text-slate-400">/{x.slug || x.id}</span>
+                    <span className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                      /{x.slug || x.id}
+                    </span>
                   </div>
 
                   {/* Title & Metadata */}
@@ -1588,8 +1590,8 @@ export default function GlobalExamsManagementPage() {
                     <h3 className="text-sm font-black text-slate-900 dark:text-white sm:text-base">
                       {x.title}
                     </h3>
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="font-bold text-teal-700 dark:text-teal-300">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      <span className="font-black text-teal-700 dark:text-teal-300">
                         {x._count?.questions ?? x.totalQuestions} Questions Linked
                       </span>
                       <span>•</span>
@@ -1605,7 +1607,7 @@ export default function GlobalExamsManagementPage() {
                       {x._count && (
                         <>
                           <span>•</span>
-                          <span className="font-bold text-blue-600 dark:text-blue-400">
+                          <span className="font-bold text-sky-600 dark:text-sky-400">
                             {x._count.attempts || 0} attempts
                           </span>
                         </>

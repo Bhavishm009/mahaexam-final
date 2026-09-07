@@ -99,7 +99,7 @@ export default function Finance() {
 
         {/* Financial KPI Cards */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="glass-card rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Gross Platform Sales
@@ -115,12 +115,12 @@ export default function Finance() {
                 maximumFractionDigits: 2,
               })}
             </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
               Total volume across all paid checkouts
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="glass-card rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Platform Earnings
@@ -136,12 +136,12 @@ export default function Finance() {
                 maximumFractionDigits: 2,
               })}
             </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
               Platform net income (direct + fees)
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="glass-card rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Coaching Partner Share
@@ -157,12 +157,12 @@ export default function Finance() {
                 maximumFractionDigits: 2,
               })}
             </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
               Disbursable to partner academies
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="glass-card rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Successful Orders
@@ -174,15 +174,15 @@ export default function Finance() {
             <div className="mt-3 text-3xl font-black text-slate-900 dark:text-white">
               {totals.paidCount || payments.length}
             </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
               Verified Razorpay transactions
             </p>
           </div>
         </div>
 
         {/* Section 1: Recent Real Student Payments (Razorpay Verified) */}
-        <div className="mt-8 rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="border-b border-slate-100 p-6 dark:border-slate-800">
+        <div className="glass-card mt-8 overflow-hidden rounded-3xl shadow-sm">
+          <div className="border-b border-slate-200/80 p-6 dark:border-slate-800/80">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">
@@ -289,12 +289,12 @@ export default function Finance() {
         </div>
 
         {/* Section 2: Marketplace Transfers */}
-        <div className="mt-8 rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="border-b border-slate-100 p-6 dark:border-slate-800">
+        <div className="glass-card mt-8 overflow-hidden rounded-3xl shadow-sm">
+          <div className="border-b border-slate-200/80 p-6 dark:border-slate-800/80">
             <h2 className="text-xl font-black text-slate-900 dark:text-white">
               Coaching Partner Marketplace Transfers
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-300">
               Automated revenue share splits for partner academies hosting paid tests.
             </p>
             {msg && (
@@ -368,7 +368,7 @@ export default function Finance() {
         </div>
 
         {/* Section 3: Coaching Payout Accounts */}
-        <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass-card mt-8 rounded-3xl p-6 shadow-sm">
           <div className="p-6">
             <h2 className="text-xl font-black text-slate-900 dark:text-white">
               Connected Partner Payout Accounts

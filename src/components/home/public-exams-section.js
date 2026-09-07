@@ -157,8 +157,8 @@ export function PublicExamsSection({ initialExams = [] }) {
               onClick={() => setActiveCategory(cat.id)}
               className={`rounded-2xl px-4 py-2 text-xs font-bold transition active:scale-95 sm:px-5 sm:py-2.5 sm:text-sm ${
                 activeCategory === cat.id
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 dark:bg-blue-600"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                  ? "glass-btn-primary font-black text-white shadow-md shadow-sky-500/25"
+                  : "glass-pill text-slate-800 hover:bg-slate-200/80 dark:text-slate-200 dark:hover:bg-slate-800/80"
               }`}
             >
               {cat.label}
@@ -187,9 +187,9 @@ export function PublicExamsSection({ initialExams = [] }) {
                 : "100% Live";
 
             const badgeColor = isPyq
-              ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-700"
+              ? "bg-amber-100/90 text-amber-950 border-amber-300/80 dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-700"
               : exam.badgeColor ||
-                "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700";
+                "bg-emerald-100/90 text-emerald-950 border-emerald-300/80 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-700";
 
             const catSlug =
               exam.examType === "PREVIOUS_YEAR"
@@ -210,7 +210,7 @@ export function PublicExamsSection({ initialExams = [] }) {
             return (
               <div
                 key={exam.id || exam.slug}
-                className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="glass-card flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
@@ -219,7 +219,7 @@ export function PublicExamsSection({ initialExams = [] }) {
                     >
                       {badgeText}
                     </span>
-                    <span className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold leading-none text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                    <span className="inline-flex items-center justify-center rounded-lg border border-slate-200/60 bg-slate-100/80 px-2.5 py-1 text-[10px] font-bold leading-none text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300">
                       {qCount} {t.questionsCount}
                     </span>
                   </div>
@@ -228,25 +228,25 @@ export function PublicExamsSection({ initialExams = [] }) {
                     {title}
                   </h3>
 
-                  <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-3 text-center text-xs dark:bg-slate-800/60">
+                  <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200/60 bg-slate-100/70 p-3 text-center text-xs dark:border-slate-700/60 dark:bg-slate-900/70">
                     <div className="flex flex-col items-center justify-center gap-1">
-                      <div className="text-[10px] font-medium leading-none text-slate-400">
+                      <div className="text-[10px] font-bold leading-none text-slate-600 dark:text-slate-300">
                         {t.questionsCount}
                       </div>
                       <div className="font-black leading-none text-slate-900 dark:text-white">
                         {qCount}
                       </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center gap-1 border-x border-slate-200/60 dark:border-slate-700/50">
-                      <div className="text-[10px] font-medium leading-none text-slate-400">
+                    <div className="flex flex-col items-center justify-center gap-1 border-x border-slate-200/70 dark:border-slate-700/70">
+                      <div className="text-[10px] font-bold leading-none text-slate-600 dark:text-slate-300">
                         {t.minutes}
                       </div>
-                      <div className="font-black leading-none text-blue-600 dark:text-blue-400">
+                      <div className="font-black leading-none text-sky-600 dark:text-sky-400">
                         {duration}m
                       </div>
                     </div>
                     <div className="flex flex-col items-center justify-center gap-1">
-                      <div className="text-[10px] font-medium leading-none text-slate-400">
+                      <div className="text-[10px] font-bold leading-none text-slate-600 dark:text-slate-300">
                         {t.marks}
                       </div>
                       <div className="font-black leading-none text-emerald-600 dark:text-emerald-400">
@@ -256,10 +256,10 @@ export function PublicExamsSection({ initialExams = [] }) {
                   </div>
                 </div>
 
-                <div className="mt-6 border-t border-slate-100 pt-4 dark:border-slate-800">
+                <div className="mt-6 border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
                   <Link
                     href={targetHref}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-xs font-bold leading-none text-white shadow-sm transition hover:bg-blue-500 active:scale-95 dark:bg-blue-600 dark:hover:bg-blue-500"
+                    className="glass-btn-primary inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-bold leading-none text-white shadow-sm transition hover:shadow-md active:scale-95"
                   >
                     <Zap className="h-4 w-4 text-amber-300" />
                     <span>{t.startExamBtn}</span>

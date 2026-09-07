@@ -103,7 +103,7 @@ export default function DatabaseHealthPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12 font-sans">
       {/* Top Banner */}
-      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:p-8">
+      <div className="glass-card flex flex-col justify-between gap-4 rounded-3xl p-6 shadow-sm sm:flex-row sm:items-center sm:p-8">
         <div>
           <div className="flex items-center gap-3">
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 font-black text-white shadow-lg shadow-blue-500/20">
@@ -155,7 +155,7 @@ export default function DatabaseHealthPage() {
           <button
             onClick={handleRunBenchmark}
             disabled={isBusy}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-600/20 transition-all hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="glass-btn-primary flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-md transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {benchmarkMutation.isPending ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -203,9 +203,11 @@ export default function DatabaseHealthPage() {
       {/* KPI Cards Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Connection Health */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass-card rounded-3xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">Database Status</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Database Status
+            </span>
             <div className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400">
               <CheckCircle2 className="h-4 w-4" />
             </div>
@@ -222,9 +224,11 @@ export default function DatabaseHealthPage() {
         </div>
 
         {/* Card 2: Total Records */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass-card rounded-3xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">Total Stored Records</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Total Stored Records
+            </span>
             <div className="grid h-8 w-8 place-items-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950/80 dark:text-blue-400">
               <Layers className="h-4 w-4" />
             </div>
@@ -233,16 +237,18 @@ export default function DatabaseHealthPage() {
             <p className="text-xl font-black text-slate-900 dark:text-white">
               {totalRecords.toLocaleString()}
             </p>
-            <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
               Across {tablesList.length} database tables
             </p>
           </div>
         </div>
 
         {/* Card 3: Infrastructure Engine */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass-card rounded-3xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">Managed Engine</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Managed Engine
+            </span>
             <div className="grid h-8 w-8 place-items-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950/80 dark:text-purple-400">
               <Server className="h-4 w-4" />
             </div>
@@ -258,9 +264,11 @@ export default function DatabaseHealthPage() {
         </div>
 
         {/* Card 4: Backup & Recovery */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass-card rounded-3xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">Disaster Recovery</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Disaster Recovery
+            </span>
             <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/80 dark:text-amber-400">
               <ShieldCheck className="h-4 w-4" />
             </div>
@@ -277,7 +285,7 @@ export default function DatabaseHealthPage() {
       {/* Infrastructure Telemetry Details */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Connection & Pool Card */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass-card rounded-3xl p-6 shadow-sm">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/80 dark:text-blue-400">
               <Cpu className="h-5 w-5" />
@@ -333,7 +341,7 @@ export default function DatabaseHealthPage() {
         </div>
 
         {/* Schema Parity Card */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass-card rounded-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
             <div className="flex items-center gap-3">
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400">
@@ -390,7 +398,7 @@ export default function DatabaseHealthPage() {
       </div>
 
       {/* Table Inventory */}
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="glass-card overflow-hidden rounded-3xl shadow-sm">
         <div className="flex flex-col gap-4 border-b border-slate-100 p-6 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
             <HardDrive className="h-5 w-5 text-blue-600 dark:text-blue-400" />

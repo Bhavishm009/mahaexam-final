@@ -48,7 +48,7 @@ export default function AdminQuestionBankPage() {
   return (
     <div className="space-y-6 font-sans">
       {/* Top Header */}
-      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center">
+      <div className="glass-card flex flex-col justify-between gap-4 rounded-3xl p-6 shadow-sm sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
@@ -68,7 +68,7 @@ export default function AdminQuestionBankPage() {
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/admin/questions/import"
-            className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-95"
+            className="glass-btn-primary inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 text-xs font-bold text-white shadow-md transition active:scale-95"
           >
             <Upload className="h-4 w-4" />
             <span>Import Questions</span>
@@ -77,7 +77,7 @@ export default function AdminQuestionBankPage() {
       </div>
 
       {/* Main Container Card */}
-      <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="glass-card space-y-4 rounded-3xl p-6 shadow-sm">
         {/* Search & Difficulty Filter Bar */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">

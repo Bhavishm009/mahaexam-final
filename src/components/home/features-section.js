@@ -22,50 +22,50 @@ export function FeaturesSection() {
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100/90 text-sky-600 dark:bg-sky-950/90 dark:text-sky-400">
               <Layers3 className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-base font-black text-slate-900 dark:text-white">
               {t.feat1Title}
             </h3>
-            <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat1Desc}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-emerald-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/90 text-emerald-600 dark:bg-emerald-950/90 dark:text-emerald-400">
               <ShieldCheck className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-base font-black text-slate-900 dark:text-white">
               {t.feat2Title}
             </h3>
-            <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat2Desc}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-amber-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
+          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-600 dark:bg-amber-950/90 dark:text-amber-400">
               <Trophy className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-base font-black text-slate-900 dark:text-white">
               {t.feat3Title}
             </h3>
-            <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat3Desc}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-purple-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
+          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100/90 text-purple-600 dark:bg-purple-950/90 dark:text-purple-400">
               <BarChart3 className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-base font-black text-slate-900 dark:text-white">
               {t.feat4Title}
             </h3>
-            <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat4Desc}
             </p>
           </div>

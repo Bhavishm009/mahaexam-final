@@ -202,7 +202,7 @@ export function ExamsDirectoryClient({
           return (
             <article
               key={e.id}
-              className="group flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
+              className="glass-card group flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
@@ -211,51 +211,51 @@ export function ExamsDirectoryClient({
                   >
                     {language === "mr" ? e.badgeMr : e.badgeEn}
                   </span>
-                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  <span className="rounded-lg border border-slate-200/60 bg-slate-100/80 px-2.5 py-1 text-[10px] font-bold text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300">
                     {e.examType?.replace(/_/g, " ") || "CBT"}
                   </span>
                 </div>
 
                 <Link href={detailHref} prefetch={true}>
-                  <h3 className="mt-4 line-clamp-2 text-base font-bold leading-snug text-slate-900 transition group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 sm:text-lg">
+                  <h3 className="mt-4 line-clamp-2 text-base font-black leading-snug text-slate-900 transition group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400 sm:text-lg">
                     {e.title}
                   </h3>
                 </Link>
 
-                <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-3 text-center text-xs dark:bg-slate-800/60">
+                <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200/60 bg-slate-100/70 p-3 text-center text-xs dark:border-slate-700/60 dark:bg-slate-900/70">
                   <div>
-                    <div className="flex items-center justify-center gap-1 text-slate-400">
+                    <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-300">
                       <HelpCircle className="h-3.5 w-3.5" />
-                      <span className="text-[10px]">प्रश्न</span>
+                      <span className="text-[10px] font-bold">प्रश्न</span>
                     </div>
-                    <div className="mt-1 font-bold text-slate-900 dark:text-slate-100">
-                      {qCount}
-                    </div>
+                    <div className="mt-1 font-black text-slate-900 dark:text-white">{qCount}</div>
                   </div>
-                  <div>
-                    <div className="flex items-center justify-center gap-1 text-slate-400">
+                  <div className="border-x border-slate-200/70 dark:border-slate-700/70">
+                    <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-300">
                       <Clock className="h-3.5 w-3.5" />
-                      <span className="text-[10px]">वेळ</span>
+                      <span className="text-[10px] font-bold">वेळ</span>
                     </div>
-                    <div className="mt-1 font-bold text-slate-900 dark:text-slate-100">
+                    <div className="mt-1 font-black text-sky-600 dark:text-sky-400">
                       {duration} मि
                     </div>
                   </div>
                   <div>
-                    <div className="flex items-center justify-center gap-1 text-slate-400">
+                    <div className="flex items-center justify-center gap-1 text-slate-600 dark:text-slate-300">
                       <Award className="h-3.5 w-3.5" />
-                      <span className="text-[10px]">गुण</span>
+                      <span className="text-[10px] font-bold">गुण</span>
                     </div>
-                    <div className="mt-1 font-bold text-blue-600 dark:text-blue-400">{marks}</div>
+                    <div className="mt-1 font-black text-emerald-600 dark:text-emerald-400">
+                      {marks}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <div className="mt-6 flex items-center gap-2 border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
                 <Link
                   href={startHref}
                   prefetch={true}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-blue-600 py-3 text-xs font-bold text-white shadow-glow transition hover:bg-blue-500 active:scale-[0.98]"
+                  className="glass-btn-primary inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-3 text-xs font-black text-white shadow-md transition active:scale-95"
                 >
                   <Zap className="h-3.5 w-3.5 text-amber-300" />
                   <span>{language === "mr" ? "सराव सुरू करा" : "Attempt Now"}</span>
@@ -265,7 +265,7 @@ export function ExamsDirectoryClient({
                 <Link
                   href={detailHref}
                   prefetch={true}
-                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  className="inline-flex items-center justify-center rounded-2xl border border-slate-300/80 bg-white/70 px-3.5 py-3 text-xs font-bold text-slate-800 transition hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
                   title="अभ्यासक्रम व सूचना पहा (Syllabus & Info)"
                 >
                   <BookOpen className="h-4 w-4" />

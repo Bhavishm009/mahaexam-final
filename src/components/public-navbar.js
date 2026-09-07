@@ -27,6 +27,8 @@ export function PublicNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+  const mobileButtonRef = useRef(null);
   const pathname = usePathname();
   const { user, loading, logout } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
@@ -50,6 +52,27 @@ export function PublicNavbar() {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [userMenuOpen]);
+
+  // Close mobile navigation drawer when clicking outside
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleMobileClickOutside = (event) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target) &&
+        mobileButtonRef.current &&
+        !mobileButtonRef.current.contains(event.target)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleMobileClickOutside);
+    document.addEventListener("touchstart", handleMobileClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleMobileClickOutside);
+      document.removeEventListener("touchstart", handleMobileClickOutside);
+    };
+  }, [mobileMenuOpen]);
 
   const isLoginPage = pathname === "/login" || pathname === "/coaching/login";
   const isRegisterPage = pathname === "/register" || pathname === "/coaching/register";
@@ -165,8 +188,7 @@ export function PublicNavbar() {
 
                 {userMenuOpen && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                    <div className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                    <div className="glass-card absolute right-0 z-50 mt-2 w-56 rounded-2xl p-2.5 shadow-2xl">
                       <div className="border-b border-slate-100 px-3 py-2.5 dark:border-slate-800">
                         <div className="truncate text-xs font-black text-slate-900 dark:text-white">
                           {user?.name || "User"}
@@ -272,6 +294,7 @@ export function PublicNavbar() {
           )}
 
           <button
+            ref={mobileButtonRef}
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
@@ -286,32 +309,35 @@ export function PublicNavbar() {
       {mobileMenuOpen && (
         <>
           <div
-            className="backdrop-blur-xs fixed inset-0 z-40 bg-slate-950/40 md:hidden"
+            className="backdrop-blur-xs fixed inset-0 z-40 bg-slate-950/60 md:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="animate-in slide-in-from-top-2 relative z-50 border-b border-slate-200 bg-white px-4 py-6 shadow-xl duration-200 dark:border-slate-800 dark:bg-slate-900 md:hidden">
+          <div
+            ref={mobileMenuRef}
+            className="glass-panel animate-in slide-in-from-top-2 relative z-50 rounded-b-3xl border-b border-slate-200/80 px-5 py-6 shadow-2xl backdrop-blur-2xl duration-200 dark:border-slate-800/80 md:hidden"
+          >
             <nav className="flex flex-col gap-2">
               <Link
                 href="/exams"
                 prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
+                className={`flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition ${
                   pathname === "/exams"
-                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                    : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                    ? "bg-gradient-to-r from-sky-500 to-blue-600 font-black text-white shadow-md shadow-sky-500/25"
+                    : "text-slate-800 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:hover:text-white"
                 }`}
               >
-                <BookOpen className="h-4 w-4 text-blue-600" />
+                <BookOpen className="h-4 w-4 text-sky-500 dark:text-sky-400" />
                 <span>{t.navMockTests}</span>
               </Link>
               <Link
                 href="/jobs"
                 prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold transition ${
+                className={`flex items-center justify-between rounded-2xl px-3.5 py-2.5 text-xs font-bold transition ${
                   pathname === "/jobs"
-                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                    : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                    ? "bg-gradient-to-r from-sky-500 to-blue-600 font-black text-white shadow-md shadow-sky-500/25"
+                    : "text-slate-800 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:hover:text-white"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -326,28 +352,28 @@ export function PublicNavbar() {
                 href="/blogs"
                 prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-bold transition ${
+                className={`flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition ${
                   pathname?.startsWith("/blogs")
-                    ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"
-                    : "text-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                    ? "bg-gradient-to-r from-sky-500 to-blue-600 font-black text-white shadow-md shadow-sky-500/25"
+                    : "text-slate-800 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:hover:text-white"
                 }`}
               >
-                <BookOpen className="h-4 w-4 text-indigo-600" />
+                <BookOpen className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
                 <span>{t.navBlogs}</span>
               </Link>
 
-              <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <div className="mt-4 flex flex-col gap-2 border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
                 {!mounted || (loading && !user) ? (
                   <div className="h-10 w-full animate-pulse rounded-xl bg-slate-200/80 dark:bg-slate-800/80" />
                 ) : user ? (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-3 rounded-2xl bg-slate-100 p-3 dark:bg-slate-800/80">
+                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-slate-100/80 p-3 dark:border-slate-800 dark:bg-slate-900/80">
                       <UserAvatar src={user?.profilePhoto} name={user?.name} size="sm" />
                       <div className="min-w-0 flex-1 truncate">
-                        <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                        <div className="truncate text-xs font-black text-slate-900 dark:text-white">
                           {user.name || "User"}
                         </div>
-                        <div className="truncate text-[10px] text-slate-500 dark:text-slate-400">
+                        <div className="truncate text-[10px] font-semibold text-slate-600 dark:text-slate-300">
                           {user.email}
                         </div>
                       </div>
@@ -356,7 +382,7 @@ export function PublicNavbar() {
                     <Link
                       href={dashboardHref}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                      className="glass-btn-primary flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-center text-xs font-bold text-white shadow-md"
                     >
                       <LayoutDashboard className="h-4 w-4" />
                       <span>{language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}</span>
@@ -365,9 +391,9 @@ export function PublicNavbar() {
                     <Link
                       href={profileHref}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300/80 bg-white/70 py-2.5 text-center text-xs font-bold text-slate-800 transition hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-800"
                     >
-                      <UserIcon className="h-4 w-4 text-blue-600" />
+                      <UserIcon className="h-4 w-4 text-sky-500" />
                       <span>{language === "mr" ? "माझे प्रोफाइल" : "My Profile"}</span>
                     </Link>
 
@@ -377,7 +403,7 @@ export function PublicNavbar() {
                         setMobileMenuOpen(false);
                         logout();
                       }}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-center text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200/80 bg-rose-50/90 py-2.5 text-center text-xs font-bold text-rose-700 transition hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>{language === "mr" ? "लॉगआउट करा" : "Sign Out"}</span>
@@ -389,7 +415,7 @@ export function PublicNavbar() {
                       <Link
                         href="/login"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="shadow-xs w-full rounded-xl border border-slate-300/80 bg-white/80 py-2.5 text-center text-xs font-bold text-slate-800 hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-800"
                       >
                         {t.studentSignIn}
                       </Link>
@@ -398,7 +424,7 @@ export function PublicNavbar() {
                       <Link
                         href="/register"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="w-full rounded-xl bg-blue-600 py-2.5 text-center text-xs font-bold text-white shadow-md hover:bg-blue-500"
+                        className="glass-btn-primary w-full rounded-xl py-2.5 text-center text-xs font-bold text-white shadow-md"
                       >
                         {t.studentRegister}
                       </Link>
@@ -406,7 +432,7 @@ export function PublicNavbar() {
                     <Link
                       href="/coaching/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full rounded-xl border border-amber-500/30 bg-amber-500/10 py-2.5 text-center text-xs font-bold text-amber-700 dark:text-amber-400"
+                      className="w-full rounded-xl border border-amber-500/30 bg-amber-500/10 py-2.5 text-center text-xs font-bold text-amber-700 hover:bg-amber-500/20 dark:text-amber-300"
                     >
                       {t.coachingRegister}
                     </Link>

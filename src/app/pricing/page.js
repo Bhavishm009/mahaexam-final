@@ -111,26 +111,28 @@ export default function PricingPage() {
             {studentPlans.map((p, idx) => (
               <div
                 key={idx}
-                className={`relative flex flex-col justify-between rounded-3xl border bg-white p-8 shadow-sm transition hover:shadow-xl dark:bg-slate-900 ${
+                className={`glass-card relative flex flex-col justify-between p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
                   p.popular
-                    ? "border-2 border-blue-600 shadow-blue-500/10 dark:border-blue-500"
-                    : "border-slate-200 dark:border-slate-800"
+                    ? "border-2 border-sky-500/80 shadow-sky-500/15 dark:border-sky-400/80"
+                    : ""
                 }`}
               >
                 {p.popular && (
-                  <div className="absolute -top-3.5 right-6 rounded-full bg-blue-600 px-3.5 py-1 text-xs font-black text-white shadow-sm">
+                  <div className="absolute -top-3.5 right-6 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-1 text-xs font-black text-white shadow-md shadow-sky-500/25">
                     सर्वात लोकप्रिय (Most Popular)
                   </div>
                 )}
                 <div>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white">{p.name}</h3>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{p.desc}</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    {p.desc}
+                  </p>
 
                   <div className="mt-6 flex items-baseline gap-2">
                     <span className="text-4xl font-black text-slate-900 dark:text-white">
                       {p.price}
                     </span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                       / {p.period}
                     </span>
                   </div>
@@ -139,9 +141,9 @@ export default function PricingPage() {
                     {p.features.map((f, fIdx) => (
                       <li
                         key={fIdx}
-                        className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300"
+                        className="flex items-center gap-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200"
                       >
-                        <div className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                        <div className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-emerald-100/90 text-emerald-800 dark:bg-emerald-950/90 dark:text-emerald-300">
                           <Check className="h-2.5 w-2.5" />
                         </div>
                         <span>{f}</span>
@@ -156,8 +158,8 @@ export default function PricingPage() {
                     prefetch={true}
                     className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-bold transition active:scale-95 ${
                       p.popular
-                        ? "bg-blue-600 text-white shadow-md hover:bg-blue-500"
-                        : "border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
+                        ? "glass-btn-primary font-black text-white shadow-md"
+                        : "border border-slate-300/80 bg-white/70 text-slate-800 hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
                     }`}
                   >
                     <span>{p.ctaText}</span>
@@ -182,21 +184,23 @@ export default function PricingPage() {
             {coachingPlans.map((p, idx) => (
               <div
                 key={idx}
-                className={`relative flex flex-col justify-between rounded-3xl border bg-white p-8 shadow-sm transition hover:shadow-xl dark:bg-slate-900 ${
+                className={`glass-card relative flex flex-col justify-between p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
                   p.popular
-                    ? "border-2 border-indigo-600 shadow-indigo-500/10 dark:border-indigo-500"
-                    : "border-slate-200 dark:border-slate-800"
+                    ? "border-2 border-indigo-500/80 shadow-indigo-500/15 dark:border-indigo-400/80"
+                    : ""
                 }`}
               >
                 <div>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white">{p.name}</h3>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{p.desc}</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    {p.desc}
+                  </p>
 
                   <div className="mt-6 flex items-baseline gap-2">
                     <span className="text-4xl font-black text-slate-900 dark:text-white">
                       {p.price}
                     </span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                       / {p.period}
                     </span>
                   </div>
@@ -205,9 +209,9 @@ export default function PricingPage() {
                     {p.features.map((f, fIdx) => (
                       <li
                         key={fIdx}
-                        className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300"
+                        className="flex items-center gap-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200"
                       >
-                        <div className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                        <div className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-indigo-100/90 text-indigo-800 dark:bg-indigo-950/90 dark:text-indigo-300">
                           <Check className="h-2.5 w-2.5" />
                         </div>
                         <span>{f}</span>
@@ -220,7 +224,7 @@ export default function PricingPage() {
                   <Link
                     href={p.ctaHref}
                     prefetch={true}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3.5 text-xs font-bold text-white shadow-md transition hover:bg-indigo-500 active:scale-95"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-500/40 bg-indigo-600 py-3.5 text-xs font-bold text-white shadow-md transition hover:bg-indigo-500 active:scale-95"
                   >
                     <span>अकॅडेमी सुरू करा</span>
                     <ArrowRight className="h-3.5 w-3.5" />
