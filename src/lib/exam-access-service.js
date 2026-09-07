@@ -237,6 +237,7 @@ export async function listStudentAvailableExams(userId = null) {
       price: true,
       isFree: true,
       visibilityMode: true,
+      status: true,
       startAt: true,
       endAt: true,
       _count: {
@@ -279,6 +280,7 @@ export async function listStudentAvailableExams(userId = null) {
           price: true,
           isFree: true,
           visibilityMode: true,
+          status: true,
           startAt: true,
           endAt: true,
           _count: {
@@ -334,6 +336,7 @@ export async function listStudentAvailableExams(userId = null) {
           price: true,
           isFree: true,
           visibilityMode: true,
+          status: true,
           startAt: true,
           endAt: true,
           _count: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -26,6 +26,7 @@ export function PublicNavbar() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
   const pathname = usePathname();
   const { user, loading, logout } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
@@ -33,6 +34,22 @@ export function PublicNavbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [userMenuOpen]);
 
   const isLoginPage = pathname === "/login" || pathname === "/coaching/login";
   const isRegisterPage = pathname === "/register" || pathname === "/coaching/register";
@@ -133,7 +150,7 @@ export function PublicNavbar() {
           ) : user ? (
             <div className="flex items-center gap-2.5">
               {/* Single Unified Profile Dropdown Button */}
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen((x) => !x)}
