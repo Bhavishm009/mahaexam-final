@@ -1,9 +1,14 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { ShieldCheck, Award, Globe, Heart, LogOut } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
 import { useAuth } from "@/components/auth-provider";
+
+function CopyrightYear() {
+  return <span suppressHydrationWarning>{new Date().getFullYear()}</span>;
+}
 
 export function PublicFooter() {
   const { language } = useLanguage();
@@ -339,7 +344,13 @@ export function PublicFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 text-xs text-slate-400 dark:border-slate-800 sm:flex-row">
-          <div>© {new Date().getFullYear()} MahaExam. All rights reserved. (सर्व हक्क राखीव)</div>
+          <div>
+            ©{" "}
+            <Suspense fallback={<span suppressHydrationWarning>2026</span>}>
+              <CopyrightYear />
+            </Suspense>{" "}
+            MahaExam. All rights reserved. (सर्व हक्क राखीव)
+          </div>
           <div className="flex gap-4">
             <span className="hover:underline">Privacy Policy</span>
             <span className="hover:underline">Terms of Service</span>
