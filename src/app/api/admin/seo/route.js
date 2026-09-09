@@ -1,16 +1,39 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
-import { getAllSeoSettings, updateSeoForRoute } from "@/lib/seo-service";
+import {
+  getAllSeoSettings,
+  getSeoSettingForRoute,
+  updateSeoForRoute,
+  deleteSeoForRoute,
+  bulkDeleteSeoRoutes,
+} from "@/lib/seo-service";
 
-export async function GET() {
+export async function GET(req) {
   const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
   if (!session || session.role !== "SUPER_ADMIN") {
     return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   }
 
-  const settings = await getAllSeoSettings();
-  return NextResponse.json({ success: true, settings });
+  try {
+    const { searchParams } = new URL(req.url);
+    const route = searchParams.get("route") || searchParams.get("id");
+
+    if (route) {
+      const decodedRoute = decodeURIComponent(route);
+      const setting = await getSeoSettingForRoute(decodedRoute);
+      if (!setting) {
+        return NextResponse.json({ error: "SEO setting not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, setting });
+    }
+
+    const settings = await getAllSeoSettings();
+    return NextResponse.json({ success: true, settings });
+  } catch (err) {
+    console.error("Error in GET /api/admin/seo:", err);
+    return NextResponse.json({ error: "Failed to fetch SEO settings" }, { status: 500 });
+  }
 }
 
 export async function POST(req) {
@@ -57,6 +80,53 @@ export async function POST(req) {
     console.error("Error saving SEO settings:", error);
     return NextResponse.json(
       { error: error.message || "Failed to save SEO settings." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(req) {
+  const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+  if (!session || session.role !== "SUPER_ADMIN") {
+    return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const queryRoute = searchParams.get("route");
+
+    let body = {};
+    try {
+      body = await req.json();
+    } catch {}
+
+    const routesToDelete = body.routes || (queryRoute ? [queryRoute] : []);
+
+    if (!routesToDelete.length) {
+      return NextResponse.json(
+        { error: "Missing route parameter or routes array to delete." },
+        { status: 400 },
+      );
+    }
+
+    if (routesToDelete.length === 1) {
+      await deleteSeoForRoute(routesToDelete[0]);
+      return NextResponse.json({
+        success: true,
+        message: `SEO override for '${routesToDelete[0]}' removed successfully.`,
+      });
+    }
+
+    const result = await bulkDeleteSeoRoutes(routesToDelete);
+    return NextResponse.json({
+      success: true,
+      count: result.count,
+      message: `Successfully removed SEO overrides for ${routesToDelete.length} routes.`,
+    });
+  } catch (error) {
+    console.error("Error deleting SEO settings:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to delete SEO settings." },
       { status: 500 },
     );
   }

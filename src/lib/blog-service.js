@@ -274,6 +274,32 @@ export async function updateBlogPost(id, data) {
   return (await getBlogPostBySlug(data.slug)) || { id, ...data };
 }
 
+export async function getBlogPostById(id) {
+  if (!id) return null;
+  try {
+    if (prisma?.blogPost) {
+      const post = await prisma.blogPost.findUnique({
+        where: { id },
+      });
+      if (post) return post;
+    }
+  } catch (err) {
+    console.error("Error fetching blog post by id via Prisma:", err?.message);
+  }
+
+  try {
+    const rows = await prisma.$queryRawUnsafe(
+      `SELECT * FROM "BlogPost" WHERE "id" = $1 LIMIT 1`,
+      id,
+    );
+    if (rows && rows.length > 0) return rows[0];
+  } catch (err) {
+    console.error("Error fetching blog post by id via Raw SQL:", err?.message);
+  }
+
+  return FALLBACK_BLOGS.find((b) => b.id === id) || null;
+}
+
 export async function deleteBlogPost(id) {
   try {
     if (prisma?.blogPost) {
@@ -287,4 +313,20 @@ export async function deleteBlogPost(id) {
 
   await prisma.$queryRawUnsafe(`DELETE FROM "BlogPost" WHERE "id" = $1`, id);
   return { id };
+}
+
+export async function deleteBlogPosts(ids) {
+  if (!Array.isArray(ids) || ids.length === 0) return { count: 0 };
+  try {
+    if (prisma?.blogPost) {
+      return await prisma.blogPost.deleteMany({
+        where: { id: { in: ids } },
+      });
+    }
+  } catch (err) {
+    console.error("Error in deleteBlogPosts:", err?.message);
+  }
+
+  await prisma.$queryRawUnsafe(`DELETE FROM "BlogPost" WHERE "id" = ANY($1::text[])`, ids);
+  return { count: ids.length };
 }

@@ -1,11 +1,34 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
-import { getAllJobAlerts, createJobAlert } from "@/lib/job-service";
+import {
+  getAllJobAlerts,
+  getJobAlertById,
+  createJobAlert,
+  updateJobAlert,
+  deleteJobAlert,
+  deleteJobAlerts,
+} from "@/lib/job-service";
 
-export async function GET() {
-  const alerts = await getAllJobAlerts();
-  return NextResponse.json({ success: true, jobAlerts: alerts });
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (id) {
+      const job = await getJobAlertById(id);
+      if (!job) {
+        return NextResponse.json({ error: "Job alert not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, jobAlert: job });
+    }
+
+    const alerts = await getAllJobAlerts();
+    return NextResponse.json({ success: true, jobAlerts: alerts });
+  } catch (err) {
+    console.error("Error in GET /api/admin/jobs:", err);
+    return NextResponse.json({ error: "Failed to fetch job alerts" }, { status: 500 });
+  }
 }
 
 export async function POST(req) {
@@ -25,6 +48,7 @@ export async function POST(req) {
       qualification,
       qualificationMr,
       lastDate,
+      status,
       officialUrl,
       notificationPdf,
       description,
@@ -68,6 +92,7 @@ export async function POST(req) {
         qualification: qualification?.trim() || "",
         qualificationMr: qualificationMr?.trim() || qualification?.trim() || "",
         lastDate: lastDate?.trim() || "",
+        status: status || "ACTIVE",
         officialUrl: officialUrl?.trim() || "",
         notificationPdf: notificationPdf?.trim() || "",
         description: description?.trim() || descriptionMr?.trim() || "",
@@ -90,6 +115,76 @@ export async function POST(req) {
     console.error("Error creating job alert:", error);
     return NextResponse.json(
       { error: error.message || "Failed to save job notification. Please try again." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(req) {
+  const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+  if (!session || !["SUPER_ADMIN", "COACHING_ADMIN"].includes(session.role)) {
+    return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { id, ...data } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Job ID is required for editing." }, { status: 400 });
+    }
+
+    const updatedJob = await updateJobAlert(id, data);
+    return NextResponse.json({
+      success: true,
+      jobAlert: updatedJob,
+      message: "Job alert updated successfully!",
+    });
+  } catch (error) {
+    console.error("Error updating job alert:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to update job notification." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(req) {
+  const session = await verifySessionToken((await cookies()).get(COOKIE)?.value);
+  if (!session || !["SUPER_ADMIN", "COACHING_ADMIN"].includes(session.role)) {
+    return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const queryId = searchParams.get("id");
+
+    let body = {};
+    try {
+      body = await req.json();
+    } catch {}
+
+    const idsToDelete = body.ids || (queryId ? [queryId] : []);
+
+    if (!idsToDelete.length) {
+      return NextResponse.json({ error: "Missing job alert ID(s) to delete" }, { status: 400 });
+    }
+
+    if (idsToDelete.length === 1) {
+      await deleteJobAlert(idsToDelete[0]);
+      return NextResponse.json({ success: true, message: "Job alert deleted successfully." });
+    }
+
+    const result = await deleteJobAlerts(idsToDelete);
+    return NextResponse.json({
+      success: true,
+      count: result.count,
+      message: `Successfully deleted ${idsToDelete.length} job alerts.`,
+    });
+  } catch (error) {
+    console.error("Error deleting job alert:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to delete job alert." },
       { status: 500 },
     );
   }

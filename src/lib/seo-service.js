@@ -300,6 +300,7 @@ export async function getAllSeoSettings() {
     const defItem = DEFAULT_SEO_CONFIG[routePath] || {};
 
     return {
+      id: dbItem?.id || null,
       route: routePath,
       title: dbItem?.title || defItem.title || "",
       titleMr: dbItem?.titleMr || defItem.titleMr || "",
@@ -309,6 +310,88 @@ export async function getAllSeoSettings() {
       canonicalUrl: dbItem?.canonicalUrl || defItem.canonicalUrl || "",
       ogImage: dbItem?.ogImage || defItem.ogImage || "",
       isCustomized: !!dbItem,
+      isDefaultRoute: !!DEFAULT_SEO_CONFIG[routePath],
     };
   });
+}
+
+/**
+ * Fetch a single SEO setting by route
+ */
+export async function getSeoSettingForRoute(routePath) {
+  if (!routePath) return null;
+  const cleanPath = routePath.toLowerCase();
+  let dbItem = null;
+  try {
+    if (prisma?.seoSetting) {
+      dbItem = await prisma.seoSetting.findUnique({
+        where: { route: cleanPath },
+      });
+    }
+  } catch (err) {
+    console.error("Error fetching SEO setting for route:", err?.message);
+  }
+
+  const defItem = DEFAULT_SEO_CONFIG[cleanPath] || {};
+  if (!dbItem && !DEFAULT_SEO_CONFIG[cleanPath]) {
+    return null;
+  }
+
+  return {
+    id: dbItem?.id || null,
+    route: cleanPath,
+    title: dbItem?.title || defItem.title || "",
+    titleMr: dbItem?.titleMr || defItem.titleMr || "",
+    description: dbItem?.description || defItem.description || "",
+    descriptionMr: dbItem?.descriptionMr || defItem.descriptionMr || "",
+    keywords: dbItem?.keywords || defItem.keywords || "",
+    canonicalUrl: dbItem?.canonicalUrl || defItem.canonicalUrl || "",
+    ogImage: dbItem?.ogImage || defItem.ogImage || "",
+    isCustomized: !!dbItem,
+    isDefaultRoute: !!DEFAULT_SEO_CONFIG[cleanPath],
+  };
+}
+
+/**
+ * Delete / Reset custom SEO overrides for a specific route
+ */
+export async function deleteSeoForRoute(routePath) {
+  const cleanPath = routePath?.toLowerCase() || "/";
+  try {
+    if (prisma?.seoSetting) {
+      await prisma.seoSetting.deleteMany({
+        where: { route: cleanPath },
+      });
+    }
+    try {
+      revalidateTag("seo-settings");
+    } catch {}
+    return { success: true, route: cleanPath };
+  } catch (err) {
+    console.error("Error deleting SEO setting for route:", err?.message);
+    throw err;
+  }
+}
+
+/**
+ * Bulk delete / reset custom SEO overrides for multiple routes
+ */
+export async function bulkDeleteSeoRoutes(routes) {
+  if (!Array.isArray(routes) || routes.length === 0) return { count: 0 };
+  const cleanRoutes = routes.map((r) => r.toLowerCase().trim()).filter(Boolean);
+  try {
+    if (prisma?.seoSetting) {
+      const result = await prisma.seoSetting.deleteMany({
+        where: { route: { in: cleanRoutes } },
+      });
+      try {
+        revalidateTag("seo-settings");
+      } catch {}
+      return { success: true, count: result.count };
+    }
+  } catch (err) {
+    console.error("Error in bulkDeleteSeoRoutes:", err?.message);
+    throw err;
+  }
+  return { success: true, count: 0 };
 }

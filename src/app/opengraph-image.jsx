@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getDevanagariOgFont, ShapedText } from "@/lib/og-font";
 
-export const runtime = "nodejs";
 export const alt = "MahaExam — महाराष्ट्र स्पर्धा परीक्षा मॉक टेस्ट पोर्टल";
 export const size = {
   width: 1200,

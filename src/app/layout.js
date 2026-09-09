@@ -92,6 +92,9 @@ export const metadata = {
       "पोलीस भरती, MPSC, तलाठी, जिल्हा परिषद आणि सर्व सरकारी स्पर्धा परीक्षांसाठी TCS/IBPS पॅटर्न ऑनलाइन मॉक टेस्ट पोर्टल.",
     images: ["/twitter-image"],
   },
+  verification: {
+    google: "8Ai3ewNx506LH-WShi3IGQQI0yc2T9R0ZDRtAQwOJLA",
+  },
 };
 
 export const viewport = {

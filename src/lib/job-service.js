@@ -6,6 +6,7 @@ export const INITIAL_JOB_ALERTS = [
   {
     id: "police-2026",
     slug: "police-constable-recruitment-2026",
+    category: "पोलीस भरती (Police Bharti)",
     department: "महाराष्ट्र पोलीस विभाग (Maharashtra Police Dept)",
     departmentMr: "महाराष्ट्र पोलीस विभाग",
     title: "महाराष्ट्र पोलीस शिपाई व चालक भरती २०२६ (Police Bharti)",
@@ -30,6 +31,7 @@ export const INITIAL_JOB_ALERTS = [
   {
     id: "mpsc-rajyaseva-2026",
     slug: "mpsc-civil-services-2026",
+    category: "MPSC",
     department: "महाराष्ट्र लोकसेवा आयोग (MPSC)",
     departmentMr: "महाराष्ट्र लोकसेवा आयोग (MPSC)",
     title: "MPSC महाराष्ट्र नागरी सेवा राजपत्रित संयुक्त पूर्व परीक्षा २०२६",
@@ -54,6 +56,7 @@ export const INITIAL_JOB_ALERTS = [
   {
     id: "talathi-2026",
     slug: "talathi-tcs-cbt-exam-2026",
+    category: "तलाठी भरती (Talathi)",
     department: "महसूल व वन विभाग (Revenue Department)",
     departmentMr: "महसूल व वन विभाग",
     title: "महाराष्ट्र तलाठी भरती TCS पॅटर्न CBT परीक्षा २०२६",
@@ -77,6 +80,7 @@ export const INITIAL_JOB_ALERTS = [
   {
     id: "zp-arogya-2026",
     slug: "zilla-parishad-arogya-sevak-2026",
+    category: "जिल्हा परिषद (ZP Bharti)",
     department: "ग्रामविकास विभाग, जिल्हा परिषद (Rural Dev & ZP)",
     departmentMr: "ग्रामविकास विभाग, जिल्हा परिषद",
     title: "जिल्हा परिषद आरोग्य सेवक व ग्रामसेवक भरती परीक्षा २०२६",
@@ -100,6 +104,7 @@ export const INITIAL_JOB_ALERTS = [
   {
     id: "vanrakshak-2026",
     slug: "vanrakshak-forest-guard-2026",
+    category: "वन विभाग (Forest Dept)",
     department: "महाराष्ट्र वन विभाग (Forest Department)",
     departmentMr: "महाराष्ट्र वन विभाग",
     title: "महाराष्ट्र वनरक्षक (Forest Guard) ऑनलाइन CBT भरती २०२६",
@@ -132,6 +137,19 @@ async function fetchAllJobAlertsInternal() {
       return dbAlerts.map((j) => ({
         id: j.id,
         slug: j.slug || j.id,
+        category:
+          j.category ||
+          (j.department?.includes("पोलीस") || j.title?.includes("पोलीस")
+            ? "पोलीस भरती (Police Bharti)"
+            : j.department?.includes("MPSC") || j.title?.includes("MPSC")
+              ? "MPSC"
+              : j.department?.includes("महसूल") || j.title?.includes("तलाठी")
+                ? "तलाठी भरती (Talathi)"
+                : j.department?.includes("जिल्हा") || j.title?.includes("आरोग्य")
+                  ? "जिल्हा परिषद (ZP Bharti)"
+                  : j.department?.includes("वन")
+                    ? "वन विभाग (Forest Dept)"
+                    : "इतर सरकारी भरती (General)"),
         department: j.department,
         departmentMr: j.departmentMr || j.department,
         title: j.title,
@@ -298,4 +316,89 @@ export async function createJobAlert(data, notifyStudents = true) {
   }
 
   return newJob;
+}
+
+/**
+ * Update an existing job alert
+ */
+export async function updateJobAlert(id, data) {
+  try {
+    if (prisma?.jobAlert) {
+      const updated = await prisma.jobAlert.update({
+        where: { id },
+        data: {
+          department: data.department,
+          departmentMr: data.departmentMr || data.department,
+          title: data.title,
+          titleMr: data.titleMr || data.title,
+          vacancies: data.vacancies,
+          qualification: data.qualification,
+          qualificationMr: data.qualificationMr || data.qualification,
+          lastDate: data.lastDate,
+          status: data.status || "ACTIVE",
+          statusColor: data.statusColor,
+          officialUrl: data.officialUrl,
+          notificationPdf: data.notificationPdf,
+          description: data.description,
+          descriptionMr: data.descriptionMr || data.description,
+          examSlug: data.examSlug,
+          salaryRange: data.salaryRange,
+          ageLimit: data.ageLimit,
+          selectionProcess: data.selectionProcess,
+          imageUrl: data.imageUrl,
+        },
+      });
+
+      try {
+        revalidateTag("job-alerts");
+      } catch {}
+
+      return updated;
+    }
+  } catch (err) {
+    console.error("Error updating job alert:", err?.message);
+    throw err;
+  }
+}
+
+/**
+ * Delete a single job alert
+ */
+export async function deleteJobAlert(id) {
+  try {
+    if (prisma?.jobAlert) {
+      const deleted = await prisma.jobAlert.delete({
+        where: { id },
+      });
+      try {
+        revalidateTag("job-alerts");
+      } catch {}
+      return deleted;
+    }
+  } catch (err) {
+    console.error("Error deleting job alert:", err?.message);
+    throw err;
+  }
+}
+
+/**
+ * Bulk delete job alerts
+ */
+export async function deleteJobAlerts(ids) {
+  if (!Array.isArray(ids) || ids.length === 0) return { count: 0 };
+  try {
+    if (prisma?.jobAlert) {
+      const result = await prisma.jobAlert.deleteMany({
+        where: { id: { in: ids } },
+      });
+      try {
+        revalidateTag("job-alerts");
+      } catch {}
+      return { success: true, count: result.count };
+    }
+  } catch (err) {
+    console.error("Error in deleteJobAlerts:", err?.message);
+    throw err;
+  }
+  return { success: true, count: 0 };
 }

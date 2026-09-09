@@ -3,13 +3,36 @@ import { cookies } from "next/headers";
 import { COOKIE, verifySessionToken } from "@/lib/auth";
 import {
   getAllBlogPosts,
+  getBlogPostById,
+  getBlogPostBySlug,
   createBlogPost,
   deleteBlogPost,
+  deleteBlogPosts,
   updateBlogPost,
 } from "@/lib/blog-service";
 
-export async function GET() {
+export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    const slug = searchParams.get("slug");
+
+    if (id) {
+      const blog = await getBlogPostById(id);
+      if (!blog) {
+        return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, blog });
+    }
+
+    if (slug) {
+      const blog = await getBlogPostBySlug(slug);
+      if (!blog) {
+        return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, blog });
+    }
+
     const blogs = await getAllBlogPosts({ includeDrafts: true });
     return NextResponse.json({ success: true, blogs });
   } catch (error) {
@@ -102,14 +125,30 @@ export async function DELETE(req) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const queryId = searchParams.get("id");
 
-    if (!id) {
-      return NextResponse.json({ error: "Missing blog post ID" }, { status: 400 });
+    let body = {};
+    try {
+      body = await req.json();
+    } catch {}
+
+    const idsToDelete = body.ids || (queryId ? [queryId] : []);
+
+    if (!idsToDelete.length) {
+      return NextResponse.json({ error: "Missing blog post ID(s) to delete" }, { status: 400 });
     }
 
-    await deleteBlogPost(id);
-    return NextResponse.json({ success: true, message: "Blog post deleted successfully." });
+    if (idsToDelete.length === 1) {
+      await deleteBlogPost(idsToDelete[0]);
+      return NextResponse.json({ success: true, message: "Blog post deleted successfully." });
+    }
+
+    const result = await deleteBlogPosts(idsToDelete);
+    return NextResponse.json({
+      success: true,
+      count: result.count,
+      message: `Successfully deleted ${idsToDelete.length} blog posts.`,
+    });
   } catch (error) {
     console.error("Error deleting blog post:", error);
     return NextResponse.json(
