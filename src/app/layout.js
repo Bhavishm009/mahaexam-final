@@ -93,7 +93,7 @@ export const metadata = {
     images: ["/twitter-image"],
   },
   verification: {
-    google: "8Ai3ewNx506LH-WShi3IGQQI0yc2T9R0ZDRtAQwOJLA",
+    google: "AFLJikKCe3pGN_LvqX6a0Je8-zyg0l4oYqIw27KxiTU",
   },
 };
 
