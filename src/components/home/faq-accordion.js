@@ -1,8 +1,5 @@
-"use client";
-
-import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useLanguage } from "@/components/language-provider";
+import { translations } from "@/lib/translations";
 
 const defaultFaqsData = [
   {
@@ -32,11 +29,10 @@ const defaultFaqsData = [
 ];
 
 export function FaqAccordion() {
-  const [openFaq, setOpenFaq] = useState(null);
-  const { language, t } = useLanguage();
+  const t = translations.mr;
 
   return (
-    <section id="faq" className="py-16 sm:py-20">
+    <section id="faq" className="content-visibility-auto py-16 sm:py-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
@@ -48,36 +44,20 @@ export function FaqAccordion() {
         </div>
 
         <div className="mt-8 space-y-3">
-          {defaultFaqsData.map((faq, idx) => {
-            const isOpen = openFaq === idx;
-            const questionText = language === "mr" ? faq.qMr : faq.qEn;
-            const answerText = language === "mr" ? faq.aMr : faq.aEn;
-
-            return (
-              <div
-                key={idx}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  className="flex w-full items-center justify-between p-4 text-left text-xs font-bold text-slate-900 transition hover:bg-slate-50 dark:text-white dark:hover:bg-slate-800/50 sm:p-5 sm:text-sm"
-                >
-                  <span className="pr-4">{questionText}</span>
-                  <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
-                      isOpen ? "rotate-180 text-blue-600 dark:text-blue-400" : ""
-                    }`}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="border-t border-slate-100 bg-slate-50/50 p-4 text-xs leading-relaxed text-slate-600 dark:border-slate-800/80 dark:bg-slate-950/40 dark:text-slate-300 sm:p-5 sm:text-sm">
-                    {answerText}
-                  </div>
-                )}
+          {defaultFaqsData.map((faq, idx) => (
+            <details
+              key={idx}
+              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
+            >
+              <summary className="flex cursor-pointer select-none list-none items-center justify-between p-4 text-left text-xs font-bold text-slate-900 transition hover:bg-slate-50 dark:text-white dark:hover:bg-slate-800/50 sm:p-5 sm:text-sm [&::-webkit-details-marker]:hidden">
+                <span className="pr-4">{faq.qMr}</span>
+                <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-180 group-open:text-blue-600 dark:group-open:text-blue-400" />
+              </summary>
+              <div className="border-t border-slate-100 bg-slate-50/50 p-4 text-xs leading-relaxed text-slate-600 dark:border-slate-800/80 dark:bg-slate-950/40 dark:text-slate-300 sm:p-5 sm:text-sm">
+                {faq.aMr}
               </div>
-            );
-          })}
+            </details>
+          ))}
         </div>
       </div>
     </section>

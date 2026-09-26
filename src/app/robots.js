@@ -35,5 +35,7 @@ export default function robots() {
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    // LLMs.txt — structured AI-readable site summary (https://llmstxt.org)
+    // Discoverable at /llms.txt and /llms-full.txt
   };
 }

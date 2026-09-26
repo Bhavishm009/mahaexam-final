@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/server-user";
 import { AppShell } from "@/components/shell";
 
+import { ReactQueryProvider } from "@/components/query-provider";
+
 export default async function AdminLayout({ children }) {
   const user = await getServerUser();
 
@@ -26,8 +28,15 @@ export default async function AdminLayout({ children }) {
   }
 
   return (
-    <AppShell role="admin" title="Super Admin" subtitle="Manage the MahaExam platform" user={user}>
-      {children}
-    </AppShell>
+    <ReactQueryProvider>
+      <AppShell
+        role="admin"
+        title="Super Admin"
+        subtitle="Manage the MahaExam platform"
+        user={user}
+      >
+        {children}
+      </AppShell>
+    </ReactQueryProvider>
   );
 }

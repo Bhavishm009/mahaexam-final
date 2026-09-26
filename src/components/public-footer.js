@@ -113,7 +113,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/exams"
-                  prefetch={true}
+                  prefetch={false}
                   className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                 >
                   {language === "mr" ? "सर्व २९+ मोफत टेस्ट्स →" : "All 29+ Free Tests →"}
@@ -122,7 +122,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/exams/police-bharti"
-                  prefetch={true}
+                  prefetch={false}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "महाराष्ट्र पोलीस भरती" : "Police Bharti 2026"}
@@ -131,7 +131,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/exams/mpsc"
-                  prefetch={true}
+                  prefetch={false}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "MPSC राज्यसेवा / संयुक्त" : "MPSC Rajyaseva / Combined"}
@@ -140,7 +140,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/exams/talathi"
-                  prefetch={true}
+                  prefetch={false}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "तलाठी भरती सराव" : "Talathi Bharti Mock Tests"}
@@ -149,7 +149,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/exams/zp-bharti"
-                  prefetch={true}
+                  prefetch={false}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "जिल्हा परिषद भरती" : "Zilla Parishad Recruitment"}
@@ -158,7 +158,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/jobs"
-                  prefetch={true}
+                  prefetch={false}
                   className="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
                 >
                   {language === "mr" ? "भरती जाहिराती २०२६ 🔥" : "Govt Job Alerts 2026 🔥"}
@@ -176,7 +176,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/blogs"
-                  prefetch={true}
+                  prefetch={false}
                   className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
                 >
                   {language === "mr" ? "ब्लॉग व ताज्या बातम्या 📰" : "Blog & Latest Articles 📰"}
@@ -185,7 +185,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/features"
-                  prefetch={true}
+                  prefetch={false}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "वैशिष्ट्ये (TCS/IBPS इंजिन)" : "Platform Features"}
@@ -194,7 +194,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/for-coaching"
-                  prefetch={true}
+                  prefetch={false}
                   className="transition hover:text-blue-600 dark:hover:text-white"
                 >
                   {language === "mr" ? "अकॅडेमी सोल्यूशन्स" : "For Coaching Institutes"}
@@ -203,7 +203,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/pricing"
-                  prefetch={true}
+                  prefetch={false}
                   className="font-bold text-blue-600 hover:underline dark:text-blue-400"
                 >
                   {language === "mr"
@@ -216,7 +216,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/coaching/dashboard"
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "अकॅडेमी डॅशबोर्ड" : "Coaching Dashboard"}
@@ -225,7 +225,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/coaching/exams"
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "परीक्षा व्यवस्थापन" : "Manage Exams"}
@@ -237,7 +237,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/coaching/register"
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "नवीन अकॅडेमी नोंदणी" : "Register Academy"}
@@ -246,7 +246,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/coaching/login"
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "अकॅडेमी संचालक लॉगिन" : "Academy Admin Login"}
@@ -274,7 +274,7 @@ export function PublicFooter() {
                             ? "/coaching/dashboard"
                             : "/student/dashboard"
                       }
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "माझा डॅशबोर्ड" : "My Dashboard"}
@@ -289,7 +289,7 @@ export function PublicFooter() {
                             ? "/coaching/profile"
                             : "/student/profile"
                       }
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "माझे प्रोफाइल" : "My Profile"}
@@ -311,7 +311,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/login"
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "विद्यार्थी लॉगिन" : "Student Login"}
@@ -320,7 +320,7 @@ export function PublicFooter() {
                   <li>
                     <Link
                       href="/register"
-                      prefetch={true}
+                      prefetch={false}
                       className="transition hover:text-blue-600 dark:hover:text-white"
                     >
                       {language === "mr" ? "मोफत नोंदणी" : "Free Registration"}
@@ -331,7 +331,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   href="/faq"
-                  prefetch={true}
+                  prefetch={false}
                   className="font-bold text-blue-600 hover:underline dark:text-blue-400"
                 >
                   {language === "mr"

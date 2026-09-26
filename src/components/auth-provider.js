@@ -92,11 +92,25 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     // Restore cached session after mount to ensure SSR matches client initial render
     const cached = getStoredUser();
+    const hasSessionCookie =
+      typeof document !== "undefined" &&
+      (document.cookie.includes("mahaexam_session") ||
+        document.cookie.includes("maha_exam_session") ||
+        document.cookie.includes("next-auth.session-token") ||
+        document.cookie.includes("token="));
+
     if (cached) {
       setUserState(cached);
       setLoading(false);
+      refreshUser();
+    } else if (hasSessionCookie) {
+      // User has session cookie but localStorage was cleared
+      setLoading(false);
+      refreshUser();
+    } else {
+      // Pure guest visitor - no background auth API calls needed on public pages
+      setLoading(false);
     }
-    refreshUser();
 
     // Re-verify session when user returns to the tab after inactivity
     const onVisibilityOrFocus = () => {

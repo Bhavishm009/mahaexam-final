@@ -18,8 +18,8 @@ export function NotificationPermissionPrompt() {
     if (Notification.permission === "default") {
       const dismissed = sessionStorage.getItem("mahaexam_notif_dismissed");
       if (!dismissed) {
-        // Show after a brief delay so page loads cleanly
-        const timer = setTimeout(() => setShow(true), 2500);
+        // Show after initial page interaction / idle time so page loads cleanly
+        const timer = setTimeout(() => setShow(true), 7500);
         return () => clearTimeout(timer);
       }
     } else if (Notification.permission === "granted") {

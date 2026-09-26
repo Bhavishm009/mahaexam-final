@@ -1,21 +1,14 @@
-"use client";
-
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
-import { useLanguage } from "@/components/language-provider";
-import { useAuth } from "@/components/auth-provider";
+import { translations } from "@/lib/translations";
 
 export function PricingSection() {
-  const { t } = useLanguage();
-  const { user } = useAuth();
-
-  const isStudent = user?.role === "STUDENT";
-  const isCoaching = user?.role === "COACHING_ADMIN" || user?.role === "TEACHER";
+  const t = translations.mr;
 
   return (
     <section
       id="pricing"
-      className="border-t border-slate-200/80 bg-slate-100/50 py-16 transition-colors dark:border-slate-800/80 dark:bg-slate-950/40 sm:py-20"
+      className="content-visibility-auto border-t border-slate-200/80 bg-slate-100/50 py-16 transition-colors dark:border-slate-800/80 dark:bg-slate-950/40 sm:py-20"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
@@ -59,10 +52,11 @@ export function PricingSection() {
             </div>
             <div className="mt-8">
               <Link
-                href={user ? "/student/exams" : "/register"}
+                href="/register"
+                prefetch={false}
                 className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-300/80 bg-white/70 py-3 text-xs font-bold text-slate-800 transition hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-800"
               >
-                {user ? "परीक्षा पहा (View Exams)" : t.choosePlan}
+                {t.choosePlan}
               </Link>
             </div>
           </div>
@@ -101,10 +95,11 @@ export function PricingSection() {
             </div>
             <div className="mt-8">
               <Link
-                href={user ? (isStudent ? "/student/exams" : "/dashboard") : "/register"}
+                href="/register"
+                prefetch={false}
                 className="glass-btn-primary inline-flex w-full items-center justify-center rounded-2xl py-3 text-xs font-black text-white shadow-md transition active:scale-95"
               >
-                {user ? "सराव सुरू करा (Start Practice)" : t.choosePlan}
+                {t.choosePlan}
               </Link>
             </div>
           </div>
@@ -140,10 +135,11 @@ export function PricingSection() {
             </div>
             <div className="mt-8">
               <Link
-                href={isCoaching ? "/coaching/subscription" : "/coaching/register"}
+                href="/coaching/register"
+                prefetch={false}
                 className="inline-flex w-full items-center justify-center rounded-2xl border border-amber-500/40 bg-amber-500/15 py-3 text-xs font-black text-amber-800 transition hover:bg-amber-500/25 active:scale-95 dark:text-amber-300"
               >
-                {isCoaching ? "सबस्क्रिप्शन व्यवस्थापन" : t.choosePlan}
+                {t.choosePlan}
               </Link>
             </div>
           </div>

@@ -1,18 +1,12 @@
-"use client";
-
 import Link from "next/link";
 import { Building2, CheckCircle2 } from "lucide-react";
-import { useLanguage } from "@/components/language-provider";
-import { useAuth } from "@/components/auth-provider";
+import { translations } from "@/lib/translations";
 
 export function CoachingSection() {
-  const { t } = useLanguage();
-  const { user } = useAuth();
-
-  const isCoaching = user?.role === "COACHING_ADMIN" || user?.role === "TEACHER";
+  const t = translations.mr;
 
   return (
-    <section id="coaching" className="py-16 sm:py-20">
+    <section id="coaching" className="content-visibility-auto py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-amber-50/40 to-slate-50 p-8 shadow-sm transition-colors dark:border-slate-800 dark:bg-gradient-to-br dark:from-slate-900 dark:via-amber-950/30 dark:to-slate-900 sm:p-12">
           <div className="grid items-center gap-8 lg:grid-cols-2">
@@ -46,11 +40,12 @@ export function CoachingSection() {
 
               <div className="mt-8">
                 <Link
-                  href={isCoaching ? "/coaching/dashboard" : "/coaching/register"}
+                  href="/coaching/register"
+                  prefetch={false}
                   className="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-3.5 text-xs font-bold text-white shadow-sm transition hover:bg-amber-500 active:scale-95 sm:text-sm"
                 >
                   <Building2 className="h-4 w-4" />
-                  <span>{isCoaching ? "अकॅडेमी डॅशबोर्ड उघडा" : t.coachRegisterBtn}</span>
+                  <span>{t.coachRegisterBtn}</span>
                 </Link>
               </div>
             </div>

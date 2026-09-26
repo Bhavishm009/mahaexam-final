@@ -1,18 +1,31 @@
-import { Suspense } from "react";
-import { cookies } from "next/headers";
-import { COOKIE, verifySessionToken } from "@/lib/auth";
+import dynamic from "next/dynamic";
 import { getCachedPublicExams } from "@/lib/cached-exams";
-import { ExamsSkeleton } from "@/components/skeletons/exams-skeleton";
 import { HeroTitle } from "@/components/home/hero-title";
 import { HeroCta } from "@/components/home/hero-cta";
 import { HeroStatsBanner } from "@/components/home/hero-stats-banner";
 import { PublicExamsSection } from "@/components/home/public-exams-section";
-import { FeaturesSection } from "@/components/home/features-section";
-import { CoachingSection } from "@/components/home/coaching-section";
-import { PricingSection } from "@/components/home/pricing-section";
-import { FaqAccordion } from "@/components/home/faq-accordion";
+
+// Below-fold sections: SSR their HTML but defer JS hydration bundles
+const FeaturesSection = dynamic(
+  () => import("@/components/home/features-section").then((mod) => mod.FeaturesSection),
+  { ssr: true },
+);
+const CoachingSection = dynamic(
+  () => import("@/components/home/coaching-section").then((mod) => mod.CoachingSection),
+  { ssr: true },
+);
+const PricingSection = dynamic(
+  () => import("@/components/home/pricing-section").then((mod) => mod.PricingSection),
+  { ssr: true },
+);
+const FaqAccordion = dynamic(
+  () => import("@/components/home/faq-accordion").then((mod) => mod.FaqAccordion),
+  { ssr: true },
+);
 
 import { getSeoForRoute } from "@/lib/seo-service";
+
+export const revalidate = 60;
 
 export async function generateMetadata() {
   return await getSeoForRoute("/", {
@@ -23,26 +36,12 @@ export async function generateMetadata() {
 }
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE)?.value;
-  const session = await verifySessionToken(token);
-
   let dbExams = [];
   try {
     dbExams = await getCachedPublicExams();
   } catch {
     dbExams = [];
   }
-
-  const initialSession = session
-    ? {
-        id: session.sub,
-        name: session.name,
-        email: session.email,
-        role: session.role,
-        organizationId: session.organizationId,
-      }
-    : null;
 
   return (
     <>
@@ -51,15 +50,13 @@ export default async function Home() {
         <div className="bg-radial-gradient pointer-events-none absolute inset-0 -z-10 opacity-60" />
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <HeroTitle />
-          <HeroCta initialSession={initialSession} />
+          <HeroCta />
           <HeroStatsBanner />
         </div>
       </section>
 
       {/* MOCK TESTS CATALOG */}
-      <Suspense fallback={<ExamsSkeleton />}>
-        <PublicExamsSection initialExams={dbExams} />
-      </Suspense>
+      <PublicExamsSection initialExams={dbExams} />
 
       {/* FEATURES GRID */}
       <FeaturesSection />

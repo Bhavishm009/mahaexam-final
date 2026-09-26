@@ -1,8 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { PublicNavbar } from "@/components/public-navbar";
-import { PublicFooter } from "@/components/public-footer";
+
+const PublicNavbar = dynamic(
+  () => import("@/components/public-navbar").then((mod) => mod.PublicNavbar),
+  { ssr: true },
+);
+
+const PublicFooter = dynamic(
+  () => import("@/components/public-footer").then((mod) => mod.PublicFooter),
+  { ssr: true },
+);
 
 export function PublicLayoutWrapper({ children }) {
   const pathname = usePathname();

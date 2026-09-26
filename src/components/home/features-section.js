@@ -1,15 +1,13 @@
-"use client";
-
 import { Layers3, ShieldCheck, Trophy, BarChart3 } from "lucide-react";
-import { useLanguage } from "@/components/language-provider";
+import { translations } from "@/lib/translations";
 
 export function FeaturesSection() {
-  const { t } = useLanguage();
+  const t = translations.mr;
 
   return (
     <section
       id="features"
-      className="border-y border-slate-200/80 bg-slate-100/50 py-16 transition-colors dark:border-slate-800/80 dark:bg-slate-950/40 sm:py-20"
+      className="content-visibility-auto border-y border-slate-200/80 bg-slate-100/50 py-16 transition-colors dark:border-slate-800/80 dark:bg-slate-950/40 sm:py-20"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">

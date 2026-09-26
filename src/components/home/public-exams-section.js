@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth-provider";
 
 export function PublicExamsSection({ initialExams = [] }) {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [showAll, setShowAll] = useState(false);
   const { language, t } = useLanguage();
   const { user } = useAuth();
 
@@ -58,25 +59,25 @@ export function PublicExamsSection({ initialExams = [] }) {
     }
     if (
       type.includes("SARALSEVA") ||
-      type.includes("VANRAKSHAK") ||
-      slug.includes("vanrakshak") ||
       slug.includes("saralseva") ||
-      title.includes("वनरक्षक") ||
-      title.includes("सरळसेवा")
+      slug.includes("vanrakshak") ||
+      title.includes("सरळसेवा") ||
+      title.includes("वनरक्षक")
     ) {
-      return { id: "saralseva", labelMr: "सरळसेवा / वनरक्षक", labelEn: "Saralseva & Forest" };
+      return { id: "saralseva", labelMr: "सरळसेवा भरती", labelEn: "Saral Seva" };
     }
     if (
       type.includes("PYQ") ||
-      slug.includes("official") ||
+      type.includes("PREVIOUS") ||
       slug.includes("pyq") ||
-      e.isPyq === true ||
-      title.includes("मूळ प्रश्नपत्रिका") ||
-      title.includes("official paper")
+      title.includes("pyq") ||
+      title.includes("मागील वर्षाचे") ||
+      title.includes("प्रश्नपत्रिका")
     ) {
-      return { id: "pyq", labelMr: "मूळ PYQ प्रश्नपत्रिका", labelEn: "Official PYQs" };
+      return { id: "pyq", labelMr: "मागील प्रश्नपत्रिका (PYQ)", labelEn: "PYQs" };
     }
-    const fallbackId = type ? type.toLowerCase().replace(/[^a-z0-9]/g, "-") : "other";
+
+    const fallbackId = slug.split("-")[0] || "other";
     return {
       id: fallbackId,
       labelMr: e.examType || "इतर परीक्षा",
@@ -136,6 +137,13 @@ export function PublicExamsSection({ initialExams = [] }) {
     });
   }, [sourceList, activeCategory]);
 
+  const displayedExams = useMemo(() => {
+    if (showAll || activeCategory !== "all") {
+      return filteredExams;
+    }
+    return filteredExams.slice(0, 6);
+  }, [filteredExams, showAll, activeCategory]);
+
   return (
     <section id="exams" className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -168,7 +176,7 @@ export function PublicExamsSection({ initialExams = [] }) {
 
         {/* Exam Cards Grid */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredExams.map((exam) => {
+          {displayedExams.map((exam) => {
             const title =
               language === "mr"
                 ? exam.titleMr || exam.title
@@ -259,6 +267,7 @@ export function PublicExamsSection({ initialExams = [] }) {
                 <div className="mt-6 border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
                   <Link
                     href={targetHref}
+                    prefetch={false}
                     className="glass-btn-primary inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-bold leading-none text-white shadow-sm transition hover:shadow-md active:scale-95"
                   >
                     <Zap className="h-4 w-4 text-amber-300" />
@@ -270,18 +279,27 @@ export function PublicExamsSection({ initialExams = [] }) {
           })}
         </div>
 
-        {/* View All Exams Banner */}
-        <div className="mt-12 text-center">
+        {/* View More / View All Banner */}
+        <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          {!showAll && filteredExams.length > 6 && (
+            <button
+              type="button"
+              onClick={() => setShowAll(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-7 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            >
+              <span>{language === "mr" ? "अधिक परीक्षा दाखवा (+)" : "Show More Tests (+)"}</span>
+            </button>
+          )}
           <Link
             href="/exams"
-            prefetch={true}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:from-blue-500 hover:to-indigo-500 hover:shadow-xl active:scale-95"
+            prefetch={false}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:from-blue-500 hover:to-indigo-500 hover:shadow-xl active:scale-95"
           >
             <Zap className="h-4 w-4 text-amber-300" />
             <span>
               {language === "mr"
-                ? `सर्व २९+ सराव परीक्षा व PYQ पेपर्स पहा (${sourceList.length} उपलब्ध)`
-                : `Explore All 29+ Mock Tests & PYQs (${sourceList.length} Available)`}
+                ? `सर्व परीक्षा पोर्टल उघडा (${sourceList.length} उपलब्ध)`
+                : `Explore All Exams (${sourceList.length} Available)`}
             </span>
           </Link>
         </div>
