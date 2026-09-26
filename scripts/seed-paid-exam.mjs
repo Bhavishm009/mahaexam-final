@@ -31,9 +31,11 @@ async function seedPaidExam() {
       totalMarks: 25,
     },
     create: {
-      title: "Maharashtra Police Bharti 2026 Premium Paid Mock Test (सशुल्क सराव परीक्षा - Razorpay Test)",
+      title:
+        "Maharashtra Police Bharti 2026 Premium Paid Mock Test (सशुल्क सराव परीक्षा - Razorpay Test)",
       slug: "test-paid-police-bharti-2026",
-      description: "सशुल्क चाचणी परीक्षा (Razorpay Test Mode) - अस्सल TCS/IBPS पॅटर्ननुसार सराव परीक्षा. शुल्क: ₹१ (100 पैसे).",
+      description:
+        "सशुल्क चाचणी परीक्षा (Razorpay Test Mode) - अस्सल TCS/IBPS पॅटर्ननुसार सराव परीक्षा. शुल्क: ₹१ (100 पैसे).",
       examType: "Police Bharti",
       language: "mr",
       durationMinutes: 90,
@@ -48,7 +50,9 @@ async function seedPaidExam() {
     },
   });
 
-  console.log(`✅ Paid Exam created/updated: ID = ${paidExam.id}, Slug = ${paidExam.slug}, Price = ₹${paidExam.price}`);
+  console.log(
+    `✅ Paid Exam created/updated: ID = ${paidExam.id}, Slug = ${paidExam.slug}, Price = ₹${paidExam.price}`,
+  );
 
   // 2. Link 25 questions to this exam
   const questions = await prisma.question.findMany({

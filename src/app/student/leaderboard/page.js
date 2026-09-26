@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Trophy, Medal } from "lucide-react";
+import { Trophy, Medal, ArrowLeft } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function Leaderboard({ searchParams }) {
   const [rows, setRows] = useState([]);
@@ -37,83 +48,89 @@ export default function Leaderboard({ searchParams }) {
                 Top rankers across Maharashtra state mock exams and coaching tests.
               </p>
             </div>
-            <Link
-              href="/student/dashboard"
-              className="inline-flex items-center gap-1.5 self-start rounded-2xl bg-white/20 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/30 sm:self-auto"
+            <Button
+              asChild
+              variant="outline"
+              className="border-white/30 bg-white/10 text-white hover:bg-white/20"
             >
-              Back to Dashboard
-            </Link>
+              <Link href="/student/dashboard" className="gap-1.5">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <h2 className="flex items-center gap-2 text-base font-black text-slate-900 dark:text-white sm:text-lg">
-            <Medal className="h-5 w-5 text-amber-500" />
-            <span>Top Performers (सर्वोत्कृष्ट विद्यार्थी)</span>
-          </h2>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Medal className="h-5 w-5 text-amber-500" />
+              <CardTitle>Top Performers (सर्वोत्कृष्ट विद्यार्थी)</CardTitle>
+            </div>
+            <CardDescription>Verified highest scoring candidates</CardDescription>
+          </CardHeader>
 
-          {loading ? (
-            <div className="grid min-h-[30vh] place-items-center">
-              <div className="flex items-center gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                <span>Loading leaderboard...</span>
+          <CardContent>
+            {loading ? (
+              <div className="grid min-h-[30vh] place-items-center">
+                <div className="flex items-center gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                  <span>Loading leaderboard...</span>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="border-b border-slate-100 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
-                  <tr>
-                    <th className="rounded-l-xl p-3.5 font-bold">Rank</th>
-                    <th className="p-3.5 font-bold">Student Name</th>
-                    <th className="p-3.5 font-bold">Score</th>
-                    <th className="rounded-r-xl p-3.5 font-bold">Percentile</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {rows.map((x) => (
-                    <tr
-                      key={x.id}
-                      className="transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
-                    >
-                      <td className="p-3.5 font-black text-slate-900 dark:text-white">
-                        <span
-                          className={`inline-flex h-7 w-7 items-center justify-center rounded-xl font-bold ${
-                            x.rank === 1
-                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                              : x.rank === 2
-                                ? "bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
-                                : x.rank === 3
-                                  ? "bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-400"
-                                  : "text-slate-500"
-                          }`}
-                        >
-                          #{x.rank}
-                        </span>
-                      </td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">
-                        {x.student?.name || "Student"}
-                      </td>
-                      <td className="p-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">
-                        {x.score}
-                      </td>
-                      <td className="p-3.5 font-semibold text-slate-700 dark:text-slate-300">
-                        {x.percentile ?? "—"}%
-                      </td>
-                    </tr>
-                  ))}
-                  {!rows.length && (
-                    <tr>
-                      <td colSpan={4} className="py-12 text-center text-xs text-slate-400">
-                        Leaderboard data will be published as soon as students complete attempts.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-20">Rank</TableHead>
+                      <TableHead>Student Name</TableHead>
+                      <TableHead>Score</TableHead>
+                      <TableHead className="text-right">Percentile</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((x) => (
+                      <TableRow key={x.id}>
+                        <TableCell className="font-black text-slate-900 dark:text-white">
+                          <span
+                            className={`inline-flex h-7 w-7 items-center justify-center rounded-xl font-bold ${
+                              x.rank === 1
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                : x.rank === 2
+                                  ? "bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
+                                  : x.rank === 3
+                                    ? "bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-400"
+                                    : "text-slate-500"
+                            }`}
+                          >
+                            #{x.rank}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-bold text-slate-900 dark:text-white">
+                          {x.student?.name || "Student"}
+                        </TableCell>
+                        <TableCell className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                          {x.score}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-slate-700 dark:text-slate-300">
+                          {x.percentile ?? "—"}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {!rows.length && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="py-12 text-center text-xs text-slate-400">
+                          Leaderboard data will be published as soon as students complete attempts.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

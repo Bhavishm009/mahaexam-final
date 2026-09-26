@@ -1,14 +1,23 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
-import { getInitials } from "@/lib/avatar";
 import { UserAvatar } from "@/components/user-avatar";
 import { useAuth } from "@/components/auth-provider";
 import NotificationCenter from "@/components/notification-center";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard,
   Building2,
@@ -21,7 +30,6 @@ import {
   User,
   LogOut,
   Menu,
-  X,
   Database,
   Globe,
   Activity,
@@ -208,20 +216,23 @@ function NavLinks({ role, close, user }) {
             href={item.href}
             prefetch={true}
             onClick={close}
-            className={`group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all ${
+            className={`group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all ${
               active
-                ? "bg-gradient-to-r from-sky-500 to-blue-600 font-black text-white shadow-md shadow-sky-500/25"
-                : "text-slate-800 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:hover:text-white"
+                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25 dark:bg-blue-600"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-slate-100"
             }`}
           >
             <Icon
               className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
                 active
                   ? "text-white"
-                  : "text-slate-600 group-hover:text-sky-600 dark:text-slate-300 dark:group-hover:text-sky-400"
+                  : "text-slate-500 group-hover:text-blue-600 dark:text-slate-400 dark:group-hover:text-blue-400"
               }`}
             />
             <span className="truncate">{label}</span>
+            {active && (
+              <span className="absolute right-2 h-1.5 w-1.5 rounded-full bg-white opacity-80" />
+            )}
           </Link>
         );
       })}
@@ -230,29 +241,11 @@ function NavLinks({ role, close, user }) {
 }
 
 export function Shell({ children, role = "student", user }) {
-  const [open, setOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const userMenuRef = useRef(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(user || null);
   const router = useRouter();
   const { language, toggleLanguage } = useLanguage();
   const { user: authUser } = useAuth();
-
-  // Close profile dropdown when clicking outside
-  useEffect(() => {
-    if (!userMenuOpen) return;
-    const handleClickOutside = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [userMenuOpen]);
 
   useEffect(() => {
     if (user) {
@@ -276,7 +269,6 @@ export function Shell({ children, role = "student", user }) {
   }, [authUser]);
 
   useEffect(() => {
-    // If profilePhoto is missing, fetch fresh user data from /api/auth/me
     if (currentUser?.profilePhoto) return;
     async function loadCurrentUser() {
       try {
@@ -306,9 +298,9 @@ export function Shell({ children, role = "student", user }) {
 
   const roleLabels = {
     STUDENT: "Student Candidate",
-    COACHING_ADMIN: "Coaching Academy Admin",
+    COACHING_ADMIN: "Coaching Academy",
     TEACHER: "Faculty / Teacher",
-    SUPER_ADMIN: "Super Admin Console",
+    SUPER_ADMIN: "Super Admin",
   };
 
   const activeUser = authUser || currentUser || user;
@@ -329,48 +321,53 @@ export function Shell({ children, role = "student", user }) {
         : "/student/profile";
 
   return (
-    <div className="flex min-h-screen w-full max-w-full bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-[#030712] dark:text-slate-100">
+    <div className="flex min-h-screen w-full max-w-full bg-slate-50/70 font-sans text-slate-900 transition-colors dark:bg-[#030712] dark:text-slate-100">
       {/* Sidebar Desktop */}
       <aside
         data-shell-sidebar="true"
-        className="glass-panel sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-slate-200/80 p-4 backdrop-blur-2xl transition-colors dark:border-slate-800/80 md:flex"
+        className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-slate-200/80 bg-white p-4 backdrop-blur-xl transition-colors dark:border-slate-800/80 dark:bg-slate-950 md:flex"
       >
         <div className="space-y-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 px-2">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 font-black text-white shadow-sm shadow-sky-500/20">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 font-black text-white shadow-sm shadow-blue-500/20">
               M
             </div>
             <div>
               <div className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-                Maha<span className="text-sky-500 dark:text-sky-400">Exam</span>
+                Maha<span className="text-blue-600 dark:text-blue-400">Exam</span>
               </div>
-              <div className="text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                {roleLabels[activeUser?.role] || (role === "admin" ? "Super Admin Console" : role)}
+              <div className="mt-0.5 flex items-center gap-1.5">
+                <Badge
+                  variant="outline"
+                  className="border-slate-200 px-1.5 py-0 text-[10px] font-bold text-slate-500 dark:border-slate-800"
+                >
+                  {roleLabels[activeUser?.role] || (role === "admin" ? "Admin" : role)}
+                </Badge>
               </div>
             </div>
           </Link>
 
           {/* Navigation Links */}
-          <div className="overflow-y-auto pr-1">
+          <div className="scrollbar-thin max-h-[calc(100vh-180px)] overflow-y-auto pr-1">
             <NavLinks role={role} user={activeUser} />
           </div>
         </div>
 
         {/* Bottom User Card */}
-        <div className="border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
-          <div className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-100/80 p-2.5 dark:border-slate-700/60 dark:bg-slate-900/80">
+        <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-50 p-2 dark:border-slate-800 dark:bg-slate-900/60">
             <Link
               href={profileUrl}
-              className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-slate-200/70 dark:hover:bg-slate-800"
+              className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl p-1 transition hover:bg-white dark:hover:bg-slate-800"
               title="View Profile"
             >
               <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
               <div className="min-w-0 truncate">
-                <div className="truncate text-xs font-black text-slate-900 dark:text-white">
+                <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
                   {activeUser?.name || "User"}
                 </div>
-                <div className="truncate text-[10px] font-semibold text-slate-600 dark:text-slate-300">
+                <div className="truncate text-[10px] text-slate-500 dark:text-slate-400">
                   {activeUser?.email || "Account"}
                 </div>
               </div>
@@ -378,7 +375,7 @@ export function Shell({ children, role = "student", user }) {
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-xl p-1.5 text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/60 dark:hover:text-rose-400"
+              className="rounded-xl p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
               title="Sign Out"
             >
               <LogOut className="h-4 w-4" />
@@ -392,16 +389,73 @@ export function Shell({ children, role = "student", user }) {
         {/* Top App Header */}
         <header
           data-shell-header="true"
-          className="sticky top-0 z-40 flex h-16 w-full shrink-0 items-center justify-between gap-1.5 border-b border-slate-200/80 bg-white/80 px-3 backdrop-blur-2xl transition-colors dark:border-slate-800/80 dark:bg-[#030712]/75 sm:px-6"
+          className="sticky top-0 z-40 flex h-16 w-full shrink-0 items-center justify-between gap-1.5 border-b border-slate-200/80 bg-white/80 px-3 backdrop-blur-xl transition-colors dark:border-slate-800/80 dark:bg-slate-950/80 sm:px-6"
         >
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="shrink-0 rounded-xl border border-slate-200 p-1.5 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800 md:hidden"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {/* Mobile Sheet Drawer Trigger */}
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-xl border border-slate-200 p-2 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800 md:hidden"
+                  aria-label="Open Navigation"
+                >
+                  <Menu className="h-4 w-4" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex w-72 flex-col justify-between p-5">
+                <div className="space-y-6">
+                  <SheetHeader>
+                    <SheetTitle className="text-left">
+                      <Link href="/" className="flex items-center gap-3">
+                        <div className="grid h-8 w-8 place-items-center rounded-xl bg-blue-600 font-black text-white">
+                          M
+                        </div>
+                        <span className="text-base font-black text-slate-900 dark:text-white">
+                          Maha<span className="text-blue-600 dark:text-blue-400">Exam</span>
+                        </span>
+                      </Link>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-1">
+                    <NavLinks role={role} close={() => setMobileOpen(false)} user={activeUser} />
+                  </div>
+                </div>
+
+                <div className="space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                  <Link
+                    href={profileUrl}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-900/60"
+                  >
+                    <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
+                    <div className="min-w-0 truncate">
+                      <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                        {activeUser?.name || "User"}
+                      </div>
+                      <div className="truncate text-[10px] text-slate-500 dark:text-slate-400">
+                        {activeUser?.email || "Account"}
+                      </div>
+                    </div>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50/80 py-2.5 text-xs font-bold text-red-700 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/50 dark:text-red-300"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>
+                      {role === "admin"
+                        ? "Sign Out"
+                        : language === "mr"
+                          ? "लॉगआउट करा"
+                          : "Sign Out"}
+                    </span>
+                  </button>
+                </div>
+              </SheetContent>
+            </Sheet>
+
             <div className="whitespace-nowrap text-xs font-black tracking-tight text-slate-900 dark:text-white sm:text-sm">
               {role === "student" && (language === "mr" ? "विद्यार्थी डॅशबोर्ड" : "Student Portal")}
               {role === "coaching" && (language === "mr" ? "अकॅडेमी कन्सोल" : "Coaching Portal")}
@@ -409,13 +463,13 @@ export function Shell({ children, role = "student", user }) {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             {/* Language Switcher */}
             {role !== "admin" && (
               <button
                 type="button"
                 onClick={toggleLanguage}
-                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1.5 text-xs font-bold text-slate-800 transition hover:bg-slate-200 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:px-2.5 sm:py-1.5"
+                className="shadow-2xs inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                 title="Language / भाषा"
               >
                 <Globe className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
@@ -428,142 +482,60 @@ export function Shell({ children, role = "student", user }) {
 
             <NotificationCenter />
 
-            {/* Profile Dropdown */}
-            <div className="relative" ref={userMenuRef}>
-              <button
-                type="button"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 pr-2.5 text-xs font-bold text-slate-800 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
-              >
-                <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
-                <span className="hidden sm:inline">
-                  {activeUser?.name?.split(" ")[0] || "Account"}
-                </span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-              </button>
-
-              {userMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                  <div className="glass-card absolute right-0 z-50 mt-2 w-56 rounded-2xl p-2.5 shadow-2xl">
-                    <div className="border-b border-slate-100 px-3 py-2 text-xs dark:border-slate-800">
-                      <div className="font-bold text-slate-900 dark:text-white">
-                        {activeUser?.name || "User"}
-                      </div>
-                      <div className="truncate text-[10px] text-slate-400">
-                        {activeUser?.email || "Account"}
-                      </div>
-                    </div>
-
-                    <Link
-                      href={profileUrl}
-                      onClick={() => setUserMenuOpen(false)}
-                      className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <UserCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      <span>
-                        {role === "admin"
-                          ? "My Profile"
-                          : language === "mr"
-                            ? "माझे प्रोफाइल"
-                            : "My Profile"}
-                      </span>
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>
-                        {role === "admin"
-                          ? "Sign Out"
-                          : language === "mr"
-                            ? "लॉगआउट करा"
-                            : "Sign Out"}
-                      </span>
-                    </button>
+            {/* shadcn DropdownMenu for Profile */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="shadow-2xs flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1.5 pr-2.5 text-xs font-bold text-slate-800 transition hover:bg-slate-50 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
+                  <span className="hidden font-bold sm:inline">
+                    {activeUser?.name?.split(" ")[0] || "Account"}
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    {activeUser?.name || "User"}
                   </div>
-                </>
-              )}
-            </div>
+                  <div className="truncate text-[10px] font-normal text-slate-500 dark:text-slate-400">
+                    {activeUser?.email || "Account"}
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={profileUrl} className="flex w-full items-center gap-2">
+                    <UserCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span>
+                      {role === "admin"
+                        ? "My Profile"
+                        : language === "mr"
+                          ? "माझे प्रोफाइल"
+                          : "My Profile"}
+                    </span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:text-red-400 dark:focus:bg-red-950/50"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>
+                    {role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
         {/* Page Main Content */}
         <main className="min-w-0 max-w-full flex-1 p-3.5 sm:p-6 lg:p-8">{children}</main>
       </div>
-
-      {/* Mobile Drawer */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="animate-in fade-in fixed inset-0 z-50 flex bg-black/60 backdrop-blur-sm duration-200 md:hidden"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="glass-card animate-in slide-in-from-left flex h-full w-72 flex-col justify-between rounded-r-3xl border-r border-slate-200/80 p-5 shadow-2xl backdrop-blur-2xl transition-colors dark:border-slate-800/80"
-          >
-            <div className="space-y-6">
-              <div className="flex items-center justify-between px-2">
-                <Link href="/" className="flex items-center gap-3">
-                  <div className="grid h-8 w-8 place-items-center rounded-xl bg-blue-600 font-black text-white">
-                    M
-                  </div>
-                  <span className="text-base font-black text-slate-900 dark:text-white">
-                    Maha<span className="text-blue-600 dark:text-blue-400">Exam</span>
-                  </span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="overflow-y-auto pr-1">
-                <NavLinks role={role} close={() => setOpen(false)} user={activeUser} />
-              </div>
-            </div>
-
-            <div className="space-y-3 border-t border-slate-200/70 pt-4 dark:border-slate-800/80">
-              <Link
-                href={profileUrl}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-slate-100/80 p-2.5 dark:border-slate-700/60 dark:bg-slate-900/80"
-                title="View Profile"
-              >
-                <UserAvatar src={profilePhotoUrl} name={activeUser?.name || "User"} size="xs" />
-                <div className="min-w-0 truncate">
-                  <div className="truncate text-xs font-black text-slate-900 dark:text-white">
-                    {activeUser?.name || "User"}
-                  </div>
-                  <div className="truncate text-[10px] font-semibold text-slate-600 dark:text-slate-300">
-                    {activeUser?.email || "Account"}
-                  </div>
-                </div>
-              </Link>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200/80 bg-rose-50/90 py-3 text-xs font-bold text-rose-700 transition hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>
-                  {role === "admin" ? "Sign Out" : language === "mr" ? "लॉगआउट करा" : "Sign Out"}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

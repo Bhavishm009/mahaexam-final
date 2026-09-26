@@ -12,7 +12,10 @@ if (fs.existsSync(envPath)) {
     const trimmed = line.trim();
     if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
       const [key, ...rest] = trimmed.split("=");
-      const val = rest.join("=").replace(/^["']|["']$/g, "").trim();
+      const val = rest
+        .join("=")
+        .replace(/^["']|["']$/g, "")
+        .trim();
       if (!process.env[key.trim()]) {
         process.env[key.trim()] = val;
       }
@@ -258,12 +261,16 @@ async function testFullRazorpayFlow() {
   console.log("==================================================\n");
 
   // Clean up any test records so production DB stays 100% clean
-  await prisma.examPurchase.deleteMany({
-    where: { razorpayPaymentId: { startsWith: "pay_test_" } },
-  }).catch(() => {});
-  await prisma.paymentOrder.deleteMany({
-    where: { providerPaymentId: { startsWith: "pay_test_" } },
-  }).catch(() => {});
+  await prisma.examPurchase
+    .deleteMany({
+      where: { razorpayPaymentId: { startsWith: "pay_test_" } },
+    })
+    .catch(() => {});
+  await prisma.paymentOrder
+    .deleteMany({
+      where: { providerPaymentId: { startsWith: "pay_test_" } },
+    })
+    .catch(() => {});
 }
 
 testFullRazorpayFlow()

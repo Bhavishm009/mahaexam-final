@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-require('dotenv').config();
+const { PrismaClient } = require("@prisma/client");
+require("dotenv").config();
 
 // Connect using Supabase primary pooler (same as application)
 const supabaseUrl = process.env.SECONDARY_DATABASE_URL || process.env.DATABASE_URL;
@@ -7,11 +7,14 @@ const supabaseUrl = process.env.SECONDARY_DATABASE_URL || process.env.DATABASE_U
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: supabaseUrl.includes(':6543') && !supabaseUrl.includes('pgbouncer=true')
-        ? supabaseUrl + (supabaseUrl.includes('?') ? '&' : '?') + 'pgbouncer=true&connection_limit=10&pool_timeout=30'
-        : supabaseUrl
-    }
-  }
+      url:
+        supabaseUrl.includes(":6543") && !supabaseUrl.includes("pgbouncer=true")
+          ? supabaseUrl +
+            (supabaseUrl.includes("?") ? "&" : "?") +
+            "pgbouncer=true&connection_limit=10&pool_timeout=30"
+          : supabaseUrl,
+    },
+  },
 });
 
 async function runBatch(concurrency, totalRequests) {
@@ -65,7 +68,7 @@ async function runBatch(concurrency, totalRequests) {
 
   latencies.sort((a, b) => a - b);
   const avg = Math.round(latencies.reduce((a, b) => a + b, 0) / (latencies.length || 1));
-  const p50 = latencies[Math.floor(latencies.length * 0.50)] || 0;
+  const p50 = latencies[Math.floor(latencies.length * 0.5)] || 0;
   const p95 = latencies[Math.floor(latencies.length * 0.95)] || 0;
   const p99 = latencies[Math.floor(latencies.length * 0.99)] || 0;
   const rps = Math.round((success / (totalDuration / 1000)) * 10) / 10;
@@ -91,15 +94,17 @@ async function runBatch(concurrency, totalRequests) {
 }
 
 async function main() {
-  console.log('🚀 Initiating Database High-Concurrency Stress Test against Supabase PgBouncer Pooler...');
+  console.log(
+    "🚀 Initiating Database High-Concurrency Stress Test against Supabase PgBouncer Pooler...",
+  );
 
   // Test with ramp-up concurrency
-  await runBatch(10, 50);    // 10 concurrent requests
-  await runBatch(25, 100);   // 25 concurrent requests
-  await runBatch(50, 200);   // 50 concurrent requests
-  await runBatch(100, 300);  // 100 concurrent requests
+  await runBatch(10, 50); // 10 concurrent requests
+  await runBatch(25, 100); // 25 concurrent requests
+  await runBatch(50, 200); // 50 concurrent requests
+  await runBatch(100, 300); // 100 concurrent requests
 
-  console.log('\n🏁 High-concurrency stress testing successfully concluded!');
+  console.log("\n🏁 High-concurrency stress testing successfully concluded!");
   await prisma.$disconnect();
 }
 

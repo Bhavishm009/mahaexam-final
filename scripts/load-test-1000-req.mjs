@@ -6,7 +6,9 @@ async function runDatabase1000StressTest() {
   console.log("================================================================================");
 
   const TOTAL_QUERIES = 1000;
-  console.log(`Dispatching ${TOTAL_QUERIES} queries simultaneously at timestamp ${new Date().toISOString()}...`);
+  console.log(
+    `Dispatching ${TOTAL_QUERIES} queries simultaneously at timestamp ${new Date().toISOString()}...`,
+  );
 
   const startTime = Date.now();
   const latencies = [];
@@ -16,17 +18,22 @@ async function runDatabase1000StressTest() {
 
   // Mix of real queries representing realistic exam platform read operations
   // Test with connection_limit=10 to demonstrate production scalability with PgBouncer
-  const prodPrisma = new (await import('@prisma/client')).PrismaClient({
+  const prodPrisma = new (await import("@prisma/client")).PrismaClient({
     datasources: {
       db: {
-        url: (process.env.SECONDARY_DATABASE_URL || process.env.DATABASE_URL).replace(/connection_limit=\d+/, 'connection_limit=10') + '&pool_timeout=35'
-      }
-    }
+        url:
+          (process.env.SECONDARY_DATABASE_URL || process.env.DATABASE_URL).replace(
+            /connection_limit=\d+/,
+            "connection_limit=10",
+          ) + "&pool_timeout=35",
+      },
+    },
   });
 
   const queryGenerators = [
     () => prodPrisma.exam.findMany({ take: 3, select: { id: true, title: true, price: true } }),
-    () => prodPrisma.question.findFirst({ select: { id: true, questionText: true, subjectId: true } }),
+    () =>
+      prodPrisma.question.findFirst({ select: { id: true, questionText: true, subjectId: true } }),
     () => prodPrisma.user.findFirst({ select: { id: true, name: true, role: true } }),
     () => prodPrisma.examResult.count(),
     () => prodPrisma.subject.findMany({ select: { id: true, name: true } }),
@@ -52,7 +59,7 @@ async function runDatabase1000StressTest() {
 
   latencies.sort((a, b) => a - b);
   const avg = Math.round(latencies.reduce((a, b) => a + b, 0) / (latencies.length || 1));
-  const p50 = latencies[Math.floor(latencies.length * 0.50)] || 0;
+  const p50 = latencies[Math.floor(latencies.length * 0.5)] || 0;
   const p95 = latencies[Math.floor(latencies.length * 0.95)] || 0;
   const p99 = latencies[Math.floor(latencies.length * 0.99)] || 0;
   const max = latencies[latencies.length - 1] || 0;
@@ -60,9 +67,13 @@ async function runDatabase1000StressTest() {
 
   console.log("\n📊 1,000 DATABASE QUERIES RESULTS:");
   console.log(`   - Total Queries Dispatched: ${TOTAL_QUERIES}`);
-  console.log(`   - Successful Queries:       ${successCount} (${Math.round((successCount / TOTAL_QUERIES) * 100)}%)`);
+  console.log(
+    `   - Successful Queries:       ${successCount} (${Math.round((successCount / TOTAL_QUERIES) * 100)}%)`,
+  );
   console.log(`   - Failed Queries:           ${failedCount}`);
-  console.log(`   - Total Completion Time:    ${totalElapsed} ms (${(totalElapsed / 1000).toFixed(2)}s)`);
+  console.log(
+    `   - Total Completion Time:    ${totalElapsed} ms (${(totalElapsed / 1000).toFixed(2)}s)`,
+  );
   console.log(`   - Overall Throughput:       ${throughput} queries/second`);
   console.log(`   - Min Latency:              ${latencies[0] || 0} ms`);
   console.log(`   - Median Latency (p50):     ${p50} ms`);
@@ -120,15 +131,19 @@ async function runHttp1000StressTest() {
   const httpElapsed = Date.now() - startTime;
 
   httpLatencies.sort((a, b) => a - b);
-  const p50 = httpLatencies[Math.floor(httpLatencies.length * 0.50)] || 0;
+  const p50 = httpLatencies[Math.floor(httpLatencies.length * 0.5)] || 0;
   const p95 = httpLatencies[Math.floor(httpLatencies.length * 0.95)] || 0;
   const rps = Math.round((successHttp / (httpElapsed / 1000)) * 10) / 10;
 
   console.log("\n📊 1,000 HTTP REQUESTS RESULTS:");
   console.log(`   - Total HTTP Requests:     ${TOTAL_HTTP}`);
-  console.log(`   - Successful (HTTP 200):   ${successHttp} (${Math.round((successHttp / TOTAL_HTTP) * 100)}%)`);
+  console.log(
+    `   - Successful (HTTP 200):   ${successHttp} (${Math.round((successHttp / TOTAL_HTTP) * 100)}%)`,
+  );
   console.log(`   - Failed Requests:         ${failedHttp}`);
-  console.log(`   - Total Duration:          ${httpElapsed} ms (${(httpElapsed / 1000).toFixed(2)}s)`);
+  console.log(
+    `   - Total Duration:          ${httpElapsed} ms (${(httpElapsed / 1000).toFixed(2)}s)`,
+  );
   console.log(`   - HTTP Throughput:         ${rps} req/second`);
   console.log(`   - p50 Latency:             ${p50} ms`);
   console.log(`   - p95 Latency:             ${p95} ms`);
@@ -136,7 +151,9 @@ async function runHttp1000StressTest() {
   if (failedHttp > 0) {
     console.log("\n⚠️ HTTP Bottleneck Analysis:", [...new Set(httpErrors)]);
   } else {
-    console.log("\n✅ ZERO HTTP FAILURES: Node.js server handled 1,000 concurrent requests without crashing.");
+    console.log(
+      "\n✅ ZERO HTTP FAILURES: Node.js server handled 1,000 concurrent requests without crashing.",
+    );
   }
 }
 

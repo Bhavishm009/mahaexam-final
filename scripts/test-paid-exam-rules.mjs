@@ -62,7 +62,8 @@ async function runTests() {
     where: { studentId_examId: { studentId: student.id, examId: paidExam.id } },
   });
 
-  const isAllowedPaid = isPaid && (userPurchase?.status === "PAID" || userEntitlement?.status === "ACTIVE");
+  const isAllowedPaid =
+    isPaid && (userPurchase?.status === "PAID" || userEntitlement?.status === "ACTIVE");
   console.log("Access result for paid student:", {
     allowed: isAllowedPaid,
     source: "PURCHASED",
@@ -109,7 +110,9 @@ async function runTests() {
     console.error("FAILED: Archived exam should not be available!");
     process.exit(1);
   }
-  console.log("PASSED: Archived exam returns EXAM_NOT_AVAILABLE while preserving user profile purchase data!");
+  console.log(
+    "PASSED: Archived exam returns EXAM_NOT_AVAILABLE while preserving user profile purchase data!",
+  );
 
   // Restore exam to LIVE for normal app usage
   await prisma.exam.update({

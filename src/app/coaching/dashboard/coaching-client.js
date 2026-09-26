@@ -2,6 +2,39 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  StatCard,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Users,
+  Layers3,
+  FileText,
+  Database,
+  CreditCard,
+  Plus,
+  LayoutDashboard,
+  Calendar,
+  IndianRupee,
+  CheckCircle2,
+  TrendingUp,
+  Sparkles,
+} from "lucide-react";
 
 export function CoachingDashboardClient({ initialData }) {
   const [data, setData] = useState(initialData || null);
@@ -48,8 +81,8 @@ export function CoachingDashboardClient({ initialData }) {
 
   if (!data) {
     return (
-      <main className="grid min-h-[50vh] place-items-center text-slate-600 dark:text-slate-400">
-        <div className="flex items-center gap-2 font-medium">
+      <main className="grid min-h-[50vh] place-items-center text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-3 text-sm font-semibold">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
           <span>Loading coaching dashboard...</span>
         </div>
@@ -57,215 +90,367 @@ export function CoachingDashboardClient({ initialData }) {
     );
   }
 
-  const nav = [
-    ["overview", "Overview"],
-    ["students", "Students"],
-    ["batches", "Batches"],
-    ["exams", "Exams"],
-    ["questions", "Question Bank"],
-    ["payments", "Payments"],
-  ];
-
   return (
     <main className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
+      {/* Top Header */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-            {nav.find((x) => x[0] === tab)?.[1]}
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+            Coaching Academy Dashboard
           </h1>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            Manage your coaching institute from one place.
+          <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 sm:text-sm">
+            Manage your coaching institute, students, question banks, and live examinations.
           </p>
         </div>
-        <Link
-          href="/coaching/exam-builder"
-          className="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-500 active:scale-95 sm:text-sm"
-        >
-          + Create Exam
-        </Link>
+        <Button asChild size="default" className="shadow-sm">
+          <Link href="/coaching/exam-builder" className="gap-1.5">
+            <Plus className="h-4 w-4" />
+            <span>Create New Exam</span>
+          </Link>
+        </Button>
       </header>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {nav.map(([id, label]) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-bold transition sm:text-sm ${
-              tab === id
-                ? "bg-slate-900 text-white shadow-sm dark:bg-blue-600 dark:text-white"
-                : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {/* Tabs Navigation */}
+      <Tabs value={tab} onValueChange={setTab} className="space-y-6">
+        <TabsList className="h-auto w-full flex-wrap justify-start overflow-x-auto p-1">
+          <TabsTrigger value="overview" className="gap-2 text-xs">
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            <span>Overview</span>
+          </TabsTrigger>
+          <TabsTrigger value="students" className="gap-2 text-xs">
+            <Users className="h-3.5 w-3.5" />
+            <span>Students ({students.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="batches" className="gap-2 text-xs">
+            <Layers3 className="h-3.5 w-3.5" />
+            <span>Batches ({batches.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="exams" className="gap-2 text-xs">
+            <FileText className="h-3.5 w-3.5" />
+            <span>Exams ({exams.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="questions" className="gap-2 text-xs">
+            <Database className="h-3.5 w-3.5" />
+            <span>Question Bank</span>
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="gap-2 text-xs">
+            <CreditCard className="h-3.5 w-3.5" />
+            <span>Payments</span>
+          </TabsTrigger>
+        </TabsList>
 
-      {tab === "overview" && <Overview data={data} />}
-      {tab === "students" && <Students students={students} />}
-      {tab === "batches" && <Batches batches={batches} />}
-      {tab === "exams" && <Exams exams={exams} />}
-      {tab === "questions" && <Questions q={questions} />}
-      {tab === "payments" && <Payments payments={data.recentPayments || []} />}
+        <TabsContent value="overview">
+          <Overview data={data} />
+        </TabsContent>
+        <TabsContent value="students">
+          <Students students={students} />
+        </TabsContent>
+        <TabsContent value="batches">
+          <Batches batches={batches} />
+        </TabsContent>
+        <TabsContent value="exams">
+          <Exams exams={exams} />
+        </TabsContent>
+        <TabsContent value="questions">
+          <Questions q={questions} />
+        </TabsContent>
+        <TabsContent value="payments">
+          <Payments payments={data.recentPayments || []} />
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }
 
 function Overview({ data }) {
   const cards = [
-    ["Students", data.counts?.students || 0],
-    ["Active Batches", data.counts?.batches || 0],
-    ["Questions", data.counts?.questions || 0],
-    ["Upcoming Exams", data.counts?.upcomingExams || 0],
-    ["Live Exams", data.counts?.liveExams || 0],
-    ["Revenue", `₹${((data.revenue?.amount || 0) / 100).toLocaleString("en-IN")}`],
-    ["Payments", data.revenue?.payments || 0],
-    ["Avg. Score", `${data.averagePercentage || 0}%`],
+    {
+      label: "Enrolled Students",
+      value: data.counts?.students || 0,
+      icon: Users,
+      note: "Total registered students",
+    },
+    {
+      label: "Active Batches",
+      value: data.counts?.batches || 0,
+      icon: Layers3,
+      note: "Classroom cohorts",
+    },
+    {
+      label: "Question Bank",
+      value: data.counts?.questions || 0,
+      icon: Database,
+      note: "MCQs & descriptive",
+    },
+    {
+      label: "Upcoming Exams",
+      value: data.counts?.upcomingExams || 0,
+      icon: Calendar,
+      note: "Scheduled tests",
+    },
+    {
+      label: "Live Exams Now",
+      value: data.counts?.liveExams || 0,
+      icon: Sparkles,
+      note: "In progress",
+    },
+    {
+      label: "Total Revenue",
+      value: `₹${((data.revenue?.amount || 0) / 100).toLocaleString("en-IN")}`,
+      icon: IndianRupee,
+      note: "Collected fees",
+    },
+    {
+      label: "Paid Transactions",
+      value: data.revenue?.payments || 0,
+      icon: CreditCard,
+      note: "Successful orders",
+    },
+    {
+      label: "Average Score",
+      value: `${data.averagePercentage || 0}%`,
+      icon: TrendingUp,
+      note: "Overall cohort score",
+    },
   ];
 
   return (
-    <>
+    <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (
-          <div
-            key={c[0]}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition dark:border-slate-800 dark:bg-slate-900"
-          >
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{c[0]}</div>
-            <div className="mt-2 text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-              {c[1]}
-            </div>
-          </div>
+          <StatCard key={c.label} label={c.label} value={c.value} icon={c.icon} note={c.note} />
         ))}
       </div>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-2">
-        <Panel title="Recent Exams">
-          {data.recentExams?.map((e) => (
-            <div
-              key={e.id}
-              className="flex items-center justify-between border-b border-slate-100 py-3.5 dark:border-slate-800"
-            >
-              <div>
-                <b className="text-sm font-bold text-slate-900 dark:text-white">{e.title}</b>
-                <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  {e.totalQuestions} questions · {e.durationMinutes} min
+      <div className="grid gap-6 xl:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Exams</CardTitle>
+            <CardDescription>Latest published and scheduled examinations</CardDescription>
+          </CardHeader>
+          <CardContent className="divide-y divide-slate-100 dark:divide-slate-800">
+            {!data.recentExams || data.recentExams.length === 0 ? (
+              <p className="py-4 text-center text-xs text-slate-400">No exams created yet.</p>
+            ) : (
+              data.recentExams.map((e) => (
+                <div
+                  key={e.id}
+                  className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0"
+                >
+                  <div>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">
+                      {e.title}
+                    </span>
+                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {e.totalQuestions} questions · {e.durationMinutes} min
+                    </div>
+                  </div>
+                  <Badge variant="info">{e.status}</Badge>
                 </div>
-              </div>
-              <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-950/70 dark:text-blue-300">
-                {e.status}
-              </span>
-            </div>
-          ))}
-        </Panel>
+              ))
+            )}
+          </CardContent>
+        </Card>
 
-        <Panel title="Recent Payments">
-          {data.recentPayments?.map((p) => (
-            <div
-              key={p.id}
-              className="flex items-center justify-between border-b border-slate-100 py-3.5 dark:border-slate-800"
-            >
-              <div>
-                <b className="text-sm font-bold text-slate-900 dark:text-white">
-                  {p.user?.name || "Student"}
-                </b>
-                <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  {p.exam?.title || "Exam"}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Payments</CardTitle>
+            <CardDescription>Real-time incoming student registrations</CardDescription>
+          </CardHeader>
+          <CardContent className="divide-y divide-slate-100 dark:divide-slate-800">
+            {!data.recentPayments || data.recentPayments.length === 0 ? (
+              <p className="py-4 text-center text-xs text-slate-400">No payment records yet.</p>
+            ) : (
+              data.recentPayments.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0"
+                >
+                  <div>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">
+                      {p.user?.name || "Student"}
+                    </span>
+                    <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {p.exam?.title || "Exam Enrollment"}
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                    ₹{((p.amount || 0) / 100).toLocaleString("en-IN")}
+                  </span>
                 </div>
-              </div>
-              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                ₹{((p.amount || 0) / 100).toLocaleString("en-IN")}
-              </span>
-            </div>
-          ))}
-        </Panel>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
-    </>
+    </div>
   );
 }
 
 function Students({ students }) {
   return (
-    <Panel title={`Students (${students.length})`}>
-      <Table headers={["Name", "Email", "Status", "Joined"]}>
-        {students.map((s) => (
-          <tr key={s.id} className="border-t border-slate-100 dark:border-slate-800">
-            <td className="p-3 font-semibold text-slate-900 dark:text-white">{s.name}</td>
-            <td className="text-slate-600 dark:text-slate-300">{s.email}</td>
-            <td>
-              <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
-                {s.status}
-              </span>
-            </td>
-            <td className="text-slate-500 dark:text-slate-400">
-              {new Date(s.createdAt).toLocaleDateString()}
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </Panel>
+    <Card>
+      <CardHeader>
+        <CardTitle>Enrolled Students</CardTitle>
+        <CardDescription>Complete roster of registered academy students</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Student Name</TableHead>
+                <TableHead>Email Address</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Enrolled Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {students.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center text-xs text-slate-400">
+                    No students enrolled yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                students.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-bold text-slate-900 dark:text-white">
+                      {s.name}
+                    </TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-400">{s.email}</TableCell>
+                    <TableCell>
+                      <Badge variant="success">{s.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-slate-500 dark:text-slate-400">
+                      {new Date(s.createdAt).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function Batches({ batches }) {
   return (
-    <Panel title={`Batches (${batches.length})`}>
-      <Table headers={["Batch", "Students", "Status"]}>
-        {batches.map((b) => (
-          <tr key={b.id} className="border-t border-slate-100 dark:border-slate-800">
-            <td className="p-3 font-semibold text-slate-900 dark:text-white">{b.name}</td>
-            <td className="text-slate-600 dark:text-slate-300">{b.students?.length || 0}</td>
-            <td>
-              <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-950/70 dark:text-blue-300">
-                {b.status}
-              </span>
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </Panel>
+    <Card>
+      <CardHeader>
+        <CardTitle>Academy Batches</CardTitle>
+        <CardDescription>Configured classroom sections and cohorts</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Batch Name</TableHead>
+                <TableHead>Students Count</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {batches.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-24 text-center text-xs text-slate-400">
+                    No active batches found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                batches.map((b) => (
+                  <TableRow key={b.id}>
+                    <TableCell className="font-bold text-slate-900 dark:text-white">
+                      {b.name}
+                    </TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-400">
+                      {b.students?.length || 0} students
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="info">{b.status}</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function Exams({ exams }) {
   return (
-    <Panel title={`Exams (${exams.length})`}>
-      <Table headers={["Exam", "Status", "Questions", "Start", "Price", "Actions"]}>
-        {exams.map((e) => (
-          <tr key={e.id} className="border-t border-slate-100 dark:border-slate-800">
-            <td className="p-3 font-semibold text-slate-900 dark:text-white">{e.title}</td>
-            <td>
-              <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                {e.status}
-              </span>
-            </td>
-            <td className="text-slate-600 dark:text-slate-300">{e.totalQuestions}</td>
-            <td className="text-slate-500 dark:text-slate-400">
-              {e.startAt ? new Date(e.startAt).toLocaleString() : "—"}
-            </td>
-            <td className="font-semibold text-slate-900 dark:text-white">
-              ₹{(Number(e.price || 0) / 100).toLocaleString("en-IN")}
-            </td>
-            <td className="p-3">
-              <div className="flex items-center gap-2">
-                <Link
-                  className="rounded-lg bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300"
-                  href={`/coaching/exams/${e.id}/questions`}
-                >
-                  Manage Paper
-                </Link>
-                <Link
-                  className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
-                  href={`/coaching/results/${e.id}`}
-                >
-                  Results
-                </Link>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </Panel>
+    <Card>
+      <CardHeader>
+        <CardTitle>Examinations</CardTitle>
+        <CardDescription>Academy-specific tests and mock assessments</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Exam Title</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Questions</TableHead>
+                <TableHead>Start Date</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {exams.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center text-xs text-slate-400">
+                    No exams found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                exams.map((e) => (
+                  <TableRow key={e.id}>
+                    <TableCell className="font-bold text-slate-900 dark:text-white">
+                      {e.title}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{e.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-400">
+                      {e.totalQuestions}
+                    </TableCell>
+                    <TableCell className="text-slate-500 dark:text-slate-400">
+                      {e.startAt ? new Date(e.startAt).toLocaleString() : "—"}
+                    </TableCell>
+                    <TableCell className="font-bold text-slate-900 dark:text-white">
+                      ₹{(Number(e.price || 0) / 100).toLocaleString("en-IN")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button asChild variant="outline" size="sm" className="h-7 text-xs">
+                          <Link href={`/coaching/exams/${e.id}/questions`}>Manage Paper</Link>
+                        </Button>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                        >
+                          <Link href={`/coaching/results/${e.id}`}>Results</Link>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -274,17 +459,7 @@ function Questions({ q }) {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {q &&
         Object.entries(q).map(([k, v]) => (
-          <div
-            key={k}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
-            <div className="text-xs font-medium capitalize text-slate-500 dark:text-slate-400">
-              {k}
-            </div>
-            <div className="mt-2 text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
-              {v}
-            </div>
-          </div>
+          <StatCard key={k} label={k.replace(/([A-Z])/g, " $1").trim()} value={v} icon={Database} />
         ))}
     </div>
   );
@@ -292,54 +467,55 @@ function Questions({ q }) {
 
 function Payments({ payments }) {
   return (
-    <Panel title="Recent Payments">
-      <Table headers={["Student", "Exam", "Amount", "Status", "Date"]}>
-        {payments.map((p) => (
-          <tr key={p.id} className="border-t border-slate-100 dark:border-slate-800">
-            <td className="p-3 font-medium text-slate-900 dark:text-white">{p.user?.name}</td>
-            <td className="text-slate-600 dark:text-slate-300">{p.exam?.title || "—"}</td>
-            <td className="font-bold text-emerald-600 dark:text-emerald-400">
-              ₹{((p.amount || 0) / 100).toLocaleString("en-IN")}
-            </td>
-            <td>
-              <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
-                {p.status}
-              </span>
-            </td>
-            <td className="text-slate-500 dark:text-slate-400">
-              {new Date(p.createdAt).toLocaleString()}
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </Panel>
-  );
-}
-
-function Panel({ title, children }) {
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition dark:border-slate-800 dark:bg-slate-900">
-      <h2 className="text-base font-black text-slate-900 dark:text-white sm:text-lg">{title}</h2>
-      <div className="mt-3">{children}</div>
-    </section>
-  );
-}
-
-function Table({ headers, children }) {
-  return (
-    <div className="mt-3 overflow-x-auto">
-      <table className="w-full text-left text-xs sm:text-sm">
-        <thead className="border-b border-slate-200 bg-slate-50 font-bold text-slate-700 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300">
-          <tr>
-            {headers.map((h) => (
-              <th key={h} className="p-3">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">{children}</tbody>
-      </table>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Recent Student Payments</CardTitle>
+        <CardDescription>Direct Razorpay receipts and enrollments</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Student</TableHead>
+                <TableHead>Exam Title</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Payment Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {payments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center text-xs text-slate-400">
+                    No recent payments recorded.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                payments.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-bold text-slate-900 dark:text-white">
+                      {p.user?.name}
+                    </TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-400">
+                      {p.exam?.title || "—"}
+                    </TableCell>
+                    <TableCell className="font-black text-emerald-600 dark:text-emerald-400">
+                      ₹{((p.amount || 0) / 100).toLocaleString("en-IN")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="success">{p.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-slate-500 dark:text-slate-400">
+                      {new Date(p.createdAt).toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

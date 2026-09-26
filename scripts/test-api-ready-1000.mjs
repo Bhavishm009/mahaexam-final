@@ -41,16 +41,20 @@ async function testFullStack1000Http() {
   const totalElapsed = Date.now() - startTime;
 
   latencies.sort((a, b) => a - b);
-  const p50 = latencies[Math.floor(latencies.length * 0.50)] || 0;
+  const p50 = latencies[Math.floor(latencies.length * 0.5)] || 0;
   const p95 = latencies[Math.floor(latencies.length * 0.95)] || 0;
   const p99 = latencies[Math.floor(latencies.length * 0.99)] || 0;
   const rps = Math.round((successCount / (totalElapsed / 1000)) * 10) / 10;
 
   console.log("\n📊 1,000 FULL-STACK HTTP -> DB REQUEST RESULTS:");
   console.log(`   - Total Requests Sent:   ${TOTAL_REQS}`);
-  console.log(`   - Successful (HTTP 200): ${successCount} (${Math.round((successCount / TOTAL_REQS) * 100)}%)`);
+  console.log(
+    `   - Successful (HTTP 200): ${successCount} (${Math.round((successCount / TOTAL_REQS) * 100)}%)`,
+  );
   console.log(`   - Failed Requests:       ${failedCount}`);
-  console.log(`   - Total Duration:        ${totalElapsed} ms (${(totalElapsed / 1000).toFixed(2)}s)`);
+  console.log(
+    `   - Total Duration:        ${totalElapsed} ms (${(totalElapsed / 1000).toFixed(2)}s)`,
+  );
   console.log(`   - End-to-End Throughput: ${rps} req/second`);
   console.log(`   - p50 Latency:           ${p50} ms`);
   console.log(`   - p95 Latency:           ${p95} ms`);
@@ -59,7 +63,9 @@ async function testFullStack1000Http() {
   if (failedCount > 0) {
     console.log("\n⚠️ Error breakdown:", [...new Set(errorDetails)]);
   } else {
-    console.log("\n✅ ZERO FAILURES: 1,000 end-to-end HTTP + Database queries handled successfully!");
+    console.log(
+      "\n✅ ZERO FAILURES: 1,000 end-to-end HTTP + Database queries handled successfully!",
+    );
   }
 }
 

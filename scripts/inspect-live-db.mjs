@@ -20,7 +20,9 @@ async function main() {
   console.log(`   - Connected Database: ${dbMeta.database_name}`);
   console.log(`   - Connected User:     ${dbMeta.connected_user}`);
   console.log(`   - Server IP:          ${dbMeta.server_ip}`);
-  console.log(`   - Server Port:        ${dbMeta.server_port} (Port 6543 = Supabase PgBouncer Pooler)`);
+  console.log(
+    `   - Server Port:        ${dbMeta.server_port} (Port 6543 = Supabase PgBouncer Pooler)`,
+  );
   console.log(`   - PostgreSQL Version: ${dbMeta.postgresql_version}`);
 
   // Inspect active connection counts on this database
@@ -51,7 +53,7 @@ async function main() {
   await prisma.$disconnect();
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error("❌ Inspection failed:", err);
   process.exit(1);
 });

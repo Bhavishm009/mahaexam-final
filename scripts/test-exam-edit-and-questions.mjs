@@ -15,14 +15,18 @@ async function runTests() {
       status: "DRAFT",
       isFree: true,
       price: 0,
-      createdBy: (await prisma.user.findFirst({ where: { role: "SUPER_ADMIN" } }))?.id || "cmtookv4r0000jr04hp2bc9da",
+      createdBy:
+        (await prisma.user.findFirst({ where: { role: "SUPER_ADMIN" } }))?.id ||
+        "cmtookv4r0000jr04hp2bc9da",
     },
   });
 
   const qCountInitial = await prisma.examQuestion.count({ where: { examId: testExam.id } });
   console.log(`✓ Initial Questions in Exam: ${qCountInitial}`);
   if (qCountInitial !== 0) {
-    throw new Error(`Expected 0 questions, found ${qCountInitial}! Auto-adding is still happening!`);
+    throw new Error(
+      `Expected 0 questions, found ${qCountInitial}! Auto-adding is still happening!`,
+    );
   }
   console.log("🎉 SUCCESS: No questions were auto-added!");
 
@@ -33,7 +37,9 @@ async function runTests() {
     include: { questions: true },
   });
   if (!emptyExam.questions || emptyExam.questions.length === 0) {
-    console.log("✓ Verified: System correctly catches that exam has 0 questions without auto-injecting 25 questions.");
+    console.log(
+      "✓ Verified: System correctly catches that exam has 0 questions without auto-injecting 25 questions.",
+    );
   }
 
   console.log("\n=== 3. TEST: Adding Selected Questions from Question Bank ===");
