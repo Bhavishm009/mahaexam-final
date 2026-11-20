@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -1474,16 +1475,16 @@ model PaymentWebhookEvent {
 }
 
 model CoachingBatch {
-  id             String                @id @default(cuid())
-  organizationId String
-  name           String
-  code           String                @unique
-  isActive       Boolean               @default(true)
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  memberships    BatchMembership[]
-  exams          BatchExamAssignment[]
+  id              String                @id @default(cuid())
+  organizationId  String
+  name            String
+  code            String                @unique
+  isActive        Boolean               @default(true)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  organization    Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships     BatchMembership[]
+  exams           BatchExamAssignment[]
   coachingInvites CoachingInvite[]
 
   @@index([organizationId, isActive])
@@ -1591,17 +1592,17 @@ model StudentPerformanceSnapshot {
 }
 
 model PushSubscription {
-  id          String   @id @default(cuid())
-  endpoint    String   @unique
-  p256dh      String
-  auth        String
-  userId      String?
-  userAgent   String?
-  ipAddress   String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userId    String?
+  userAgent String?
+  ipAddress String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isActive])
 }
@@ -1647,7 +1648,7 @@ model SeoSetting {
   title          String
   titleMr        String?
   description    String
-  descriptionMr String?
+  descriptionMr  String?
   keywords       String?
   ogImage        String?
   canonicalUrl   String?
@@ -1665,14 +1666,14 @@ model JobAlert {
   titleMr          String?
   vacancies        String
   qualification    String
-  qualificationMr String?
+  qualificationMr  String?
   lastDate         String
   status           String   @default("ACTIVE")
   statusColor      String?  @default("bg-emerald-100 text-emerald-800")
   officialUrl      String?
   notificationPdf  String?
   description      String
-  descriptionMr   String?
+  descriptionMr    String?
   examSlug         String?
   salaryRange      String?
   ageLimit         String?
@@ -1683,19 +1684,17 @@ model JobAlert {
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  titleMr     String?
-  content     String
-  contentMr   String?
-  excerpt     String?
-  imageUrl    String?
-  category    String   @default("Exam News")
-  published   Boolean  @default(true)
-  authorName  String?  @default("MahaExam Team")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  titleMr    String?
+  content    String
+  contentMr  String?
+  excerpt    String?
+  imageUrl   String?
+  category   String   @default("Exam News")
+  published  Boolean  @default(true)
+  authorName String?  @default("MahaExam Team")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
-
-

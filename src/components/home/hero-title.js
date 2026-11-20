@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { translations } from "@/lib/translations";
+import { ShinyText } from "@/components/reactbits";
 
 export function HeroTitle() {
   const t = translations.mr;
@@ -7,8 +8,14 @@ export function HeroTitle() {
   return (
     <>
       <div className="inline-flex min-h-[28px] items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-950/60 dark:text-blue-300">
-        <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-        <span>{t.heroBadge}</span>
+        <Sparkles className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+        <ShinyText
+          text={t.heroBadge}
+          color="currentColor"
+          shineColor="#38bdf8"
+          speed={2.5}
+          className="font-bold tracking-wide"
+        />
       </div>
 
       <h1 className="mx-auto mt-6 min-h-[96px] max-w-4xl text-3xl font-black leading-[1.2] tracking-tight sm:min-h-[120px] sm:text-balance sm:text-5xl lg:text-6xl">

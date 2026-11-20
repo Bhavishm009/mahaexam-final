@@ -4,6 +4,7 @@ import { HeroTitle } from "@/components/home/hero-title";
 import { HeroCta } from "@/components/home/hero-cta";
 import { HeroStatsBanner } from "@/components/home/hero-stats-banner";
 import { PublicExamsSection } from "@/components/home/public-exams-section";
+import { ClickSpark } from "@/components/reactbits";
 
 // Below-fold sections: SSR their HTML but defer JS hydration bundles
 const FeaturesSection = dynamic(
@@ -47,12 +48,14 @@ export default async function Home() {
     <>
       {/* HERO SECTION */}
       <section className="relative overflow-hidden pb-16 pt-12 sm:pb-24 sm:pt-20">
-        <div className="bg-radial-gradient pointer-events-none absolute inset-0 -z-10 opacity-60" />
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <HeroTitle />
-          <HeroCta />
-          <HeroStatsBanner />
-        </div>
+        <ClickSpark sparkColor="#38bdf8" sparkSize={10} sparkCount={8} duration={450}>
+          <div className="bg-radial-gradient pointer-events-none absolute inset-0 -z-10 opacity-60" />
+          <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+            <HeroTitle />
+            <HeroCta />
+            <HeroStatsBanner />
+          </div>
+        </ClickSpark>
       </section>
 
       {/* MOCK TESTS CATALOG */}

@@ -39,14 +39,17 @@ function createClient(url) {
   });
 }
 
-// Switch primary database to Supabase in code without requiring .env changes
+// Primary database defaults to DATABASE_URL, with fallbacks
 const primaryUrl =
+  process.env.DATABASE_URL ||
   process.env.SUPABASE_DATABASE_URL ||
-  process.env.SECONDARY_DATABASE_URL ||
-  process.env.DATABASE_URL;
+  process.env.SECONDARY_DATABASE_URL;
 
-// Keep Aiven as secondary / backup database
-const secondaryUrl = process.env.SECONDARY_DATABASE_URL ? process.env.DATABASE_URL : null;
+// Secondary / backup database if explicitly configured and different from primary
+const secondaryUrl =
+  process.env.SECONDARY_DATABASE_URL && process.env.SECONDARY_DATABASE_URL !== primaryUrl
+    ? process.env.SECONDARY_DATABASE_URL
+    : null;
 
 // Singleton pattern ensures Next.js hot-reloads never leak connection handles
 export const primaryPrisma =

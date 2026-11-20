@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { translations } from "@/lib/translations";
+import { SpotlightCard, ShinyText } from "@/components/reactbits";
 
 export function PricingSection() {
   const t = translations.mr;
@@ -22,7 +23,11 @@ export function PricingSection() {
 
         <div className="mt-12 grid gap-8 lg:grid-cols-3">
           {/* Free Plan */}
-          <div className="glass-card flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <SpotlightCard
+            spotlightColor="rgba(148, 163, 184, 0.3)"
+            intensity={0.35}
+            className="flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
                 {t.planFreeTitle}
@@ -59,12 +64,22 @@ export function PricingSection() {
                 {t.choosePlan}
               </Link>
             </div>
-          </div>
+          </SpotlightCard>
 
           {/* Student Pro Plan */}
-          <div className="glass-card relative flex flex-col justify-between border-2 border-sky-500/80 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-sky-400/80">
+          <SpotlightCard
+            spotlightColor="rgba(56, 189, 248, 0.45)"
+            intensity={0.5}
+            className="relative flex flex-col justify-between border-2 border-sky-500/80 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-sky-400/80"
+          >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-0.5 text-[10px] font-black text-white shadow-md shadow-sky-500/25">
-              POPULAR
+              <ShinyText
+                text="POPULAR"
+                color="#ffffff"
+                shineColor="#bae6fd"
+                speed={2}
+                className="font-black"
+              />
             </div>
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
@@ -102,10 +117,14 @@ export function PricingSection() {
                 {t.choosePlan}
               </Link>
             </div>
-          </div>
+          </SpotlightCard>
 
           {/* Coaching Plan */}
-          <div className="glass-card flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <SpotlightCard
+            spotlightColor="rgba(245, 158, 11, 0.4)"
+            intensity={0.4}
+            className="flex flex-col justify-between p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
                 {t.planCoachingTitle}
@@ -142,7 +161,7 @@ export function PricingSection() {
                 {t.choosePlan}
               </Link>
             </div>
-          </div>
+          </SpotlightCard>
         </div>
       </div>
     </section>

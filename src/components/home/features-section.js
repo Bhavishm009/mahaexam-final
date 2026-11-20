@@ -1,5 +1,6 @@
 import { Layers3, ShieldCheck, Trophy, BarChart3 } from "lucide-react";
 import { translations } from "@/lib/translations";
+import { SpotlightCard } from "@/components/reactbits";
 
 export function FeaturesSection() {
   const t = translations.mr;
@@ -20,7 +21,11 @@ export function FeaturesSection() {
         </div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <SpotlightCard
+            spotlightColor="rgba(14, 165, 233, 0.35)"
+            intensity={0.4}
+            className="flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100/90 text-sky-600 dark:bg-sky-950/90 dark:text-sky-400">
               <Layers3 className="h-6 w-6" />
             </div>
@@ -30,9 +35,13 @@ export function FeaturesSection() {
             <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat1Desc}
             </p>
-          </div>
+          </SpotlightCard>
 
-          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <SpotlightCard
+            spotlightColor="rgba(16, 185, 129, 0.35)"
+            intensity={0.4}
+            className="flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/90 text-emerald-600 dark:bg-emerald-950/90 dark:text-emerald-400">
               <ShieldCheck className="h-6 w-6" />
             </div>
@@ -42,9 +51,13 @@ export function FeaturesSection() {
             <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat2Desc}
             </p>
-          </div>
+          </SpotlightCard>
 
-          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <SpotlightCard
+            spotlightColor="rgba(245, 158, 11, 0.35)"
+            intensity={0.4}
+            className="flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-600 dark:bg-amber-950/90 dark:text-amber-400">
               <Trophy className="h-6 w-6" />
             </div>
@@ -54,9 +67,13 @@ export function FeaturesSection() {
             <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat3Desc}
             </p>
-          </div>
+          </SpotlightCard>
 
-          <div className="glass-card flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <SpotlightCard
+            spotlightColor="rgba(168, 85, 247, 0.35)"
+            intensity={0.4}
+            className="flex flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100/90 text-purple-600 dark:bg-purple-950/90 dark:text-purple-400">
               <BarChart3 className="h-6 w-6" />
             </div>
@@ -66,7 +83,7 @@ export function FeaturesSection() {
             <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
               {t.feat4Desc}
             </p>
-          </div>
+          </SpotlightCard>
         </div>
       </div>
     </section>
