@@ -192,19 +192,31 @@ export async function getSeoForRoute(routePath, overrides = {}) {
   const canonicalUrl = overrides.canonicalUrl || seoData.canonicalUrl || `${siteBase}${cleanPath}`;
 
   const rawOgImg = overrides.ogImage || seoData.ogImage;
-  const ogImageUrl =
+  const isCustomExternal =
     rawOgImg &&
-    rawOgImg !== "/og-image.png" &&
-    rawOgImg !== "/og-exams.png" &&
-    rawOgImg !== "/og-jobs.png" &&
-    rawOgImg !== "/og-pricing.png" &&
-    rawOgImg !== "/og-faq.png" &&
-    rawOgImg !== "/og-features.png" &&
-    rawOgImg !== "/og-coaching.png"
-      ? rawOgImg
-      : "/opengraph-image";
+    (rawOgImg.startsWith("http://") ||
+      rawOgImg.startsWith("https://") ||
+      (rawOgImg.startsWith("/") &&
+        !rawOgImg.startsWith("/og-") &&
+        !rawOgImg.endsWith("/opengraph-image")));
 
-  const twitterImageUrl = ogImageUrl === "/opengraph-image" ? "/twitter-image" : ogImageUrl;
+  const routeOgMap = {
+    "/": "/opengraph-image",
+    "/exams": "/exams/opengraph-image",
+    "/jobs": "/jobs/opengraph-image",
+    "/blogs": "/blogs/opengraph-image",
+    "/pricing": "/pricing/opengraph-image",
+    "/features": "/features/opengraph-image",
+    "/faq": "/faq/opengraph-image",
+    "/for-coaching": "/for-coaching/opengraph-image",
+  };
+
+  const ogImageUrl = isCustomExternal
+    ? rawOgImg
+    : routeOgMap[cleanPath] ||
+      (cleanPath !== "/" ? `${cleanPath}/opengraph-image` : "/opengraph-image");
+
+  const twitterImageUrl = ogImageUrl;
 
   return {
     metadataBase: new URL(siteBase),

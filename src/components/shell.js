@@ -245,7 +245,7 @@ export function Shell({ children, role = "student", user }) {
   const [currentUser, setCurrentUser] = useState(user || null);
   const router = useRouter();
   const { language, toggleLanguage } = useLanguage();
-  const { user: authUser } = useAuth();
+  const { user: authUser, logout } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -290,10 +290,19 @@ export function Shell({ children, role = "student", user }) {
 
   async function handleLogout() {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-    } catch {}
-    router.push("/login");
-    router.refresh();
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("mahaexam_user_cache");
+        sessionStorage.removeItem("mahaexam_user_cache");
+      }
+      if (logout) {
+        await logout();
+      } else {
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.href = "/login";
+      }
+    } catch {
+      window.location.href = "/login";
+    }
   }
 
   const roleLabels = {

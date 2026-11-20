@@ -25,7 +25,7 @@ export async function generateMetadata({ params }) {
   const siteUrl = getBaseUrl();
   const pageTitle = `${blog.titleMr || blog.title} | MahaExam Blog`;
   const pageDesc = blog.excerpt || (blog.content || "").replace(/<[^>]*>/g, " ").substring(0, 160);
-  const ogImg = blog.imageUrl || "/og-image.png";
+  const ogImg = blog.imageUrl || `/blogs/${blog.slug}/opengraph-image`;
   const canonicalUrl = `${siteUrl}/blogs/${blog.slug}`;
 
   return {

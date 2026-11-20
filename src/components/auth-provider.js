@@ -68,7 +68,10 @@ export function AuthProvider({ children }) {
 
   const refreshUser = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/me");
+      const res = await fetch("/api/auth/me", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       if (res.ok) {
         const data = await res.json();
         if (data?.authenticated && data?.user) {
@@ -77,7 +80,8 @@ export function AuthProvider({ children }) {
           return data.user;
         }
       }
-      // If unauthorized or not authenticated, clear session and redirect if on protected route
+      // If unauthorized, expired, or invalid session, clear user immediately
+      setUser(null);
       if (res.status === 401 || res.status === 403) {
         handleSessionExpired();
       }
@@ -90,25 +94,27 @@ export function AuthProvider({ children }) {
   }, [setUser, handleSessionExpired]);
 
   useEffect(() => {
-    // Restore cached session after mount to ensure SSR matches client initial render
+    // Restore cached session ONLY IF an active session cookie exists in document.cookie
     const cached = getStoredUser();
     const hasSessionCookie =
       typeof document !== "undefined" &&
       (document.cookie.includes("mahaexam_session") ||
         document.cookie.includes("maha_exam_session") ||
         document.cookie.includes("next-auth.session-token") ||
+        document.cookie.includes("authjs.session-token") ||
         document.cookie.includes("token="));
 
-    if (cached) {
+    if (hasSessionCookie && cached) {
       setUserState(cached);
       setLoading(false);
       refreshUser();
     } else if (hasSessionCookie) {
-      // User has session cookie but localStorage was cleared
+      // Has cookie but no cached object
       setLoading(false);
       refreshUser();
     } else {
-      // Pure guest visitor - no background auth API calls needed on public pages
+      // No cookie present: wipe any stale local cache and remain strictly logged-out
+      setUser(null);
       setLoading(false);
     }
 
@@ -126,13 +132,25 @@ export function AuthProvider({ children }) {
       window.removeEventListener("focus", onVisibilityOrFocus);
       document.removeEventListener("visibilitychange", onVisibilityOrFocus);
     };
-  }, [refreshUser]);
+  }, [refreshUser, setUser]);
 
   const logout = useCallback(async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(CACHE_KEY);
+        sessionStorage.removeItem(CACHE_KEY);
+        document.cookie = "mahaexam_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        document.cookie = "maha_exam_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        document.cookie = "token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      }
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
     } catch {}
-    setUser(null);
+
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }

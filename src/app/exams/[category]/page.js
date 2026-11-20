@@ -57,7 +57,7 @@ export async function generateMetadata({ params }) {
       locale: "mr_IN",
       images: [
         {
-          url: "/opengraph-image",
+          url: `/exams/${cat.slug}/opengraph-image`,
           width: 1200,
           height: 630,
           alt: cat.titleMr,
@@ -69,7 +69,7 @@ export async function generateMetadata({ params }) {
       card: "summary_large_image",
       title: `${cat.titleMr} — MahaExam`,
       description,
-      images: ["/twitter-image"],
+      images: [`/exams/${cat.slug}/opengraph-image`],
     },
   };
 }

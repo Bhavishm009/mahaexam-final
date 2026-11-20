@@ -44,7 +44,7 @@ export async function generateMetadata({ params }) {
   const title = `${job.titleMr || job.title} — संपूर्ण माहिती व सराव | MahaExam`;
   const description = `महाराष्ट्र ${job.department} भरती जाहिरात २०२६. एकूण पदे: ${job.vacancies}, पात्रता: ${job.qualification}, अर्ज अंतिम तारीख: ${job.lastDate}.`;
   const canonicalUrl = `${siteUrl}/jobs/${job.slug || job.id}`;
-  const ogImg = job.imageUrl || "/og-jobs.png";
+  const ogImg = job.imageUrl || `/jobs/${job.slug || job.id}/opengraph-image`;
 
   return {
     title,

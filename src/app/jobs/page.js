@@ -13,7 +13,7 @@ export async function generateMetadata() {
   const pageDesc =
     seo.description ||
     "महाराष्ट्र पोलीस भरती, तलाठी, MPSC, जिल्हा परिषद (ZP) आणि वनरक्षक भरतीच्या ताज्या अधिकृत जाहिराती, रिक्त पदे, पात्रता व अंतिम तारीख. मोफत सराव पेपर्ससह परिपूर्ण तयारी.";
-  const ogImg = seo.ogImage || "/og-image.png";
+  const ogImg = "/jobs/opengraph-image";
   const canonicalUrl = `${siteUrl}/jobs`;
 
   return {

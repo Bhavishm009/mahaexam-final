@@ -36,7 +36,7 @@ export async function generateMetadata({ params }) {
 
   const title = `${examTitle} | ${cat?.titleMr || "ऑनलाइन सराव परीक्षा"} — MahaExam`;
   const description = `महाराष्ट्र ${cat?.titleMr || "स्पर्धा परीक्षा"} TCS/IBPS पॅटर्न ऑनलाईन मॉक टेस्ट. १०० गुणांचे सराव पेपर्स, वेळ व अचूकता विश्लेषण.`;
-  const ogImageUrl = `/exam/${examSlug}/opengraph-image`;
+  const ogImageUrl = `/exams/${category}/${examSlug}/opengraph-image`;
 
   return {
     title,

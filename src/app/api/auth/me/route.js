@@ -4,6 +4,17 @@ import { COOKIE, verifySessionToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
 
+export const dynamic = "force-dynamic";
+
+function jsonWithNoCache(data, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+    },
+  });
+}
+
 export async function GET(request) {
   const cookieStore = await cookies();
   let token = cookieStore.get(COOKIE)?.value;
@@ -24,7 +35,7 @@ export async function GET(request) {
   }
 
   if (!userId) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return jsonWithNoCache({ authenticated: false, user: null }, 401);
   }
 
   const user = await prisma.user.findUnique({
@@ -73,7 +84,7 @@ export async function GET(request) {
   });
 
   if (!user) {
-    return NextResponse.json({ authenticated: false }, { status: 404 });
+    return jsonWithNoCache({ authenticated: false, user: null }, 404);
   }
 
   // Update lastLoginAt if not updated in the last 5 minutes (for online user tracking)
@@ -92,7 +103,7 @@ export async function GET(request) {
     (user.organizationId && user.studentProfile?.coachingStatus === "COACHING"),
   );
 
-  return NextResponse.json({
+  return jsonWithNoCache({
     authenticated: true,
     user: {
       ...user,

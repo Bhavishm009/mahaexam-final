@@ -134,6 +134,53 @@ const examDetailsMap = {
   },
 };
 
+export async function generateMetadata({ params }) {
+  const { examId } = await params;
+  let title = "महाराष्ट्र स्पर्धा परीक्षा ऑनलाइन सराव चाचणी";
+  let description =
+    "TCS/IBPS पॅटर्नवर आधारित १०० गुणांची मॉक टेस्ट. अचूक निगेटिव्ह मार्किंग आणि निकाल विश्लेषण.";
+  try {
+    const dbExam = await prisma.exam.findFirst({
+      where: { OR: [{ id: examId }, { slug: examId }] },
+      select: { title: true, durationMinutes: true, totalMarks: true },
+    });
+    if (dbExam?.title) {
+      title = `${dbExam.title} — MahaExam सराव चाचणी`;
+      description = `${dbExam.title}. एकूण गुण: ${dbExam.totalMarks || 100}, वेळ: ${dbExam.durationMinutes || 90} मिनिटे. TCS/IBPS पॅटर्न सराव टेस्ट.`;
+    } else if (examDetailsMap[examId]) {
+      const e = examDetailsMap[examId];
+      title = `${e.titleMr} — MahaExam`;
+      description = `${e.titleMr}. एकूण गुण: ${e.marks}, कालावधी: ${e.duration} मिनिटे. ${e.pattern}.`;
+    }
+  } catch {}
+
+  const ogImageUrl = `/exam/${examId}/opengraph-image`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+          type: "image/png",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl],
+    },
+  };
+}
+
 export default async function ExamPublicPage({ params }) {
   const { examId } = await params;
 

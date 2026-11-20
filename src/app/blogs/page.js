@@ -13,7 +13,7 @@ export async function generateMetadata() {
   const pageDesc =
     seo.description ||
     "पोलीस भरती, MPSC, तलाठी व जिल्हा परिषद परीक्षांच्या ताज्या बातम्या, अभ्यासक्रम, मार्गदर्शक लेख आणि टॉपर नीती.";
-  const ogImg = seo.ogImage || "/og-image.png";
+  const ogImg = "/blogs/opengraph-image";
   const canonicalUrl = `${siteUrl}/blogs`;
 
   return {
