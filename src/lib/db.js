@@ -39,30 +39,21 @@ function createClient(url) {
   });
 }
 
-// Primary database defaults to DATABASE_URL, with fallbacks
-const primaryUrl =
-  process.env.DATABASE_URL ||
-  process.env.SUPABASE_DATABASE_URL ||
-  process.env.SECONDARY_DATABASE_URL;
-
-// Secondary / backup database if explicitly configured and different from primary
-const secondaryUrl =
-  process.env.SECONDARY_DATABASE_URL && process.env.SECONDARY_DATABASE_URL !== primaryUrl
-    ? process.env.SECONDARY_DATABASE_URL
-    : null;
+// Single Supabase production database
+const primaryUrl = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL;
+const secondaryUrl = null;
 
 // Singleton pattern ensures Next.js hot-reloads never leak connection handles
 export const primaryPrisma =
   globalForPrisma.__mahaPrimaryPrisma ||
   (primaryUrl ? createClient(primaryUrl) : new PrismaClient());
 
-export const secondaryPrisma =
-  globalForPrisma.__mahaSecondaryPrisma || (secondaryUrl ? createClient(secondaryUrl) : null);
+export const secondaryPrisma = null;
 
 export const prisma = primaryPrisma;
 
 globalForPrisma.__mahaPrimaryPrisma = primaryPrisma;
-globalForPrisma.__mahaSecondaryPrisma = secondaryPrisma;
+globalForPrisma.__mahaSecondaryPrisma = null;
 globalForPrisma.__mahaPrisma = prisma;
 
 /**

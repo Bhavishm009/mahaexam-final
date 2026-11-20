@@ -16,12 +16,14 @@
 
 # Environment variables
 .env
+.env*
+.env.example
+.env.local
+.env.production
 .env*.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
-.env.production
 
 # Debug logs
 npm-debug.log*
